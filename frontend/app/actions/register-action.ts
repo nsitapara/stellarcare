@@ -2,7 +2,7 @@
 
 import { getApiClient } from '@lib/api'
 import type { registerFormSchema } from '@lib/validation'
-import { ApiError, type UserCreateError } from '@frontend/types/api'
+import { ApiError, type UserCreateError } from '@/types/api'
 import type { z } from 'zod'
 
 export type RegisterFormSchema = z.infer<typeof registerFormSchema>

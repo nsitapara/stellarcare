@@ -3,7 +3,7 @@
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import type { changePasswordFormSchema } from '@lib/validation'
-import { ApiError, type UserChangePasswordError } from '@frontend/types/api'
+import { ApiError, type UserChangePasswordError } from '@/types/api'
 import { getServerSession } from 'next-auth'
 import type { z } from 'zod'
 
