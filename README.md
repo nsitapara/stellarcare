@@ -126,7 +126,7 @@ frontend
 The general rule here is, if you want to have some shared code, create new package under packages/ folder. After adding new package and making it available for your website, it is needed to install the new package into website project by running a command below.
 
 ```bash
-docker compose exec web pnpm --filter web add @frontend/ui
+docker compose exec web pnpm --filter web add ../
 ```
 
 ### Adding microsite to docker-compose.yaml
@@ -178,12 +178,12 @@ The second option how to create new user account is to register it on the front 
 
 To ensure path is only for authenticated users, it is possible to use `getServerSession` to check the status of user.
 
-This function accepts an argument with authentication options, which can be imported from `@/lib/auth` and contains credentials authentication business logic.
+This function accepts an argument with authentication options, which can be imported from `@lib/auth` and contains credentials authentication business logic.
 
 ```tsx
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@lib/auth";
 
 const SomePageForAuthenticatedUsers = async () => {
   const session = await getServerSession(authOptions);
@@ -201,7 +201,7 @@ To require authenticated user account on multiple pages, similar business logic 
 ```tsx
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@lib/auth";
 
 const AuthenticatedLayout = async ({
   children,
