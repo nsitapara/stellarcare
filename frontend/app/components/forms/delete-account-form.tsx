@@ -3,8 +3,8 @@
 import type {
   DeleteAccountFormSchema,
   deleteAccountAction
-} from '@/actions/delete-account-action'
-import { deleteAccountFormSchema } from '@/lib/validation'
+} from '@actions/delete-account-action'
+import { deleteAccountFormSchema } from '@lib/validation'
 import { FormHeader } from '..//forms/form-header'
 import { SubmitField } from '..//forms/submit-field'
 import { TextField } from '..//forms/text-field'

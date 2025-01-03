@@ -1,8 +1,8 @@
 'use client'
 
-import type { profileAction } from '@/actions/profile-action'
-import { fieldApiError } from '@/lib/forms'
-import { profileFormSchema } from '@/lib/validation'
+import type { profileAction } from '@actions/profile-action'
+import { fieldApiError } from '@lib/forms'
+import { profileFormSchema } from '@lib/validation'
 import type { UserCurrent } from '@frontend/types/api'
 import { FormHeader } from '..//forms/form-header'
 import { SubmitField } from '..//forms/submit-field'

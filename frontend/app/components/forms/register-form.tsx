@@ -3,9 +3,9 @@
 import type {
   RegisterFormSchema,
   registerAction
-} from '@/actions/register-action'
-import { fieldApiError } from '@/lib/forms'
-import { registerFormSchema } from '@/lib/validation'
+} from '@actions/register-action'
+import { fieldApiError } from '@lib/forms'
+import { registerFormSchema } from '@lib/validation'
 import { FormFooter } from '../forms/form-footer'
 import { FormHeader } from '../forms/form-header'
 import { SubmitField } from '../forms/submit-field'
