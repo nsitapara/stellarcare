@@ -5,9 +5,9 @@ import type {
   deleteAccountAction
 } from '@actions/delete-account-action'
 import { deleteAccountFormSchema } from '@lib/validation'
-import { FormHeader } from '..//forms/form-header'
-import { SubmitField } from '..//forms/submit-field'
-import { TextField } from '..//forms/text-field'
+import { FormHeader } from '@components/forms/form-header'
+import { SubmitField } from '@components/forms/submit-field'
+import { TextField } from '@components/forms/text-field'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signOut, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
@@ -24,7 +24,7 @@ export function DeleteAccountForm({
     })
 
   useEffect(() => {
-    if (session.data?.user.username) {
+    if (session?.data?.user.username) {
       setValue('usernameCurrent', session.data?.user.username)
     }
   }, [setValue, session.data?.user.username])
