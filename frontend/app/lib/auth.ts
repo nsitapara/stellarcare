@@ -1,4 +1,4 @@
-import { ApiError } from '@frontend/types/api'
+import { ApiError } from '@/types/api'
 import type { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { getApiClient } from './api'

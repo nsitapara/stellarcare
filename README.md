@@ -126,7 +126,7 @@ frontend
 The general rule here is, if you want to have some shared code, create new package under packages/ folder. After adding new package and making it available for your website, it is needed to install the new package into website project by running a command below.
 
 ```bash
-docker compose exec web pnpm --filter web add @frontend/ui
+docker compose exec web pnpm --filter web add ../
 ```
 
 ### Adding microsite to docker-compose.yaml

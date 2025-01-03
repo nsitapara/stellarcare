@@ -1,4 +1,4 @@
-import { ApiClient } from '@frontend/types/api'
+import { ApiClient } from '@/types/api'
 import type { Session } from 'next-auth'
 
 export async function getApiClient(session?: Session | null) {
