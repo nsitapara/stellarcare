@@ -4,11 +4,11 @@ import type {
   DeleteAccountFormSchema,
   deleteAccountAction
 } from '@actions/delete-account-action'
-import { deleteAccountFormSchema } from '@lib/validation'
 import { FormHeader } from '@components/forms/form-header'
 import { SubmitField } from '@components/forms/submit-field'
 import { TextField } from '@components/forms/text-field'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { deleteAccountFormSchema } from '@lib/validation'
 import { signOut, useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'

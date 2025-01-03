@@ -1,9 +1,9 @@
 'use server'
 
+import { ApiError, type UserCurrentError } from '@/types/api'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import type { profileFormSchema } from '@lib/validation'
-import { ApiError, type UserCurrentError } from '@/types/api'
 import { getServerSession } from 'next-auth'
 import type { z } from 'zod'
 

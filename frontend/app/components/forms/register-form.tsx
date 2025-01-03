@@ -4,15 +4,15 @@ import type {
   RegisterFormSchema,
   registerAction
 } from '@actions/register-action'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { fieldApiError } from '@lib/forms'
 import { registerFormSchema } from '@lib/validation'
+import { signIn } from 'next-auth/react'
+import { useForm } from 'react-hook-form'
+import { TextField } from '..//forms/text-field'
 import { FormFooter } from '../forms/form-footer'
 import { FormHeader } from '../forms/form-header'
 import { SubmitField } from '../forms/submit-field'
-import { TextField } from '..//forms/text-field'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { signIn } from 'next-auth/react'
-import { useForm } from 'react-hook-form'
 
 export function RegisterForm({
   onSubmitHandler

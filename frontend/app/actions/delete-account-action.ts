@@ -1,9 +1,9 @@
 'use server'
 
+import { ApiError } from '@/types/api'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import type { deleteAccountFormSchema } from '@lib/validation'
-import { ApiError } from '@/types/api'
 import { getServerSession } from 'next-auth'
 import type { z } from 'zod'
 
