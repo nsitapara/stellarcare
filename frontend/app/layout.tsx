@@ -1,32 +1,22 @@
-import { AuthProvider } from '@/providers/auth-provider'
-import type { Metadata } from 'next'
+import { ClientLayout } from '@components/client-layout'
 import { Inter } from 'next/font/google'
-import { twMerge } from 'tailwind-merge'
-
-import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'Turbo - Django & Next.js Bootstrap Template'
+export const metadata = {
+  title: 'StellarCare - Patient Management',
+  description: 'A comprehensive healthcare management platform'
 }
 
 export default function RootLayout({
   children
-}: { children: React.ReactNode }) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body
-        className={twMerge(
-          'bg-gray-50 text-sm text-gray-700 antialiased',
-          inter.className
-        )}
-      >
-        <AuthProvider>
-          <div className="px-6">
-            <div className="container mx-auto my-12 max-w-6xl">{children}</div>
-          </div>
-        </AuthProvider>
+      <body className={inter.className}>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   )
