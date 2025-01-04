@@ -63,7 +63,7 @@ class PatientRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
 
 class PatientQueryView(APIView):
     def get(self, request):
-        query = request.query_params.get("q", None)  # Get query string from request
+        query = request.query_params.get("q", None)
         if not query:
             return Response(
                 {"error": "Query parameter 'q' is required."},
@@ -72,16 +72,18 @@ class PatientQueryView(APIView):
 
         logger.info(f"Searching patients with query: {query}")
 
-        # Perform a case-insensitive search on ID, first, last, or middle name
-        patients = Patient.objects.filter(
-            Q(id__icontains=query)
-            | Q(first__icontains=query)
-            | Q(last__icontains=query)
-            | Q(middle__icontains=query)
-        )
+        # If query is numeric, do exact ID match only
+        if query.isdigit():
+            patients = Patient.objects.filter(id=query)
+        else:
+            # Otherwise do case-insensitive search on names
+            patients = Patient.objects.filter(
+                Q(first__icontains=query)
+                | Q(last__icontains=query)
+                | Q(middle__icontains=query)
+            )
 
         logger.info(f"Found {patients.count()} matching patients")
 
-        # Serialize and return the data
         serializer = PatientSerializer(patients, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
