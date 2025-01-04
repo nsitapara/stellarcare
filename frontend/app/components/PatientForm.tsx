@@ -1,5 +1,9 @@
 'use client'
 
+import {
+  createCustomField,
+  getCustomFields
+} from '@/app/actions/get-custom-fields-action'
 import { Button } from '@/app/components/ui/button'
 import {
   Form,
@@ -10,11 +14,21 @@ import {
   FormMessage
 } from '@/app/components/ui/form'
 import { Input } from '@/app/components/ui/input'
+import type { CustomFieldDefinition } from '@/types/api/models/CustomFieldDefinition'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import * as z from 'zod'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from './ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import {
   Select,
   SelectContent,
@@ -56,17 +70,61 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       id: crypto.randomUUID()
     })) || []
   )
+  const [availableCustomFields, setAvailableCustomFields] = useState<
+    CustomFieldDefinition[]
+  >([])
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const addCustomField = () => {
-    setCustomFields([
-      ...customFields,
-      {
-        id: crypto.randomUUID(),
-        name: '',
-        type: 'text',
-        value: ''
+  useEffect(() => {
+    const fetchCustomFields = async () => {
+      try {
+        const fields = await getCustomFields()
+        setAvailableCustomFields(Array.isArray(fields) ? fields : [])
+      } catch (error) {
+        console.error('Error fetching custom fields:', error)
+        setAvailableCustomFields([])
       }
-    ])
+    }
+    fetchCustomFields()
+  }, [])
+
+  const addCustomField = async (selectedField?: CustomFieldDefinition) => {
+    if (selectedField) {
+      setCustomFields([
+        ...customFields,
+        {
+          id: crypto.randomUUID(),
+          name: selectedField.name,
+          type: selectedField.type,
+          value: selectedField.type === 'text' ? '' : 0
+        }
+      ])
+    } else if (searchQuery) {
+      try {
+        const newField = await createCustomField({
+          name: searchQuery,
+          type: 'text',
+          description: 'Custom field created from patient form'
+        })
+        if (newField) {
+          setAvailableCustomFields((prev) => [...prev, newField])
+          setCustomFields([
+            ...customFields,
+            {
+              id: crypto.randomUUID(),
+              name: newField.name,
+              type: newField.type,
+              value: newField.type === 'text' ? '' : 0
+            }
+          ])
+        }
+      } catch (error) {
+        console.error('Error creating custom field:', error)
+      }
+    }
+    setIsSearchOpen(false)
+    setSearchQuery('')
   }
 
   const removeCustomField = (id: string) => {
@@ -136,6 +194,12 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       customFields
     })
   }
+
+  const filteredCustomFields = (availableCustomFields || []).filter(
+    (field) =>
+      field.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !customFields.some((f) => f.name === field.name)
+  )
 
   return (
     <Form {...form}>
@@ -286,15 +350,60 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Custom Fields</h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addCustomField}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Custom Field
-            </Button>
+            <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Custom Field
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0" side="right" align="start">
+                <Command>
+                  <CommandInput
+                    placeholder="Search custom fields..."
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      <div className="flex flex-col items-center py-4">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          No custom fields found
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addCustomField()}
+                        >
+                          Create "{searchQuery}"
+                        </Button>
+                      </div>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {filteredCustomFields.map((field) => (
+                        <CommandItem
+                          key={field.id}
+                          onSelect={() => addCustomField(field)}
+                        >
+                          <div className="flex items-center">
+                            <span>{field.name}</span>
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              ({field.type})
+                            </span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
           {customFields.map((field) => (
             <div key={field.id} className="space-y-4 p-4 border rounded-lg">
