@@ -1,12 +1,12 @@
 'use client'
 
+import { cn } from '@components/lib/utils'
 import type React from 'react'
 import type {
   FieldValues,
   FormState,
   UseFormRegisterReturn
 } from 'react-hook-form'
-import { twMerge } from 'tailwind-merge'
 
 export function TextField({
   type,
@@ -25,22 +25,20 @@ export function TextField({
 
   return (
     <label className="mb-6 flex flex-col last:mb-0">
-      <span className="mb-3 block font-medium leading-none text-white">
-        {label}
-      </span>
+      <span className="mb-3 block font-medium text-foreground">{label}</span>
 
       <input
         type={type}
         placeholder={placeholder}
-        className={twMerge(
-          'block h-10 max-w-lg rounded bg-secondary px-4 font-medium text-white placeholder:text-gray-400 shadow-sm outline outline-1 outline-gray-600 focus:outline-primary focus:ring-4 focus:ring-primary/20',
-          hasError && 'outline-red-700 focus:outline-red-600 focus:ring-red-300'
+        className={cn(
+          'flex h-9 w-full rounded-md border border-input bg-secondary px-3 py-1 text-sm ring-offset-background text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50',
+          hasError && 'border-destructive focus-visible:ring-destructive'
         )}
         {...register}
       />
 
       {hasError && (
-        <div className="mt-2 text-red-600">
+        <div className="mt-2 text-destructive text-sm">
           {formState.errors[register.name]?.message?.toString()}
         </div>
       )}
