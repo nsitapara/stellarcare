@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions, serializers
 
-from .models import Patient
+from .models import Address, Patient
 
 User = get_user_model()
 
@@ -125,7 +125,20 @@ class UserCreateErrorSerializer(serializers.Serializer):
     )
 
 
+class AddressSerializer(serializers.ModelSerializer):
+    formatted_address = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Address
+        fields = ["id", "street", "city", "state", "zip_code", "formatted_address"]
+
+    def get_formatted_address(self, obj):
+        return str(obj)
+
+
 class PatientSerializer(serializers.ModelSerializer):
+    addresses = AddressSerializer(many=True, read_only=True)
+
     class Meta:
         model = Patient
         fields = "__all__"

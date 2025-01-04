@@ -2,9 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Address } from './Address';
 import type { StatusEnum } from './StatusEnum';
 export type PatchedPatient = {
     readonly id?: string;
+    readonly addresses?: Array<Address>;
     first?: string;
     middle?: string | null;
     last?: string;
@@ -12,7 +14,6 @@ export type PatchedPatient = {
     status?: StatusEnum;
     readonly created_at?: string;
     readonly modified_at?: string;
-    addresses?: Array<number>;
     custom_fields?: Array<number>;
     studies?: Array<number>;
     treatments?: Array<number>;

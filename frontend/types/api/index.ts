@@ -10,6 +10,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { Address } from './models/Address';
 export type { PaginatedPatientList } from './models/PaginatedPatientList';
 export type { PatchedPatient } from './models/PatchedPatient';
 export type { PatchedUserCurrent } from './models/PatchedUserCurrent';
