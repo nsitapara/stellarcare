@@ -114,6 +114,8 @@ class Patient(models.Model):
     last = models.CharField(max_length=100)
     date_of_birth = models.DateField()
     status = models.CharField(max_length=20, choices=PATIENT_STATUSES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     addresses = models.ManyToManyField(Address)
     custom_fields = models.ManyToManyField(CustomField)

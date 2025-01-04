@@ -10,6 +10,8 @@ export type Patient = {
     last: string;
     date_of_birth: string;
     status: StatusEnum;
+    readonly created_at: string;
+    readonly modified_at: string;
     addresses: Array<number>;
     custom_fields: Array<number>;
     studies: Array<number>;
