@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const api = await getApiClient(session)
     const response = await api.patients.patientsList(page, pageSize)
 
+    // Return the response directly - addresses are already included in the patient data
     return NextResponse.json(response)
   } catch (error) {
     console.error('Failed to fetch patients:', error)

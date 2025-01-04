@@ -19,10 +19,13 @@ export default async function DashboardPage() {
             data: initialData.results.map((patient: Patient) => ({
               id: patient.id,
               first: patient.first || '',
+              middle: patient.middle || '',
               last: patient.last || '',
               status: patient.status || '',
               date_of_birth: patient.date_of_birth || '',
-              created_at: patient.created_at || ''
+              created_at: patient.created_at || '',
+              addresses:
+                patient.addresses?.map((addr) => addr.formatted_address) || []
             })),
             total: initialData.count,
             page: 1,

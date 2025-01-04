@@ -18,8 +18,10 @@ import {
   TableHeader,
   TableRow
 } from '@components/ui/table'
+import { cn } from '@lib/utils'
 import { format } from 'date-fns'
 import { Search } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 interface DashboardTableProps {
@@ -31,6 +33,21 @@ interface DashboardTableProps {
   onPageSizeChange: (pageSize: number) => void
 }
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Inquiry':
+      return 'bg-blue-50 text-blue-700 ring-blue-700/10'
+    case 'Onboarding':
+      return 'bg-yellow-50 text-yellow-700 ring-yellow-700/10'
+    case 'Active':
+      return 'bg-green-50 text-green-700 ring-green-700/10'
+    case 'Churned':
+      return 'bg-red-50 text-red-700 ring-red-700/10'
+    default:
+      return 'bg-gray-50 text-gray-700 ring-gray-700/10'
+  }
+}
+
 export function DashboardTable({
   data,
   total,
@@ -39,8 +56,13 @@ export function DashboardTable({
   onPageChange,
   onPageSizeChange
 }: DashboardTableProps) {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
-  const totalPages = Math.ceil(total / pageSize)
+  const totalPages = Math.ceil(total / 10)
+
+  const handleRowClick = (patientId: string) => {
+    router.push(`/patients/${patientId}`)
+  }
 
   const filteredData = data.filter((item) =>
     `${item.first} ${item.last}`
@@ -67,9 +89,9 @@ export function DashboardTable({
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="font-semibold">Name</TableHead>
-              <TableHead className="font-semibold">Status</TableHead>
               <TableHead className="font-semibold">Date of Birth</TableHead>
-              <TableHead className="font-semibold">Created At</TableHead>
+              <TableHead className="font-semibold">Address</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -81,18 +103,44 @@ export function DashboardTable({
               </TableRow>
             ) : (
               filteredData.map((item) => (
-                <TableRow key={item.id} className="hover:bg-muted/50">
-                  <TableCell className="font-medium">{`${item.first} ${item.last}`}</TableCell>
-                  <TableCell>
-                    <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ring-gray-500/10">
-                      {item.status}
-                    </span>
+                <TableRow
+                  key={item.id}
+                  className="hover:bg-muted/50 cursor-pointer"
+                  onClick={() => handleRowClick(item.id)}
+                >
+                  <TableCell className="font-medium">
+                    {`${item.first} ${item.middle || ''} ${item.last}`.trim()}
                   </TableCell>
                   <TableCell>
                     {format(new Date(item.date_of_birth), 'MMM d, yyyy')}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(item.created_at), 'MMM d, yyyy')}
+                    {item.addresses?.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {item.addresses.map((address) => (
+                          <span
+                            key={`${item.id}-${address}`}
+                            className="text-sm text-muted-foreground"
+                          >
+                            {address}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        No address
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset',
+                        getStatusColor(item.status)
+                      )}
+                    >
+                      {item.status}
+                    </span>
                   </TableCell>
                 </TableRow>
               ))
@@ -101,31 +149,7 @@ export function DashboardTable({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between border-t pt-4">
-        <div className="flex items-center space-x-2">
-          <p className="text-sm text-muted-foreground">Rows per page</p>
-          <Select
-            value={pageSize.toString()}
-            onValueChange={(value) => {
-              const newSize = Number.parseInt(value)
-              onPageSizeChange(newSize)
-              // Reset to first page when changing page size
-              onPageChange(1)
-            }}
-          >
-            <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue placeholder={pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {[5, 10, 20, 50].map((size) => (
-                <SelectItem key={size} value={size.toString()}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
+      <div className="flex items-center justify-end border-t pt-4">
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
             Page {page} of {totalPages}

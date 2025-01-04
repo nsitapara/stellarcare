@@ -3,6 +3,16 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { StatusEnum } from './StatusEnum';
+
+export type Address = {
+    id: number;
+    street: string;
+    city: string;
+    state: string;
+    zip_code: string;
+    formatted_address: string;
+}
+
 export type Patient = {
     readonly id: string;
     first: string;
@@ -12,7 +22,7 @@ export type Patient = {
     status: StatusEnum;
     readonly created_at: string;
     readonly modified_at: string;
-    addresses: Array<number>;
+    addresses: Array<Address>;
     custom_fields: Array<number>;
     studies: Array<number>;
     treatments: Array<number>;
