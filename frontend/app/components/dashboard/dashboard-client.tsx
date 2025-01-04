@@ -21,14 +21,27 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     try {
       setLoading(true)
       setError(null)
+      console.log('Fetching data for page:', page, 'pageSize:', pageSize)
       const response = await fetch(
-        `/api/patients?page=${page}&pageSize=${pageSize}`
+        `/api/patients?page=${page}&page_size=${pageSize}`,
+        {
+          // Add cache control headers
+          headers: {
+            'Cache-Control': 'no-cache',
+            Pragma: 'no-cache'
+          },
+          // Add timestamp to prevent browser caching
+          cache: 'no-store'
+        }
       )
       if (!response.ok) {
         throw new Error('Failed to fetch data')
       }
       const result = await response.json()
-      setData({
+      console.log('Received data:', result)
+
+      // Check if the data is different from current state
+      const newData = {
         data: result.results.map((patient: Patient) => ({
           id: patient.id,
           first: patient.first || '',
@@ -43,7 +56,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         total: result.count,
         page,
         pageSize
-      })
+      }
+
+      setData(newData)
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
       setError('Failed to load patient data. Please try again later.')
@@ -53,10 +68,12 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   }, [])
 
   const handlePageChange = (page: number) => {
+    console.log('Page change requested:', page)
     fetchData(page, data.pageSize)
   }
 
   const handlePageSizeChange = (pageSize: number) => {
+    console.log('Page size change requested:', pageSize)
     fetchData(1, pageSize)
   }
 

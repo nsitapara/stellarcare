@@ -4,18 +4,27 @@ import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getServerSession(authOptions)
   if (!session) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
   try {
+    const { searchParams } = new URL(request.url)
+    const page = searchParams.get('page')
+    console.log('API Route - Fetching patients with params:', { page })
+
     const apiClient = await getApiClient(session)
-    const response = await apiClient.patients.patientsList()
+    const response = await apiClient.patients.patientsList(
+      page ? Number.parseInt(page) : 1
+    )
     return NextResponse.json(response)
   } catch (error) {
     console.error('Failed to fetch patients:', error)
+    if (error instanceof ApiError) {
+      return NextResponse.json(error.body, { status: error.status })
+    }
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }

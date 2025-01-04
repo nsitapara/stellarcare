@@ -58,7 +58,7 @@ export function DashboardTable({
 }: DashboardTableProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
-  const totalPages = Math.ceil(total / 10)
+  const totalPages = Math.ceil(total / pageSize)
 
   const handleRowClick = (patientId: string) => {
     router.push(`/patients/${patientId}`)
