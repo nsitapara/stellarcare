@@ -25,13 +25,15 @@ export function TextField({
 
   return (
     <label className="mb-6 flex flex-col last:mb-0">
-      <span className="mb-3 block font-medium leading-none">{label}</span>
+      <span className="mb-3 block font-medium leading-none text-white">
+        {label}
+      </span>
 
       <input
         type={type}
         placeholder={placeholder}
         className={twMerge(
-          'block h-10 max-w-lg rounded bg-white px-4 font-medium shadow-sm outline outline-1 outline-gray-900/10 focus:outline-purple-600 focus:ring-4 focus:ring-purple-300',
+          'block h-10 max-w-lg rounded bg-secondary px-4 font-medium text-white placeholder:text-gray-400 shadow-sm outline outline-1 outline-gray-600 focus:outline-primary focus:ring-4 focus:ring-primary/20',
           hasError && 'outline-red-700 focus:outline-red-600 focus:ring-red-300'
         )}
         {...register}

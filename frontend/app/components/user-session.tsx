@@ -11,21 +11,15 @@ export function UserSession() {
   }
 
   if (status === 'unauthenticated') {
-    return (
-      <Button variant="outline" onClick={() => signIn()}>
-        Sign In
-      </Button>
-    )
+    return <Button onClick={() => signIn()}>Sign In</Button>
   }
 
   return (
     <div className="flex items-center gap-4">
-      <span className="text-sm text-white">
+      <span className="text-sm text-foreground">
         {session?.user?.username || session?.user?.email}
       </span>
-      <Button variant="outline" onClick={() => signOut()}>
-        Sign Out
-      </Button>
+      <Button onClick={() => signOut()}>Sign Out</Button>
     </div>
   )
 }

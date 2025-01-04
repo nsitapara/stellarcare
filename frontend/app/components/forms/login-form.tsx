@@ -8,9 +8,9 @@ import type { z } from 'zod'
 import { loginFormSchema } from '../../lib/validation'
 import { FormFooter } from '../forms/form-footer'
 import { FormHeader } from '../forms/form-header'
-import { SubmitField } from '../forms/submit-field'
 import { TextField } from '../forms/text-field'
 import { ErrorMessage } from '../messages/error-message'
+import { Button } from '../ui/button'
 
 type LoginFormSchema = z.infer<typeof loginFormSchema>
 
@@ -25,25 +25,26 @@ export function LoginForm() {
     signIn('credentials', {
       username: data.username,
       password: data.password,
-      callbackUrl: '/'
+      callbackUrl: '/dashboard'
     })
   })
 
   return (
-    <>
+    <div className="w-full max-w-md mx-auto p-8">
       <FormHeader
-        title="Welcome back to Turbo"
-        description="Get an access to internal application"
+        title="Welcome back to StellarCare"
+        description="Sign in to access your dashboard"
       />
 
       {search.has('error') && search.get('error') === 'CredentialsSignin' && (
-        <ErrorMessage>Provided account does not exists.</ErrorMessage>
+        <ErrorMessage>Invalid username or password.</ErrorMessage>
       )}
 
       <form
         method="post"
         action="/api/auth/callback/credentials"
         onSubmit={onSubmitHandler}
+        className="space-y-6"
       >
         <TextField
           type="text"
@@ -61,7 +62,12 @@ export function LoginForm() {
           placeholder="Enter your password"
         />
 
-        <SubmitField>Sign in</SubmitField>
+        <Button
+          type="submit"
+          className="w-full bg-primary hover:bg-primary/90 text-white"
+        >
+          Sign in
+        </Button>
       </form>
 
       <FormFooter
@@ -69,6 +75,6 @@ export function LoginForm() {
         link="/register"
         title="Sign up"
       />
-    </>
+    </div>
   )
 }
