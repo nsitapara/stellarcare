@@ -81,3 +81,17 @@ export type Patient = {
   createdAt: string
   modifiedAt: string
 }
+
+export type PatientFormData = {
+  firstName: string
+  middleName?: string
+  lastName: string
+  dateOfBirth: string
+  addresses: Address[]
+  customFields?: CustomField[]
+  sleepStudies?: SleepStudy[]
+  medications?: Treatment[]
+  cpapUsage?: CPAPUsage[]
+  insurance?: Insurance[]
+  appointments?: Appointment[]
+}

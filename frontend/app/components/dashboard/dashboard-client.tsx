@@ -3,6 +3,7 @@
 import type { Patient } from '@/types/api/models/Patient'
 import type { PaginatedResponse } from '@/types/dashboard'
 import { Button } from '@components/ui/button'
+import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { DashboardTable } from './dashboard-table'
 
@@ -11,6 +12,7 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({ initialData }: DashboardClientProps) {
+  const router = useRouter()
   const [data, setData] = useState<PaginatedResponse>(initialData)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -69,7 +71,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             Efficiently manage and track your patient data
           </p>
         </div>
-        <Button>Add New Patient</Button>
+        <Button onClick={() => router.push('/patients/new')}>
+          Add New Patient
+        </Button>
       </div>
 
       {loading && data.data.length === 0 ? (

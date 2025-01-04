@@ -117,12 +117,12 @@ class Patient(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
-    addresses = models.ManyToManyField(Address)
-    custom_fields = models.ManyToManyField(CustomField)
-    studies = models.ManyToManyField(SleepStudy)
-    treatments = models.ManyToManyField(Treatment)
-    insurance = models.ManyToManyField(Insurance)
-    appointments = models.ManyToManyField(Visits)
+    addresses = models.ManyToManyField(Address, blank=True)
+    custom_fields = models.ManyToManyField(CustomField, blank=True)
+    studies = models.ManyToManyField(SleepStudy, blank=True)
+    treatments = models.ManyToManyField(Treatment, blank=True)
+    insurance = models.ManyToManyField(Insurance, blank=True)
+    appointments = models.ManyToManyField(Visits, blank=True)
 
     def __str__(self):
         return f"{self.first} {self.last}"

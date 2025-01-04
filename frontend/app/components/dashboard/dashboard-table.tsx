@@ -92,6 +92,7 @@ export function DashboardTable({
               <TableHead className="font-semibold">Date of Birth</TableHead>
               <TableHead className="font-semibold">Address</TableHead>
               <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="font-semibold">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -105,32 +106,17 @@ export function DashboardTable({
               filteredData.map((item) => (
                 <TableRow
                   key={item.id}
-                  className="hover:bg-muted/50 cursor-pointer"
+                  className="cursor-pointer hover:bg-muted/50"
                   onClick={() => handleRowClick(item.id)}
                 >
-                  <TableCell className="font-medium">
-                    {`${item.first} ${item.middle || ''} ${item.last}`.trim()}
-                  </TableCell>
                   <TableCell>
-                    {format(new Date(item.date_of_birth), 'MMM d, yyyy')}
+                    {item.first} {item.middle} {item.last}
                   </TableCell>
+                  <TableCell>{item.date_of_birth}</TableCell>
                   <TableCell>
-                    {item.addresses?.length > 0 ? (
-                      <div className="flex flex-col gap-1">
-                        {item.addresses.map((address) => (
-                          <span
-                            key={`${item.id}-${address}`}
-                            className="text-sm text-muted-foreground"
-                          >
-                            {address}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">
-                        No address
-                      </span>
-                    )}
+                    {item.addresses && item.addresses.length > 0
+                      ? item.addresses[0]
+                      : 'No address'}
                   </TableCell>
                   <TableCell>
                     <span
@@ -141,6 +127,20 @@ export function DashboardTable({
                     >
                       {item.status}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/patients/${item.id}/edit`)
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

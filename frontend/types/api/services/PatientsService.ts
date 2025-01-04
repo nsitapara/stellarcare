@@ -12,20 +12,17 @@ export class PatientsService {
     /**
      * Handles listing all patients and creating a new patient.
      * @param page A page number within the paginated result set.
-     * @param pageSize Number of results to return per page.
      * @returns PaginatedPatientList
      * @throws ApiError
      */
     public patientsList(
         page?: number,
-        pageSize?: number,
     ): CancelablePromise<PaginatedPatientList> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/patients/',
             query: {
                 'page': page,
-                'page_size': pageSize,
             },
         });
     }
