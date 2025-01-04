@@ -1,15 +1,21 @@
 'use client'
 
-import { CustomField, Patient } from '@/types/patient'
+import type { CustomField, Patient } from '@/types/patient'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Trash } from 'lucide-react'
+import { useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { Button } from './ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form'
 import { Input } from './ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Trash } from 'lucide-react'
-import { useState } from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from './ui/select'
 
 const addressSchema = z.object({
   street: z.string().min(1, 'Street is required'),
@@ -29,20 +35,32 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>
 
 interface PatientFormProps {
-  onSave: (patient: Patient) => void
+  onSubmit: (patient: Patient) => void
+  initialData?: Patient
 }
 
-export function PatientForm({ onSave }: PatientFormProps) {
-  const [customFields, setCustomFields] = useState<CustomField[]>([])
-  
+interface CustomFieldWithId extends CustomField {
+  id: string
+}
+
+export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
+  const [customFields, setCustomFields] = useState<CustomFieldWithId[]>(
+    initialData?.customFields.map((field) => ({
+      ...field,
+      id: crypto.randomUUID()
+    })) || []
+  )
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: '',
-      middleName: '',
-      lastName: '',
-      dateOfBirth: '',
-      addresses: [{ street: '', city: '', state: '', zipCode: '' }]
+      firstName: initialData?.firstName || '',
+      middleName: initialData?.middleName || '',
+      lastName: initialData?.lastName || '',
+      dateOfBirth: initialData?.dateOfBirth || '',
+      addresses: initialData?.addresses || [
+        { street: '', city: '', state: '', zipCode: '' }
+      ]
     }
   })
 
@@ -55,6 +73,7 @@ export function PatientForm({ onSave }: PatientFormProps) {
     setCustomFields([
       ...customFields,
       {
+        id: crypto.randomUUID(),
         name: '',
         type: 'text' as const,
         value: ''
@@ -62,28 +81,28 @@ export function PatientForm({ onSave }: PatientFormProps) {
     ])
   }
 
-  const onSubmit = (data: FormData) => {
+  const handleSubmit = (data: FormData) => {
     const newPatient: Patient = {
-      id: crypto.randomUUID(),
+      id: initialData?.id || crypto.randomUUID(),
       firstName: data.firstName,
       lastName: data.lastName,
       middleName: data.middleName,
       dateOfBirth: data.dateOfBirth,
       addresses: data.addresses,
-      customFields,
-      status: 'Inquiry',
-      sleepStudies: [],
-      medications: [],
-      cpapUsage: [],
-      insurance: [],
-      appointments: []
+      customFields: customFields.map(({ id, ...field }) => field),
+      status: initialData?.status || 'Inquiry',
+      sleepStudies: initialData?.sleepStudies || [],
+      medications: initialData?.medications || [],
+      cpapUsage: initialData?.cpapUsage || [],
+      insurance: initialData?.insurance || [],
+      appointments: initialData?.appointments || []
     }
-    onSave(newPatient)
+    onSubmit(newPatient)
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="firstName"
@@ -204,29 +223,30 @@ export function PatientForm({ onSave }: PatientFormProps) {
 
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Custom Fields</h3>
-          {customFields.map((field, idx) => (
-            <div key={`custom-field-${idx}`} className="flex space-x-2">
+          {customFields.map((field) => (
+            <div key={field.id} className="flex space-x-2">
               <Input
                 placeholder="Field Name"
                 value={field.name}
                 onChange={(e) => {
-                  const newFields = [...customFields]
-                  newFields[idx] = {
-                    ...field,
-                    name: e.target.value
-                  }
+                  const newFields = customFields.map((f) =>
+                    f.id === field.id ? { ...f, name: e.target.value } : f
+                  )
                   setCustomFields(newFields)
                 }}
               />
               <Select
                 value={field.type}
                 onValueChange={(value: 'text' | 'number') => {
-                  const newFields = [...customFields]
-                  newFields[idx] = {
-                    ...field,
-                    type: value,
-                    value: value === 'number' ? 0 : ''
-                  }
+                  const newFields = customFields.map((f) =>
+                    f.id === field.id
+                      ? {
+                          ...f,
+                          type: value,
+                          value: value === 'number' ? 0 : ''
+                        }
+                      : f
+                  )
                   setCustomFields(newFields)
                 }}
               >
@@ -242,11 +262,17 @@ export function PatientForm({ onSave }: PatientFormProps) {
                 type={field.type}
                 value={field.value}
                 onChange={(e) => {
-                  const newFields = [...customFields]
-                  newFields[idx] = {
-                    ...field,
-                    value: field.type === 'number' ? Number(e.target.value) : e.target.value
-                  }
+                  const newFields = customFields.map((f) =>
+                    f.id === field.id
+                      ? {
+                          ...f,
+                          value:
+                            field.type === 'number'
+                              ? Number(e.target.value)
+                              : e.target.value
+                        }
+                      : f
+                  )
                   setCustomFields(newFields)
                 }}
               />
@@ -255,16 +281,18 @@ export function PatientForm({ onSave }: PatientFormProps) {
                 variant="destructive"
                 size="icon"
                 onClick={() => {
-                  const newFields = [...customFields]
-                  newFields.splice(idx, 1)
-                  setCustomFields(newFields)
+                  setCustomFields(customFields.filter((f) => f.id !== field.id))
                 }}
               >
                 <Trash className="h-4 w-4" />
               </Button>
             </div>
           ))}
-          <Button type="button" variant="outline" onClick={handleAddCustomField}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddCustomField}
+          >
             Add Custom Field
           </Button>
         </div>
