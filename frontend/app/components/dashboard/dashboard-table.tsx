@@ -127,6 +127,9 @@ export function DashboardTable({
           <TableHeader>
             <TableRow className="bg-gray-100 dark:bg-zinc-800 border-b border-border dark:border-zinc-700">
               <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
+                ID
+              </TableHead>
+              <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
                 Name
               </TableHead>
               <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
@@ -147,7 +150,7 @@ export function DashboardTable({
             {data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={6}
                   className="h-24 text-center text-foreground dark:text-gray-300"
                 >
                   No results found.
@@ -160,6 +163,9 @@ export function DashboardTable({
                   className="cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 border-b border-border dark:border-zinc-700"
                   onClick={() => handleRowClick(item.id)}
                 >
+                  <TableCell className="font-mono font-medium text-foreground dark:text-gray-200 border-r border-border dark:border-zinc-700">
+                    {item.id}
+                  </TableCell>
                   <TableCell className="font-medium text-foreground dark:text-gray-200 border-r border-border dark:border-zinc-700">
                     {item.first} {item.middle} {item.last}
                   </TableCell>
