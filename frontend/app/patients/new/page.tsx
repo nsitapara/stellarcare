@@ -85,8 +85,8 @@ export default function NewPatientPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container mx-auto py-10 max-w-4xl">
+      <div className="flex justify-between items-center mb-8 px-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Add New Patient

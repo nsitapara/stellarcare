@@ -9,6 +9,7 @@ import * as z from 'zod'
 import { Button } from './ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form'
 import { Input } from './ui/input'
+import { Label } from './ui/label'
 import {
   Select,
   SelectContent,
@@ -102,140 +103,171 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="firstName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium">
-                First Name
-              </FormLabel>
-              <FormControl>
-                <Input {...field} className="bg-background border-input" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="middleName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium">
-                Middle Name
-              </FormLabel>
-              <FormControl>
-                <Input {...field} className="bg-background border-input" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="lastName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium">
-                Last Name
-              </FormLabel>
-              <FormControl>
-                <Input {...field} className="bg-background border-input" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="dateOfBirth"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium">
-                Date of Birth
-              </FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="date"
-                  className="bg-background border-input"
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-6 max-w-3xl mx-auto"
+      >
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground font-medium">
+                  First Name
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    className="bg-background border-input max-w-sm"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground font-medium">
+                  Last Name
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    className="bg-background border-input max-w-sm"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="middleName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground font-medium">
+                  Middle Name
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    className="bg-background border-input max-w-sm"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="dateOfBirth"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-foreground font-medium">
+                  Date of Birth
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    type="date"
+                    className="bg-background border-input max-w-sm"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
 
         {fields.map((field, index) => (
           <div
             key={field.id}
             className="space-y-4 p-4 rounded-md border bg-accent/10"
           >
-            <h3 className="text-lg font-semibold text-foreground">
-              Address {index + 1}
-            </h3>
-            <FormField
-              control={form.control}
-              name={`addresses.${index}.street`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground font-medium">
-                    Street
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="bg-background border-input" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`addresses.${index}.city`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground font-medium">
-                    City
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="bg-background border-input" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`addresses.${index}.state`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground font-medium">
-                    State
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="bg-background border-input" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`addresses.${index}.zipCode`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground font-medium">
-                    ZIP Code
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="bg-background border-input" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => remove(index)}
-              className="bg-background hover:bg-destructive hover:text-destructive-foreground"
-            >
-              Remove Address
-            </Button>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-foreground">
+                Address {index + 1}
+              </h3>
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                onClick={() => remove(index)}
+                className="h-9 w-9"
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              <FormField
+                control={form.control}
+                name={`addresses.${index}.street`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-foreground font-medium">
+                      Street
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="bg-background border-input max-w-sm"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`addresses.${index}.city`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-foreground font-medium">
+                      City
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="bg-background border-input max-w-sm"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`addresses.${index}.state`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-foreground font-medium">
+                      State
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="bg-background border-input max-w-sm"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`addresses.${index}.zipCode`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-foreground font-medium">
+                      ZIP Code
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        className="bg-background border-input max-w-sm"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         ))}
         <Button
@@ -256,71 +288,89 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           {customFields.map((field) => (
             <div
               key={field.id}
-              className="flex space-x-2 p-4 rounded-md border bg-accent/10"
+              className="grid grid-cols-3 gap-4 p-4 rounded-md border bg-accent/10 items-end"
             >
-              <Input
-                placeholder="Field Name"
-                value={field.name}
-                onChange={(e) => {
-                  const newFields = customFields.map((f) =>
-                    f.id === field.id ? { ...f, name: e.target.value } : f
-                  )
-                  setCustomFields(newFields)
-                }}
-                className="bg-background border-input"
-              />
-              <Select
-                value={field.type}
-                onValueChange={(value: 'text' | 'number') => {
-                  const newFields = customFields.map((f) =>
-                    f.id === field.id
-                      ? {
-                          ...f,
-                          type: value,
-                          value: value === 'number' ? 0 : ''
-                        }
-                      : f
-                  )
-                  setCustomFields(newFields)
-                }}
-              >
-                <SelectTrigger className="bg-background border-input">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="number">Number</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                type={field.type}
-                value={field.value}
-                onChange={(e) => {
-                  const newFields = customFields.map((f) =>
-                    f.id === field.id
-                      ? {
-                          ...f,
-                          value:
-                            field.type === 'number'
-                              ? Number(e.target.value)
-                              : e.target.value
-                        }
-                      : f
-                  )
-                  setCustomFields(newFields)
-                }}
-                className="bg-background border-input"
-              />
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                onClick={() => {
-                  setCustomFields(customFields.filter((f) => f.id !== field.id))
-                }}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
+              <div>
+                <Label className="text-foreground font-medium mb-2">
+                  Field Name
+                </Label>
+                <Input
+                  placeholder="Field Name"
+                  value={field.name}
+                  onChange={(e) => {
+                    const newFields = customFields.map((f) =>
+                      f.id === field.id ? { ...f, name: e.target.value } : f
+                    )
+                    setCustomFields(newFields)
+                  }}
+                  className="bg-background border-input"
+                />
+              </div>
+              <div>
+                <Label className="text-foreground font-medium mb-2">Type</Label>
+                <Select
+                  value={field.type}
+                  onValueChange={(value: 'text' | 'number') => {
+                    const newFields = customFields.map((f) =>
+                      f.id === field.id
+                        ? {
+                            ...f,
+                            type: value,
+                            value: value === 'number' ? 0 : ''
+                          }
+                        : f
+                    )
+                    setCustomFields(newFields)
+                  }}
+                >
+                  <SelectTrigger className="bg-background border-input">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label className="text-foreground font-medium mb-2">
+                    Value
+                  </Label>
+                  <Input
+                    type={field.type}
+                    value={field.value}
+                    onChange={(e) => {
+                      const newFields = customFields.map((f) =>
+                        f.id === field.id
+                          ? {
+                              ...f,
+                              value:
+                                field.type === 'number'
+                                  ? Number(e.target.value)
+                                  : e.target.value
+                            }
+                          : f
+                      )
+                      setCustomFields(newFields)
+                    }}
+                    className="bg-background border-input"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => {
+                    setCustomFields(
+                      customFields.filter((f) => f.id !== field.id)
+                    )
+                  }}
+                  className="h-10 w-10"
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
           <Button
