@@ -108,9 +108,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>First Name</FormLabel>
+              <FormLabel className="text-foreground font-medium">
+                First Name
+              </FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} className="bg-background border-input" />
               </FormControl>
             </FormItem>
           )}
@@ -120,9 +122,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           name="middleName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Middle Name</FormLabel>
+              <FormLabel className="text-foreground font-medium">
+                Middle Name
+              </FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} className="bg-background border-input" />
               </FormControl>
             </FormItem>
           )}
@@ -132,9 +136,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           name="lastName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Last Name</FormLabel>
+              <FormLabel className="text-foreground font-medium">
+                Last Name
+              </FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} className="bg-background border-input" />
               </FormControl>
             </FormItem>
           )}
@@ -144,25 +150,38 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           name="dateOfBirth"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date of Birth</FormLabel>
+              <FormLabel className="text-foreground font-medium">
+                Date of Birth
+              </FormLabel>
               <FormControl>
-                <Input {...field} type="date" />
+                <Input
+                  {...field}
+                  type="date"
+                  className="bg-background border-input"
+                />
               </FormControl>
             </FormItem>
           )}
         />
 
         {fields.map((field, index) => (
-          <div key={field.id} className="space-y-4">
-            <h3 className="text-lg font-semibold">Address {index + 1}</h3>
+          <div
+            key={field.id}
+            className="space-y-4 p-4 rounded-md border bg-accent/10"
+          >
+            <h3 className="text-lg font-semibold text-foreground">
+              Address {index + 1}
+            </h3>
             <FormField
               control={form.control}
               name={`addresses.${index}.street`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Street</FormLabel>
+                  <FormLabel className="text-foreground font-medium">
+                    Street
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} className="bg-background border-input" />
                   </FormControl>
                 </FormItem>
               )}
@@ -172,9 +191,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               name={`addresses.${index}.city`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>City</FormLabel>
+                  <FormLabel className="text-foreground font-medium">
+                    City
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} className="bg-background border-input" />
                   </FormControl>
                 </FormItem>
               )}
@@ -184,9 +205,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               name={`addresses.${index}.state`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>State</FormLabel>
+                  <FormLabel className="text-foreground font-medium">
+                    State
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} className="bg-background border-input" />
                   </FormControl>
                 </FormItem>
               )}
@@ -196,9 +219,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               name={`addresses.${index}.zipCode`}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ZIP Code</FormLabel>
+                  <FormLabel className="text-foreground font-medium">
+                    ZIP Code
+                  </FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} className="bg-background border-input" />
                   </FormControl>
                 </FormItem>
               )}
@@ -207,6 +232,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               type="button"
               variant="outline"
               onClick={() => remove(index)}
+              className="bg-background hover:bg-destructive hover:text-destructive-foreground"
             >
               Remove Address
             </Button>
@@ -217,14 +243,21 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           onClick={() =>
             append({ street: '', city: '', state: '', zipCode: '' })
           }
+          variant="outline"
+          className="bg-background hover:bg-primary hover:text-primary-foreground"
         >
           Add Address
         </Button>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Custom Fields</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            Custom Fields
+          </h3>
           {customFields.map((field) => (
-            <div key={field.id} className="flex space-x-2">
+            <div
+              key={field.id}
+              className="flex space-x-2 p-4 rounded-md border bg-accent/10"
+            >
               <Input
                 placeholder="Field Name"
                 value={field.name}
@@ -234,6 +267,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   )
                   setCustomFields(newFields)
                 }}
+                className="bg-background border-input"
               />
               <Select
                 value={field.type}
@@ -250,7 +284,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   setCustomFields(newFields)
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background border-input">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -275,6 +309,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   )
                   setCustomFields(newFields)
                 }}
+                className="bg-background border-input"
               />
               <Button
                 type="button"
@@ -292,12 +327,18 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
             type="button"
             variant="outline"
             onClick={handleAddCustomField}
+            className="bg-background hover:bg-primary hover:text-primary-foreground"
           >
             Add Custom Field
           </Button>
         </div>
 
-        <Button type="submit">Save Patient</Button>
+        <Button
+          type="submit"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          Save Patient
+        </Button>
       </form>
     </Form>
   )

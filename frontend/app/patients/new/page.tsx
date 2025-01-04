@@ -1,8 +1,10 @@
 'use client'
 
 import { PatientForm } from '@/app/components/PatientForm'
+import { Button } from '@/app/components/ui/button'
 import { StatusEnum } from '@/types/api/models/StatusEnum'
 import type { PatientFormData } from '@/types/patient'
+import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -84,16 +86,32 @@ export default function NewPatientPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Add New Patient</h1>
-        <p className="text-muted-foreground">Create a new patient record</p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Add New Patient
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Create a new patient record
+          </p>
+        </div>
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => router.push('/dashboard')}
+          className="hover:bg-destructive hover:text-destructive-foreground"
+        >
+          <X className="h-5 w-5" />
+        </Button>
       </div>
       {error && (
         <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-md whitespace-pre-line">
           {error}
         </div>
       )}
-      <PatientForm onSubmit={handleSubmit} />
+      <div className="bg-card p-6 rounded-lg border shadow-sm">
+        <PatientForm onSubmit={handleSubmit} />
+      </div>
     </div>
   )
 }
