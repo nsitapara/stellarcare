@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from unfold.admin import ModelAdmin
 from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 
-from .models import Patient, User
+from .models import CustomField, Patient, User
 
 admin.site.unregister(Group)
 
@@ -24,4 +24,9 @@ class GroupAdmin(BaseGroupAdmin, ModelAdmin):
 
 @admin.register(Patient)
 class PatientAdmin(ModelAdmin):
+    pass
+
+
+@admin.register(CustomField)
+class CustomFieldAdmin(ModelAdmin):
     pass

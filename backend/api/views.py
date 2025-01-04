@@ -6,8 +6,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Patient
-from .serializers import PatientSerializer
+from .models import CustomField, Patient
+from .serializers import CustomFieldSerializer, PatientSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -87,3 +87,27 @@ class PatientQueryView(APIView):
 
         serializer = PatientSerializer(patients, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CustomFieldListCreateView(generics.ListCreateAPIView):
+    """
+    Handles listing all custom fields and creating a new custom field.
+    """
+
+    queryset = CustomField.objects.all()
+    serializer_class = CustomFieldSerializer
+
+    def create(self, request, *args, **kwargs):
+        logger.info(f"Creating custom field with data: {request.data}")
+        response = super().create(request, *args, **kwargs)
+        logger.info(f"Created custom field with ID: {response.data['id']}")
+        return response
+
+
+class CustomFieldRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Handles retrieving, updating, and deleting a single custom field.
+    """
+
+    queryset = CustomField.objects.all()
+    serializer_class = CustomFieldSerializer

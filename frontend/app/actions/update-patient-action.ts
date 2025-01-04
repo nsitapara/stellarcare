@@ -7,6 +7,14 @@ import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 
+interface CustomFieldResponse {
+  id: number
+  name: string
+  type: string
+  value_text: string | null
+  value_number: number | null
+}
+
 export async function updatePatient(
   patientId: string,
   formData: PatientFormData,
@@ -18,7 +26,27 @@ export async function updatePatient(
   }
 
   const api = await getApiClient(session)
-  return api.patients.patientsUpdate(patientId, {
+
+  // Create new custom fields
+  const customFieldsPromises =
+    formData.customFields?.map(async (field) => {
+      const response = await api.request.request<CustomFieldResponse>({
+        method: 'POST',
+        url: '/api/custom-fields/',
+        body: {
+          name: field.name,
+          type: field.type,
+          value_text: field.type === 'text' ? field.value : null,
+          value_number: field.type === 'number' ? Number(field.value) : null
+        }
+      })
+      return response.id
+    }) || []
+
+  const customFieldIds = await Promise.all(customFieldsPromises)
+
+  // Update patient with the custom field IDs
+  return await api.patients.patientsUpdate(patientId, {
     first: formData.firstName,
     middle: formData.middleName || null,
     last: formData.lastName,
@@ -26,7 +54,6 @@ export async function updatePatient(
     addresses: formData.addresses.map(
       (addr) =>
         ({
-          id: 0,
           street: addr.street,
           city: addr.city,
           state: addr.state,
@@ -36,13 +63,10 @@ export async function updatePatient(
         }) as Address
     ),
     status: originalPatient.status,
-    custom_fields: originalPatient.custom_fields,
+    custom_fields: customFieldIds,
     studies: originalPatient.studies,
     treatments: originalPatient.treatments,
     insurance: originalPatient.insurance,
-    appointments: originalPatient.appointments,
-    id: originalPatient.id,
-    created_at: originalPatient.created_at,
-    modified_at: originalPatient.modified_at
-  } as Patient)
+    appointments: originalPatient.appointments
+  } as unknown as Patient)
 }

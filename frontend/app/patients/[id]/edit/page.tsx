@@ -11,20 +11,47 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { use } from 'react'
 
+interface CustomField {
+  id: number
+  name: string
+  type: 'text' | 'number'
+  value_text: string | null
+  value_number: number | null
+}
+
+interface CustomFieldWithId {
+  id: string
+  name: string
+  type: 'text' | 'number'
+  value: string | number
+}
+
+interface PatientFormDataWithCustomFields
+  extends Omit<PatientFormData, 'customFields'> {
+  customFields: CustomFieldWithId[]
+}
+
+interface PatientWithCustomFields extends Omit<Patient, 'custom_fields'> {
+  custom_fields: CustomField[]
+}
+
 export default function EditPatientPage({
   params
 }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
-  const [patient, setPatient] = useState<PatientFormData | null>(null)
+  const [patient, setPatient] =
+    useState<PatientFormDataWithCustomFields | null>(null)
   const [originalPatient, setOriginalPatient] = useState<Patient | null>(null)
   const { id: patientId } = use(params)
 
   useEffect(() => {
     async function loadPatient() {
       try {
-        const response = await getPatient(patientId)
-        setOriginalPatient(response)
+        const response = (await getPatient(
+          patientId
+        )) as unknown as PatientWithCustomFields
+        setOriginalPatient(response as unknown as Patient)
         setPatient({
           firstName: response.first,
           middleName: response.middle || undefined,
@@ -35,6 +62,15 @@ export default function EditPatientPage({
             city: addr.city,
             state: addr.state,
             zipCode: addr.zip_code
+          })),
+          customFields: (response.custom_fields || []).map((field) => ({
+            id: field.id.toString(),
+            name: field.name,
+            type: field.type,
+            value:
+              field.type === 'text'
+                ? field.value_text || ''
+                : field.value_number || 0
           }))
         })
       } catch (error) {
@@ -49,14 +85,18 @@ export default function EditPatientPage({
     loadPatient()
   }, [patientId])
 
-  async function handleSubmit(formData: PatientFormData) {
+  async function handleSubmit(formData: PatientFormDataWithCustomFields) {
     try {
       if (!originalPatient) {
         setError('Original patient data not found')
         return
       }
 
-      await updatePatient(patientId, formData, originalPatient)
+      await updatePatient(
+        patientId,
+        formData as PatientFormData,
+        originalPatient
+      )
       router.push('/dashboard')
     } catch (error) {
       console.error('Failed to update patient:', error)

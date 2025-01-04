@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions, serializers
 
-from .models import Address, Patient
+from .models import Address, CustomField, Patient
 
 User = get_user_model()
 
@@ -136,8 +136,22 @@ class AddressSerializer(serializers.ModelSerializer):
         return str(obj)
 
 
+class CustomFieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomField
+        fields = ["id", "name", "type", "value_text", "value_number"]
+
+    def validate(self, attrs):
+        if attrs["type"] == "text":
+            attrs["value_number"] = None
+        elif attrs["type"] == "number":
+            attrs["value_text"] = None
+        return attrs
+
+
 class PatientSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True)
+    custom_fields = CustomFieldSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = Patient
@@ -146,20 +160,20 @@ class PatientSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         addresses_data = validated_data.pop("addresses", [])
-        custom_fields = validated_data.pop("custom_fields", [])
         studies = validated_data.pop("studies", [])
         treatments = validated_data.pop("treatments", [])
         insurance = validated_data.pop("insurance", [])
         appointments = validated_data.pop("appointments", [])
 
+        # Create the patient first
         patient = Patient.objects.create(**validated_data)
 
+        # Handle addresses
         for address_data in addresses_data:
             address = Address.objects.create(**address_data)
             patient.addresses.add(address)
 
-        if custom_fields:
-            patient.custom_fields.set(custom_fields)
+        # Handle many-to-many relationships
         if studies:
             patient.studies.set(studies)
         if treatments:
@@ -173,7 +187,6 @@ class PatientSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         addresses_data = validated_data.pop("addresses", [])
-        custom_fields = validated_data.pop("custom_fields", [])
         studies = validated_data.pop("studies", [])
         treatments = validated_data.pop("treatments", [])
         insurance = validated_data.pop("insurance", [])
@@ -191,8 +204,6 @@ class PatientSerializer(serializers.ModelSerializer):
             instance.addresses.add(address)
 
         # Handle many-to-many relationships
-        if custom_fields is not None:
-            instance.custom_fields.set(custom_fields)
         if studies is not None:
             instance.studies.set(studies)
         if treatments is not None:

@@ -2,11 +2,18 @@
 
 import type { Address } from '@/types/api/models/Address'
 import type { Patient } from '@/types/api/models/Patient'
-import { StatusEnum } from '@/types/api/models/StatusEnum'
 import type { PatientFormData } from '@/types/patient'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
+
+interface CustomFieldResponse {
+  id: number
+  name: string
+  type: string
+  value_text: string | null
+  value_number: number | null
+}
 
 export async function createPatient(formData: PatientFormData) {
   const session = await getServerSession(authOptions)
@@ -15,12 +22,31 @@ export async function createPatient(formData: PatientFormData) {
   }
 
   const api = await getApiClient(session)
-  return api.patients.patientsCreate({
+
+  // Create custom fields first
+  const customFieldsPromises =
+    formData.customFields?.map(async (field) => {
+      const response = await api.request.request<CustomFieldResponse>({
+        method: 'POST',
+        url: '/api/custom-fields/',
+        body: {
+          name: field.name,
+          type: field.type,
+          value_text: field.type === 'text' ? field.value : null,
+          value_number: field.type === 'number' ? Number(field.value) : null
+        }
+      })
+      return response.id
+    }) || []
+
+  const customFieldIds = await Promise.all(customFieldsPromises)
+
+  // Create patient with the custom field IDs
+  return await api.patients.patientsCreate({
     first: formData.firstName,
     middle: formData.middleName || null,
     last: formData.lastName,
     date_of_birth: formData.dateOfBirth,
-    status: StatusEnum.INQUIRY,
     addresses: formData.addresses.map(
       (addr) =>
         ({
@@ -32,13 +58,11 @@ export async function createPatient(formData: PatientFormData) {
             `${addr.street}, ${addr.city}, ${addr.state} ${addr.zipCode}`.trim()
         }) as Address
     ),
-    custom_fields: [],
+    status: 'Inquiry',
+    custom_fields: customFieldIds,
     studies: [],
     treatments: [],
     insurance: [],
-    appointments: [],
-    id: undefined,
-    created_at: undefined,
-    modified_at: undefined
+    appointments: []
   } as unknown as Patient)
 }

@@ -3,10 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Address } from './Address';
+import type { CustomField } from './CustomField';
 import type { StatusEnum } from './StatusEnum';
 export type Patient = {
     readonly id: number;
-    readonly addresses: Array<Address>;
+    addresses: Array<Address>;
+    readonly custom_fields: Array<CustomField>;
     first: string;
     middle?: string | null;
     last: string;
@@ -14,7 +16,6 @@ export type Patient = {
     status: StatusEnum;
     readonly created_at: string;
     readonly modified_at: string;
-    custom_fields?: Array<number>;
     studies?: Array<number>;
     treatments?: Array<number>;
     insurance?: Array<number>;
