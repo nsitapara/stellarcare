@@ -1,80 +1,62 @@
 'use client'
 
+import { getPatient } from '@/app/actions/get-patient-action'
+import { updatePatient } from '@/app/actions/update-patient-action'
 import { PatientForm } from '@/app/components/PatientForm'
+import { Button } from '@/app/components/ui/button'
 import type { Patient } from '@/types/api/models/Patient'
 import type { PatientFormData } from '@/types/patient'
+import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { use } from 'react'
 
-interface EditPatientPageProps {
-  params: {
-    id: string
-  }
-}
-
-export default function EditPatientPage({ params }: EditPatientPageProps) {
+export default function EditPatientPage({
+  params
+}: { params: Promise<{ id: string }> }) {
   const router = useRouter()
-  const [patient, setPatient] = useState<Patient | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [patient, setPatient] = useState<PatientFormData | null>(null)
+  const [originalPatient, setOriginalPatient] = useState<Patient | null>(null)
+  const { id: patientId } = use(params)
 
   useEffect(() => {
     async function loadPatient() {
       try {
-        const response = await fetch(`/api/patients/${params.id}`)
-        if (!response.ok) {
-          throw new Error('Failed to load patient')
-        }
-        const patientData = await response.json()
-        setPatient(patientData)
-      } catch (error) {
-        console.error('Failed to load patient:', error)
-        setError('Failed to load patient data. Please try again.')
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadPatient()
-  }, [params.id])
-
-  async function handleSubmit(formData: PatientFormData) {
-    try {
-      if (!patient) return
-
-      const response = await fetch('/api/patients', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          id: params.id,
-          first: formData.firstName,
-          middle: formData.middleName || null,
-          last: formData.lastName,
-          date_of_birth: formData.dateOfBirth,
-          status: patient.status,
-          created_at: patient.created_at,
-          modified_at: patient.modified_at,
-          addresses: formData.addresses.map((addr) => ({
-            id: 0,
+        const response = await getPatient(patientId)
+        setOriginalPatient(response)
+        setPatient({
+          firstName: response.first,
+          middleName: response.middle || undefined,
+          lastName: response.last,
+          dateOfBirth: response.date_of_birth,
+          addresses: response.addresses.map((addr) => ({
             street: addr.street,
             city: addr.city,
             state: addr.state,
-            zip_code: addr.zipCode,
-            formatted_address: `${addr.street}, ${addr.city}, ${addr.state} ${addr.zipCode}`
-          })),
-          custom_fields: patient.custom_fields,
-          studies: patient.studies,
-          treatments: patient.treatments,
-          insurance: patient.insurance,
-          appointments: patient.appointments
+            zipCode: addr.zip_code
+          }))
         })
-      })
+      } catch (error) {
+        console.error('Failed to load patient:', error)
+        if (error instanceof Error) {
+          setError(error.message)
+        } else {
+          setError('Failed to load patient. Please try again.')
+        }
+      }
+    }
+    loadPatient()
+  }, [patientId])
 
-      if (!response.ok) {
-        throw new Error('Failed to update patient')
+  async function handleSubmit(formData: PatientFormData) {
+    try {
+      if (!originalPatient) {
+        setError('Original patient data not found')
+        return
       }
 
+      await updatePatient(patientId, formData, originalPatient)
       router.push('/dashboard')
     } catch (error) {
       console.error('Failed to update patient:', error)
@@ -86,65 +68,36 @@ export default function EditPatientPage({ params }: EditPatientPageProps) {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="flex justify-center items-center min-h-[200px]">
-          Loading...
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="p-4 text-red-700 bg-red-100 rounded-md">{error}</div>
-      </div>
-    )
-  }
-
-  if (!patient) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="p-4 text-red-700 bg-red-100 rounded-md">
-          Patient not found
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="container mx-auto py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Edit Patient</h1>
-        <p className="text-muted-foreground">Update patient information</p>
+    <div className="container mx-auto py-10 max-w-4xl">
+      <div className="flex justify-between items-center mb-8 px-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Edit Patient
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Update patient information
+          </p>
+        </div>
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => router.push('/dashboard')}
+          className="hover:bg-destructive hover:text-destructive-foreground"
+        >
+          <X className="h-5 w-5" />
+        </Button>
       </div>
-      <PatientForm
-        onSubmit={handleSubmit}
-        initialData={{
-          id: patient.id,
-          firstName: patient.first,
-          middleName: patient.middle || '',
-          lastName: patient.last,
-          dateOfBirth: patient.date_of_birth,
-          status: patient.status,
-          addresses: patient.addresses.map((addr) => ({
-            street: addr.street,
-            city: addr.city,
-            state: addr.state,
-            zipCode: addr.zip_code
-          })),
-          customFields: [],
-          sleepStudies: [],
-          medications: [],
-          cpapUsage: [],
-          insurance: [],
-          appointments: [],
-          createdAt: patient.created_at,
-          modifiedAt: patient.modified_at
-        }}
-      />
+      {error && (
+        <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-md whitespace-pre-line">
+          {error}
+        </div>
+      )}
+      <div className="bg-card p-6 rounded-lg border shadow-sm">
+        {patient && (
+          <PatientForm onSubmit={handleSubmit} initialData={patient} />
+        )}
+      </div>
     </div>
   )
 }

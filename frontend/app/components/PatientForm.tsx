@@ -1,52 +1,62 @@
 'use client'
 
-import type { CustomField, Patient } from '@/types/patient'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Trash } from 'lucide-react'
-import { useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { Button } from './ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
+
+import { Button } from '@/app/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/app/components/ui/form'
+import { Input } from '@/app/components/ui/input'
+import { Label } from '@/app/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from './ui/select'
+} from '@/app/components/ui/select'
+import { Trash } from 'lucide-react'
+import { useState } from 'react'
 
-const addressSchema = z.object({
-  street: z.string().min(1, 'Street is required'),
-  city: z.string().min(1, 'City is required'),
-  state: z.string().min(1, 'State is required'),
-  zipCode: z.string().min(5, 'ZIP code must be at least 5 characters')
-})
+interface CustomFieldWithId {
+  id: string
+  name: string
+  type: 'text' | 'number'
+  value: string | number
+}
 
 const formSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   middleName: z.string().optional(),
   lastName: z.string().min(1, 'Last name is required'),
-  dateOfBirth: z.string(),
-  addresses: z.array(addressSchema)
+  dateOfBirth: z.string().min(1, 'Date of birth is required'),
+  addresses: z.array(
+    z.object({
+      street: z.string().min(1, 'Street is required'),
+      city: z.string().min(1, 'City is required'),
+      state: z.string().min(1, 'State is required'),
+      zipCode: z.string().min(1, 'ZIP code is required')
+    })
+  )
 })
 
 type FormData = z.infer<typeof formSchema>
 
 interface PatientFormProps {
-  onSubmit: (patient: Patient) => void
-  initialData?: Patient
-}
-
-interface CustomFieldWithId extends CustomField {
-  id: string
+  onSubmit: (data: FormData & { customFields: CustomFieldWithId[] }) => void
+  initialData?: FormData & { customFields?: CustomFieldWithId[] }
 }
 
 export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   const [customFields, setCustomFields] = useState<CustomFieldWithId[]>(
-    initialData?.customFields.map((field) => ({
+    initialData?.customFields?.map((field) => ({
       ...field,
       id: crypto.randomUUID()
     })) || []
@@ -54,20 +64,18 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      firstName: initialData?.firstName || '',
-      middleName: initialData?.middleName || '',
-      lastName: initialData?.lastName || '',
-      dateOfBirth: initialData?.dateOfBirth || '',
-      addresses: initialData?.addresses || [
-        { street: '', city: '', state: '', zipCode: '' }
-      ]
+    defaultValues: initialData || {
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      dateOfBirth: '',
+      addresses: []
     }
   })
 
   const { fields, append, remove } = useFieldArray({
-    name: 'addresses',
-    control: form.control
+    control: form.control,
+    name: 'addresses'
   })
 
   const handleAddCustomField = () => {
@@ -76,29 +84,14 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       {
         id: crypto.randomUUID(),
         name: '',
-        type: 'text' as const,
+        type: 'text',
         value: ''
       }
     ])
   }
 
   const handleSubmit = (data: FormData) => {
-    const newPatient: Patient = {
-      id: initialData?.id || crypto.randomUUID(),
-      firstName: data.firstName,
-      lastName: data.lastName,
-      middleName: data.middleName,
-      dateOfBirth: data.dateOfBirth,
-      addresses: data.addresses,
-      customFields: customFields.map(({ id, ...field }) => field),
-      status: initialData?.status || 'Inquiry',
-      sleepStudies: initialData?.sleepStudies || [],
-      medications: initialData?.medications || [],
-      cpapUsage: initialData?.cpapUsage || [],
-      insurance: initialData?.insurance || [],
-      appointments: initialData?.appointments || []
-    }
-    onSubmit(newPatient)
+    onSubmit({ ...data, customFields })
   }
 
   return (
@@ -107,193 +100,177 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-6 max-w-3xl mx-auto"
       >
-        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-foreground font-medium">
-                  First Name
-                </FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    className="bg-background border-input max-w-sm"
-                  />
+                  <Input {...field} className="max-w-sm" />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-foreground font-medium">
-                  Last Name
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    className="bg-background border-input max-w-sm"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+
           <FormField
             control={form.control}
             name="middleName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-foreground font-medium">
-                  Middle Name
-                </FormLabel>
+                <FormLabel>Middle Name</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    className="bg-background border-input max-w-sm"
-                  />
+                  <Input {...field} className="max-w-sm" />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input {...field} className="max-w-sm" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="dateOfBirth"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-foreground font-medium">
-                  Date of Birth
-                </FormLabel>
+                <FormLabel>Date of Birth</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    type="date"
-                    className="bg-background border-input max-w-sm"
-                  />
+                  <Input type="date" {...field} className="max-w-sm" />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        {fields.map((field, index) => (
-          <div
-            key={field.id}
-            className="space-y-4 p-4 rounded-md border bg-accent/10"
-          >
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-foreground">
-                Address {index + 1}
-              </h3>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                onClick={() => remove(index)}
-                className="h-9 w-9"
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <Label>Addresses</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                append({ street: '', city: '', state: '', zipCode: '' })
+              }
+              className="bg-background hover:bg-primary hover:text-primary-foreground"
+            >
+              Add Address
+            </Button>
+          </div>
+
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="grid grid-cols-2 gap-4 p-4 border rounded-lg"
+            >
               <FormField
                 control={form.control}
                 name={`addresses.${index}.street`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground font-medium">
-                      Street
-                    </FormLabel>
+                    <FormLabel>Street</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        className="bg-background border-input max-w-sm"
-                      />
+                      <Input {...field} className="max-w-sm" />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name={`addresses.${index}.city`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground font-medium">
-                      City
-                    </FormLabel>
+                    <FormLabel>City</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        className="bg-background border-input max-w-sm"
-                      />
+                      <Input {...field} className="max-w-sm" />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name={`addresses.${index}.state`}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-foreground font-medium">
-                      State
-                    </FormLabel>
+                    <FormLabel>State</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        className="bg-background border-input max-w-sm"
-                      />
+                      <Input {...field} className="max-w-sm" />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name={`addresses.${index}.zipCode`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground font-medium">
-                      ZIP Code
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        className="bg-background border-input max-w-sm"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+
+              <div className="flex items-end gap-4">
+                <FormField
+                  control={form.control}
+                  name={`addresses.${index}.zipCode`}
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>ZIP Code</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="max-w-sm" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => remove(index)}
+                  className="h-9 w-9"
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
-        <Button
-          type="button"
-          onClick={() =>
-            append({ street: '', city: '', state: '', zipCode: '' })
-          }
-          variant="outline"
-          className="bg-background hover:bg-primary hover:text-primary-foreground"
-        >
-          Add Address
-        </Button>
+          ))}
+        </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">
-            Custom Fields
-          </h3>
+          <div className="flex justify-between items-center">
+            <Label>Custom Fields</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddCustomField}
+              className="bg-background hover:bg-primary hover:text-primary-foreground"
+            >
+              Add Custom Field
+            </Button>
+          </div>
+
           {customFields.map((field) => (
             <div
               key={field.id}
-              className="grid grid-cols-3 gap-4 p-4 rounded-md border bg-accent/10 items-end"
+              className="grid grid-cols-3 gap-4 p-4 border rounded-lg items-end"
             >
               <div>
-                <Label className="text-foreground font-medium mb-2">
-                  Field Name
-                </Label>
+                <Label>Field Name</Label>
                 <Input
                   placeholder="Field Name"
                   value={field.name}
@@ -303,11 +280,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                     )
                     setCustomFields(newFields)
                   }}
-                  className="bg-background border-input"
+                  className="max-w-sm"
                 />
               </div>
               <div>
-                <Label className="text-foreground font-medium mb-2">Type</Label>
+                <Label>Type</Label>
                 <Select
                   value={field.type}
                   onValueChange={(value: 'text' | 'number') => {
@@ -323,7 +300,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                     setCustomFields(newFields)
                   }}
                 >
-                  <SelectTrigger className="bg-background border-input">
+                  <SelectTrigger className="max-w-sm">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -334,9 +311,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               </div>
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <Label className="text-foreground font-medium mb-2">
-                    Value
-                  </Label>
+                  <Label>Value</Label>
                   <Input
                     type={field.type}
                     value={field.value}
@@ -354,7 +329,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                       )
                       setCustomFields(newFields)
                     }}
-                    className="bg-background border-input"
+                    className="max-w-sm"
                   />
                 </div>
                 <Button
@@ -366,29 +341,18 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                       customFields.filter((f) => f.id !== field.id)
                     )
                   }}
-                  className="h-10 w-10"
+                  className="h-9 w-9"
                 >
                   <Trash className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           ))}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleAddCustomField}
-            className="bg-background hover:bg-primary hover:text-primary-foreground"
-          >
-            Add Custom Field
-          </Button>
         </div>
 
-        <Button
-          type="submit"
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          Save Patient
-        </Button>
+        <div className="flex justify-end">
+          <Button type="submit">Save Changes</Button>
+        </div>
       </form>
     </Form>
   )
