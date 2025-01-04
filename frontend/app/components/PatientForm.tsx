@@ -59,7 +59,14 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
     initialData?.customFields?.map((field) => ({
       ...field,
       id: crypto.randomUUID()
-    })) || []
+    })) || [
+      {
+        id: crypto.randomUUID(),
+        name: '',
+        type: 'text',
+        value: ''
+      }
+    ]
   )
 
   const form = useForm<FormData>({
@@ -69,7 +76,14 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       middleName: '',
       lastName: '',
       dateOfBirth: '',
-      addresses: []
+      addresses: [
+        {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: ''
+        }
+      ]
     }
   })
 
@@ -163,12 +177,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
             <Label>Addresses</Label>
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() =>
                 append({ street: '', city: '', state: '', zipCode: '' })
               }
-              className="bg-background hover:bg-primary hover:text-primary-foreground"
             >
               Add Address
             </Button>
@@ -255,10 +268,9 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
             <Label>Custom Fields</Label>
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={handleAddCustomField}
-              className="bg-background hover:bg-primary hover:text-primary-foreground"
             >
               Add Custom Field
             </Button>
@@ -267,7 +279,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           {customFields.map((field) => (
             <div
               key={field.id}
-              className="grid grid-cols-3 gap-4 p-4 border rounded-lg items-end"
+              className="grid grid-cols-3 gap-4 p-4 border rounded-lg"
             >
               <div>
                 <Label>Field Name</Label>
@@ -309,7 +321,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-end gap-4">
                 <div className="flex-1">
                   <Label>Value</Label>
                   <Input
