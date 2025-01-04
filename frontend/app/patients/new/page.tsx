@@ -1,8 +1,8 @@
 'use client'
 
+import { createPatient } from '@/app/actions/create-patient-action'
 import { PatientForm } from '@/app/components/PatientForm'
 import { Button } from '@/app/components/ui/button'
-import { StatusEnum } from '@/types/api/models/StatusEnum'
 import type { PatientFormData } from '@/types/patient'
 import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -14,65 +14,12 @@ export default function NewPatientPage() {
 
   async function handleSubmit(formData: PatientFormData) {
     try {
-      console.log('Submitting form data:', formData)
-
-      // Format date to YYYY-MM-DD
-      const dateOfBirth = formData.dateOfBirth
-      if (!dateOfBirth) {
+      if (!formData.dateOfBirth) {
         setError('Date of birth is required')
         return
       }
 
-      const response = await fetch('/api/patients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          id: '',
-          first: formData.firstName || '',
-          middle: formData.middleName || null,
-          last: formData.lastName || '',
-          date_of_birth: dateOfBirth,
-          status: StatusEnum.INQUIRY,
-          addresses: formData.addresses.map((addr) => ({
-            id: 0,
-            street: addr.street || '',
-            city: addr.city || '',
-            state: addr.state || '',
-            zip_code: addr.zipCode || '',
-            formatted_address: addr.street
-              ? `${addr.street}, ${addr.city}, ${addr.state} ${addr.zipCode}`.trim()
-              : ''
-          })),
-          custom_fields: [],
-          studies: [],
-          treatments: [],
-          insurance: [],
-          appointments: []
-        })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('Server error:', errorData)
-
-        // Format validation errors into a readable message
-        if (typeof errorData === 'object') {
-          const errorMessages = Object.entries(errorData)
-            .map(
-              ([field, errors]) =>
-                `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
-            )
-            .join('\n')
-          throw new Error(errorMessages)
-        }
-
-        throw new Error(errorData.error || 'Failed to create patient')
-      }
-
-      const result = await response.json()
-      console.log('Patient created:', result)
+      await createPatient(formData)
       router.push('/dashboard')
     } catch (error) {
       console.error('Failed to create patient:', error)

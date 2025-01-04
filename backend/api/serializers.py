@@ -137,9 +137,49 @@ class AddressSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    addresses = AddressSerializer(many=True, read_only=True)
+    addresses = AddressSerializer(many=True)
 
     class Meta:
         model = Patient
         fields = "__all__"
         read_only_fields = ("id",)
+
+    def create(self, validated_data):
+        addresses_data = validated_data.pop("addresses", [])
+        custom_fields = validated_data.pop("custom_fields", [])
+        studies = validated_data.pop("studies", [])
+        treatments = validated_data.pop("treatments", [])
+        insurance = validated_data.pop("insurance", [])
+        appointments = validated_data.pop("appointments", [])
+
+        patient = Patient.objects.create(**validated_data)
+
+        for address_data in addresses_data:
+            address = Address.objects.create(**address_data)
+            patient.addresses.add(address)
+
+        if custom_fields:
+            patient.custom_fields.set(custom_fields)
+        if studies:
+            patient.studies.set(studies)
+        if treatments:
+            patient.treatments.set(treatments)
+        if insurance:
+            patient.insurance.set(insurance)
+        if appointments:
+            patient.appointments.set(appointments)
+
+        return patient
+
+    def update(self, instance, validated_data):
+        addresses_data = validated_data.pop("addresses", [])
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        instance.addresses.clear()
+        for address_data in addresses_data:
+            address = Address.objects.create(**address_data)
+            instance.addresses.add(address)
+
+        return instance
