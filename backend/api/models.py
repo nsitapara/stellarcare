@@ -52,7 +52,7 @@ class SleepStudy(models.Model):
     file_url = models.URLField(blank=True, null=True)
 
 
-class Treatments(models.Model):
+class Treatment(models.Model):
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=100)
     dosage = models.CharField(max_length=100)
@@ -118,9 +118,9 @@ class Patient(models.Model):
     addresses = models.ManyToManyField(Address)
     custom_fields = models.ManyToManyField(CustomField)
     studies = models.ManyToManyField(SleepStudy)
-    treatments = models.ManyToManyField(Treatments)
+    treatments = models.ManyToManyField(Treatment)
     insurance = models.ManyToManyField(Insurance)
     appointments = models.ManyToManyField(Visits)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.first} {self.last}"

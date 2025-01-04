@@ -9,7 +9,7 @@ from api.models import (
     Insurance,
     Patient,
     SleepStudy,
-    Treatments,
+    Treatment,
     Visits,
 )
 
@@ -71,9 +71,26 @@ class Command(BaseCommand):
         # Generate Treatments
         treatments = []
         treatment_types = ["CPAP", "BiPAP", "Medication", "Therapy"]
+        treatment_names = [
+            "Sleep Apnea Therapy",
+            "CPAP Treatment",
+            "BiPAP Treatment",
+            "Sleep Position Therapy",
+            "Weight Management",
+            "Oral Appliance Therapy",
+            "Lifestyle Modification",
+            "Sleep Hygiene Education",
+            "Cognitive Behavioral Therapy",
+            "Melatonin Supplement",
+            "Positional Therapy",
+            "Oxygen Therapy",
+            "Dental Device",
+            "Exercise Program",
+            "Relaxation Techniques",
+        ]
         for _ in range(15):
-            treatment = Treatments.objects.create(
-                name=fake.medical_procedure(),
+            treatment = Treatment.objects.create(
+                name=random.choice(treatment_names),
                 type=random.choice(treatment_types),
                 dosage=f"{random.randint(1, 20)} mg" if "Medication" else "N/A",
                 frequency=f"{random.randint(1, 4)} times per day",
