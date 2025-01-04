@@ -173,13 +173,33 @@ class PatientSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         addresses_data = validated_data.pop("addresses", [])
+        custom_fields = validated_data.pop("custom_fields", [])
+        studies = validated_data.pop("studies", [])
+        treatments = validated_data.pop("treatments", [])
+        insurance = validated_data.pop("insurance", [])
+        appointments = validated_data.pop("appointments", [])
+
+        # Update regular fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
+        # Handle addresses
         instance.addresses.clear()
         for address_data in addresses_data:
             address = Address.objects.create(**address_data)
             instance.addresses.add(address)
+
+        # Handle many-to-many relationships
+        if custom_fields is not None:
+            instance.custom_fields.set(custom_fields)
+        if studies is not None:
+            instance.studies.set(studies)
+        if treatments is not None:
+            instance.treatments.set(treatments)
+        if insurance is not None:
+            instance.insurance.set(insurance)
+        if appointments is not None:
+            instance.appointments.set(appointments)
 
         return instance
