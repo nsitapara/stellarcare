@@ -104,8 +104,30 @@ class CustomFieldDefinitionListCreateView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         logger.info(f"Creating custom field definition with data: {request.data}")
         response = super().create(request, *args, **kwargs)
+
+        # Associate the new custom field with the creating user
+        custom_field = CustomFieldDefinition.objects.get(id=response.data["id"])
+        user = request.user
+        logger.info(
+            f"Associating custom field {custom_field.id} with user {user.email}"
+        )
+        user.available_custom_fields.add(custom_field)
+
         logger.info(f"Created custom field definition with ID: {response.data['id']}")
         return response
+
+
+class CustomFieldDefinitionAssignedView(generics.ListAPIView):
+    """
+    Returns custom field definitions assigned to the current user.
+    """
+
+    serializer_class = CustomFieldDefinitionSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        logger.info(f"Fetching assigned custom fields for user: {user.email}")
+        return user.available_custom_fields.all().order_by("display_order", "name")
 
 
 class CustomFieldDefinitionRetrieveUpdateDeleteView(

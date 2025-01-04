@@ -2,7 +2,8 @@
 
 import {
   createCustomField,
-  getCustomFields
+  getCustomFields,
+  getUserCustomFields
 } from '@/app/actions/get-custom-fields-action'
 import { Button } from '@/app/components/ui/button'
 import {
@@ -76,6 +77,9 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   const [availableCustomFields, setAvailableCustomFields] = useState<
     CustomFieldDefinition[]
   >([])
+  const [userAssignedFields, setUserAssignedFields] = useState<
+    CustomFieldDefinition[]
+  >([])
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -83,21 +87,30 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
     const fetchCustomFields = async () => {
       try {
         console.log('Fetching custom fields...')
-        const fields = await getCustomFields()
-        console.log('Received custom fields:', fields)
-        // Remove duplicate fields by name, keeping the most recent one
-        const uniqueFields = fields.reduce((acc, curr) => {
-          acc.set(curr.name, curr)
-          return acc
-        }, new Map<string, CustomFieldDefinition>())
-        const dedupedFields = Array.from(uniqueFields.values())
-        console.log('Deduped fields:', dedupedFields)
-        setAvailableCustomFields(dedupedFields)
+        // Get all available fields for search
+        const allFields = await getCustomFields()
+        console.log('All available fields:', allFields)
+        setAvailableCustomFields(allFields)
 
-        // Initialize custom fields after we have the available fields
+        // Get user's assigned fields
+        const assignedFields = await getUserCustomFields()
+        console.log('User assigned fields:', assignedFields)
+        setUserAssignedFields(assignedFields)
+
+        // Auto-populate form with user's assigned custom fields only
+        const initialFields = assignedFields.map((field) => ({
+          id: crypto.randomUUID(),
+          name: field.name,
+          type: field.type,
+          value: field.type === 'text' ? '' : 0,
+          customFieldDefinitionId: field.id
+        }))
+        setCustomFields(initialFields)
+
+        // If we have initial data, update the values
         if (initialData?.customFields) {
           const initialCustomFields = initialData.customFields.map((field) => {
-            const fieldDef = dedupedFields.find(
+            const fieldDef = allFields.find(
               (def) => def.id === field.custom_field_definition_id
             )
             return {
@@ -116,6 +129,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       } catch (error) {
         console.error('Error fetching custom fields:', error)
         setAvailableCustomFields([])
+        setUserAssignedFields([])
       }
     }
     fetchCustomFields()
@@ -124,6 +138,14 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   const addCustomField = async (selectedField?: CustomFieldDefinition) => {
     console.log('Adding custom field:', selectedField)
     if (selectedField) {
+      // Check if field is already added
+      if (
+        customFields.some((f) => f.customFieldDefinitionId === selectedField.id)
+      ) {
+        console.log('Field already exists in form')
+        return
+      }
+
       console.log(
         'Selected field ID:',
         selectedField.id,
@@ -138,7 +160,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         customFieldDefinitionId: selectedField.id
       }
       console.log('Adding existing field:', newField)
-      setCustomFields([...customFields, newField])
+      setCustomFields([newField, ...customFields])
     } else if (searchQuery) {
       try {
         console.log('Creating new custom field with name:', searchQuery)
@@ -151,7 +173,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           console.log('Successfully created new field:', newField)
           console.log('New field ID:', newField.id, 'Type:', typeof newField.id)
           setAvailableCustomFields((prev) => {
-            const updated = [...prev, newField]
+            const updated = [newField, ...prev]
             console.log('Updated available custom fields:', updated)
             return updated
           })
@@ -163,7 +185,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
             customFieldDefinitionId: newField.id
           }
           console.log('Adding new field to form:', formField)
-          setCustomFields([...customFields, formField])
+          setCustomFields([formField, ...customFields])
         }
       } catch (error) {
         console.error('Error creating custom field:', error)
@@ -270,11 +292,12 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   const filteredCustomFields = (availableCustomFields || []).filter(
     (field) =>
       field.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !customFields.some((f) => f.name === field.name)
+      !customFields.some((f) => f.customFieldDefinitionId === field.id)
   )
   console.log('Filtered custom fields:', filteredCustomFields)
   console.log('Current custom fields:', customFields)
   console.log('Available custom fields:', availableCustomFields)
+  console.log('User assigned fields:', userAssignedFields)
 
   return (
     <Form {...form}>

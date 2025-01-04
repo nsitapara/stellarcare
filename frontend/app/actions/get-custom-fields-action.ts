@@ -35,6 +35,32 @@ export async function getCustomFields(): Promise<CustomFieldDefinition[]> {
   }
 }
 
+export async function getUserCustomFields(): Promise<CustomFieldDefinition[]> {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    throw new Error('You must be logged in to view custom fields')
+  }
+
+  try {
+    console.log(
+      'Fetching assigned custom fields for user:',
+      session.user?.email
+    )
+    const api = await getApiClient(session)
+    const response = await api.request.request<
+      PaginatedResponse<CustomFieldDefinition>
+    >({
+      method: 'GET',
+      url: '/api/custom-field-definitions/assigned/'
+    })
+    console.log('User custom fields API response:', response)
+    return response.results
+  } catch (error) {
+    console.error('Error fetching user custom fields:', error)
+    throw error
+  }
+}
+
 export async function createCustomField(data: {
   name: string
   type: 'text' | 'number'
