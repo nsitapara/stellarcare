@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions, serializers
 
-from .models import Address, CustomField, Patient
+from .models import Address, CustomFieldDefinition, Patient, PatientCustomField
 
 User = get_user_model()
 
@@ -136,22 +136,39 @@ class AddressSerializer(serializers.ModelSerializer):
         return str(obj)
 
 
-class CustomFieldSerializer(serializers.ModelSerializer):
+class CustomFieldDefinitionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomField
-        fields = ["id", "name", "type", "value_text", "value_number"]
+        model = CustomFieldDefinition
+        fields = [
+            "id",
+            "name",
+            "type",
+            "description",
+            "options",
+            "is_active",
+            "is_required",
+            "display_order",
+        ]
 
-    def validate(self, attrs):
-        if attrs["type"] == "text":
-            attrs["value_number"] = None
-        elif attrs["type"] == "number":
-            attrs["value_text"] = None
-        return attrs
+
+class PatientCustomFieldSerializer(serializers.ModelSerializer):
+    field_definition = CustomFieldDefinitionSerializer(read_only=True)
+    value = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PatientCustomField
+        fields = ["id", "field_definition", "value"]
+
+    def get_value(self, obj):
+        return obj.get_value()
 
 
 class PatientSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True)
-    custom_fields = CustomFieldSerializer(many=True, required=False)
+    custom_fields = serializers.ListField(
+        child=serializers.DictField(), write_only=True, required=False
+    )
+    patient_custom_fields = PatientCustomFieldSerializer(many=True, read_only=True)
 
     class Meta:
         model = Patient
@@ -175,9 +192,27 @@ class PatientSerializer(serializers.ModelSerializer):
             patient.addresses.add(address)
 
         # Handle custom fields
-        for custom_field_data in custom_fields_data:
-            custom_field = CustomField.objects.create(**custom_field_data)
-            patient.custom_fields.add(custom_field)
+        for field_data in custom_fields_data:
+            field_definition = CustomFieldDefinition.objects.get_or_create(
+                name=field_data["name"],
+                type=field_data["type"],
+                defaults={
+                    "description": field_data.get("description", ""),
+                    "is_active": True,
+                },
+            )[0]
+
+            value_field = f"value_{field_definition.type}"
+            value = field_data.get(f"value_{field_definition.type}") or field_data.get(
+                "value_text"
+            )
+
+            if value is not None:
+                PatientCustomField.objects.create(
+                    patient=patient,
+                    field_definition=field_definition,
+                    **{value_field: value},
+                )
 
         # Handle many-to-many relationships
         if studies:
@@ -193,10 +228,10 @@ class PatientSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         addresses_data = validated_data.pop("addresses", [])
-        studies = validated_data.pop("studies", [])
-        treatments = validated_data.pop("treatments", [])
-        insurance = validated_data.pop("insurance", [])
-        appointments = validated_data.pop("appointments", [])
+        studies = validated_data.pop("studies", None)
+        treatments = validated_data.pop("treatments", None)
+        insurance = validated_data.pop("insurance", None)
+        appointments = validated_data.pop("appointments", None)
         custom_fields_data = validated_data.pop("custom_fields", [])
 
         # Update regular fields
@@ -211,10 +246,29 @@ class PatientSerializer(serializers.ModelSerializer):
             instance.addresses.add(address)
 
         # Handle custom fields
-        instance.custom_fields.clear()
-        for custom_field_data in custom_fields_data:
-            custom_field = CustomField.objects.create(**custom_field_data)
-            instance.custom_fields.add(custom_field)
+        if custom_fields_data:
+            instance.patient_custom_fields.all().delete()
+            for field_data in custom_fields_data:
+                field_definition = CustomFieldDefinition.objects.get_or_create(
+                    name=field_data["name"],
+                    type=field_data["type"],
+                    defaults={
+                        "description": field_data.get("description", ""),
+                        "is_active": True,
+                    },
+                )[0]
+
+                value_field = f"value_{field_definition.type}"
+                value = field_data.get(
+                    f"value_{field_definition.type}"
+                ) or field_data.get("value_text")
+
+                if value is not None:
+                    PatientCustomField.objects.create(
+                        patient=instance,
+                        field_definition=field_definition,
+                        **{value_field: value},
+                    )
 
         # Handle many-to-many relationships
         if studies is not None:

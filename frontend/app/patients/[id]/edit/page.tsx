@@ -20,6 +20,7 @@ interface CustomField {
 }
 
 interface FormCustomField {
+  id: string
   name: string
   type: 'text' | 'number'
   value: string | number
@@ -63,6 +64,7 @@ export default function EditPatientPage({
             zipCode: addr.zip_code
           })),
           customFields: (response.custom_fields || []).map((field) => ({
+            id: field.id.toString(),
             name: field.name,
             type: field.type,
             value:

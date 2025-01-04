@@ -2,10 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CustomField } from './CustomField';
-export type PaginatedCustomFieldList = {
+import type { PatientCustomField } from './PatientCustomField';
+export type PaginatedPatientCustomFieldList = {
     count: number;
     next?: string | null;
     previous?: string | null;
-    results: Array<CustomField>;
+    results: Array<PatientCustomField>;
 };

@@ -2,77 +2,77 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { CustomField } from '../models/CustomField';
-import type { PaginatedCustomFieldList } from '../models/PaginatedCustomFieldList';
-import type { PatchedCustomField } from '../models/PatchedCustomField';
+import type { CustomFieldDefinition } from '../models/CustomFieldDefinition';
+import type { PaginatedCustomFieldDefinitionList } from '../models/PaginatedCustomFieldDefinitionList';
+import type { PatchedCustomFieldDefinition } from '../models/PatchedCustomFieldDefinition';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
-export class CustomFieldsService {
+export class CustomFieldDefinitionsService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
     /**
-     * Handles listing all custom fields and creating a new custom field.
+     * Handles listing all custom field definitions and creating new ones.
      * @param page A page number within the paginated result set.
-     * @returns PaginatedCustomFieldList
+     * @returns PaginatedCustomFieldDefinitionList
      * @throws ApiError
      */
-    public customFieldsList(
+    public customFieldDefinitionsList(
         page?: number,
-    ): CancelablePromise<PaginatedCustomFieldList> {
+    ): CancelablePromise<PaginatedCustomFieldDefinitionList> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/custom-fields/',
+            url: '/api/custom-field-definitions/',
             query: {
                 'page': page,
             },
         });
     }
     /**
-     * Handles listing all custom fields and creating a new custom field.
+     * Handles listing all custom field definitions and creating new ones.
      * @param requestBody
-     * @returns CustomField
+     * @returns CustomFieldDefinition
      * @throws ApiError
      */
-    public customFieldsCreate(
-        requestBody: CustomField,
-    ): CancelablePromise<CustomField> {
+    public customFieldDefinitionsCreate(
+        requestBody: CustomFieldDefinition,
+    ): CancelablePromise<CustomFieldDefinition> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/custom-fields/',
+            url: '/api/custom-field-definitions/',
             body: requestBody,
             mediaType: 'application/json',
         });
     }
     /**
-     * Handles retrieving, updating, and deleting a single custom field.
+     * Handles retrieving, updating, and deleting a single custom field definition.
      * @param id
-     * @returns CustomField
+     * @returns CustomFieldDefinition
      * @throws ApiError
      */
-    public customFieldsRetrieve(
+    public customFieldDefinitionsRetrieve(
         id: number,
-    ): CancelablePromise<CustomField> {
+    ): CancelablePromise<CustomFieldDefinition> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/custom-fields/{id}/',
+            url: '/api/custom-field-definitions/{id}/',
             path: {
                 'id': id,
             },
         });
     }
     /**
-     * Handles retrieving, updating, and deleting a single custom field.
+     * Handles retrieving, updating, and deleting a single custom field definition.
      * @param id
      * @param requestBody
-     * @returns CustomField
+     * @returns CustomFieldDefinition
      * @throws ApiError
      */
-    public customFieldsUpdate(
+    public customFieldDefinitionsUpdate(
         id: number,
-        requestBody: CustomField,
-    ): CancelablePromise<CustomField> {
+        requestBody: CustomFieldDefinition,
+    ): CancelablePromise<CustomFieldDefinition> {
         return this.httpRequest.request({
             method: 'PUT',
-            url: '/api/custom-fields/{id}/',
+            url: '/api/custom-field-definitions/{id}/',
             path: {
                 'id': id,
             },
@@ -81,19 +81,19 @@ export class CustomFieldsService {
         });
     }
     /**
-     * Handles retrieving, updating, and deleting a single custom field.
+     * Handles retrieving, updating, and deleting a single custom field definition.
      * @param id
      * @param requestBody
-     * @returns CustomField
+     * @returns CustomFieldDefinition
      * @throws ApiError
      */
-    public customFieldsPartialUpdate(
+    public customFieldDefinitionsPartialUpdate(
         id: number,
-        requestBody?: PatchedCustomField,
-    ): CancelablePromise<CustomField> {
+        requestBody?: PatchedCustomFieldDefinition,
+    ): CancelablePromise<CustomFieldDefinition> {
         return this.httpRequest.request({
             method: 'PATCH',
-            url: '/api/custom-fields/{id}/',
+            url: '/api/custom-field-definitions/{id}/',
             path: {
                 'id': id,
             },
@@ -102,17 +102,17 @@ export class CustomFieldsService {
         });
     }
     /**
-     * Handles retrieving, updating, and deleting a single custom field.
+     * Handles retrieving, updating, and deleting a single custom field definition.
      * @param id
      * @returns void
      * @throws ApiError
      */
-    public customFieldsDestroy(
+    public customFieldDefinitionsDestroy(
         id: number,
     ): CancelablePromise<void> {
         return this.httpRequest.request({
             method: 'DELETE',
-            url: '/api/custom-fields/{id}/',
+            url: '/api/custom-field-definitions/{id}/',
             path: {
                 'id': id,
             },
