@@ -4,13 +4,6 @@ import type { DashboardData } from '@/types/dashboard'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@components/ui/select'
-import {
   Table,
   TableBody,
   TableCell,
@@ -19,7 +12,6 @@ import {
   TableRow
 } from '@components/ui/table'
 import { cn } from '@lib/utils'
-import { format } from 'date-fns'
 import { Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -31,6 +23,8 @@ interface DashboardTableProps {
   pageSize: number
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
+  onSearch: (query: string) => void
+  isLoading: boolean
 }
 
 const getStatusColor = (status: string) => {
@@ -54,21 +48,49 @@ export function DashboardTable({
   page,
   pageSize,
   onPageChange,
-  onPageSizeChange
+  onPageSizeChange,
+  onSearch,
+  isLoading
 }: DashboardTableProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchValid, setIsSearchValid] = useState(true)
   const totalPages = Math.ceil(total / pageSize)
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value)
+
+    // Always allow empty search
+    if (value.length === 0) {
+      setIsSearchValid(true)
+      onSearch('')
+      return
+    }
+
+    // For numeric input, wait for 6 digits
+    if (/^\d+$/.test(value)) {
+      if (value.length === 6) {
+        setIsSearchValid(true)
+        onSearch(value)
+      } else {
+        setIsSearchValid(false)
+      }
+      return
+    }
+
+    // For text search, require 3 characters minimum
+    if (value.length < 3) {
+      setIsSearchValid(false)
+      return
+    }
+
+    setIsSearchValid(true)
+    onSearch(value)
+  }
 
   const handleRowClick = (patientId: string) => {
     router.push(`/patients/${patientId}`)
   }
-
-  const filteredData = data.filter((item) =>
-    `${item.first} ${item.last}`
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  )
 
   return (
     <div className="space-y-4">
@@ -76,11 +98,27 @@ export function DashboardTable({
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-foreground dark:text-gray-300" />
           <Input
-            placeholder="Search patients..."
+            placeholder="Search by name (min 3 chars) or patient ID (6 digits)..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+            onChange={(e) => handleSearch(e.target.value)}
+            className={cn(
+              'pl-8 bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 placeholder:text-gray-500 dark:placeholder:text-gray-400',
+              !isSearchValid && searchQuery.length > 0 && 'border-red-500',
+              isLoading && 'pr-8'
+            )}
           />
+          {isLoading && (
+            <div className="absolute right-2 top-2.5">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-foreground border-t-transparent" />
+            </div>
+          )}
+          {!isSearchValid && searchQuery.length > 0 && (
+            <p className="mt-1 text-sm text-red-500">
+              {/^\d+$/.test(searchQuery)
+                ? 'Please enter all 6 digits of the patient ID'
+                : 'Please enter at least 3 characters to search by name'}
+            </p>
+          )}
         </div>
       </div>
 
@@ -88,6 +126,9 @@ export function DashboardTable({
         <Table className="border-collapse [&_tr:last-child]:border-0">
           <TableHeader>
             <TableRow className="bg-gray-100 dark:bg-zinc-800 border-b border-border dark:border-zinc-700">
+              <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
+                ID
+              </TableHead>
               <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
                 Name
               </TableHead>
@@ -106,22 +147,25 @@ export function DashboardTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData.length === 0 ? (
+            {data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={6}
                   className="h-24 text-center text-foreground dark:text-gray-300"
                 >
                   No results found.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredData.map((item) => (
+              data.map((item) => (
                 <TableRow
                   key={item.id}
                   className="cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 border-b border-border dark:border-zinc-700"
                   onClick={() => handleRowClick(item.id)}
                 >
+                  <TableCell className="font-mono font-medium text-foreground dark:text-gray-200 border-r border-border dark:border-zinc-700">
+                    {item.id}
+                  </TableCell>
                   <TableCell className="font-medium text-foreground dark:text-gray-200 border-r border-border dark:border-zinc-700">
                     {item.first} {item.middle} {item.last}
                   </TableCell>
@@ -170,6 +214,15 @@ export function DashboardTable({
           <span className="text-foreground dark:text-gray-200">
             Page {page} of {totalPages}
           </span>
+          <select
+            className="border rounded px-2 py-1 text-sm bg-background dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+          >
+            <option value="10">10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+          </select>
           <div className="space-x-2">
             <Button
               variant="default"
