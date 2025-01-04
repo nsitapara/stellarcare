@@ -7,14 +7,6 @@ import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 
-interface CustomFieldResponse {
-  id: number
-  name: string
-  type: string
-  value_text: string | null
-  value_number: number | null
-}
-
 export async function updatePatient(
   patientId: string,
   formData: PatientFormData,
@@ -25,48 +17,50 @@ export async function updatePatient(
     throw new Error('You must be logged in to update a patient')
   }
 
-  const api = await getApiClient(session)
+  try {
+    const api = await getApiClient(session)
 
-  // Create new custom fields
-  const customFieldsPromises =
-    formData.customFields?.map(async (field) => {
-      const response = await api.request.request<CustomFieldResponse>({
-        method: 'POST',
-        url: '/api/custom-fields/',
-        body: {
-          name: field.name,
-          type: field.type,
-          value_text: field.type === 'text' ? field.value : null,
-          value_number: field.type === 'number' ? Number(field.value) : null
-        }
-      })
-      return response.id
-    }) || []
+    // Update patient with custom fields
+    const updateData = {
+      first: formData.firstName,
+      middle: formData.middleName || null,
+      last: formData.lastName,
+      date_of_birth: formData.dateOfBirth,
+      addresses: formData.addresses.map(
+        (addr) =>
+          ({
+            street: addr.street,
+            city: addr.city,
+            state: addr.state,
+            zip_code: addr.zipCode,
+            formatted_address:
+              `${addr.street}, ${addr.city}, ${addr.state} ${addr.zipCode}`.trim()
+          }) as Address
+      ),
+      status: originalPatient.status,
+      custom_fields: (formData.customFields || []).map((field) => ({
+        name: field.name,
+        type: field.type,
+        value_text: field.type === 'text' ? field.value : null,
+        value_number: field.type === 'number' ? Number(field.value) : null
+      })),
+      studies: originalPatient.studies,
+      treatments: originalPatient.treatments,
+      insurance: originalPatient.insurance,
+      appointments: originalPatient.appointments
+    }
 
-  const customFieldIds = await Promise.all(customFieldsPromises)
+    console.log('Update data:', updateData)
 
-  // Update patient with the custom field IDs
-  return await api.patients.patientsUpdate(patientId, {
-    first: formData.firstName,
-    middle: formData.middleName || null,
-    last: formData.lastName,
-    date_of_birth: formData.dateOfBirth,
-    addresses: formData.addresses.map(
-      (addr) =>
-        ({
-          street: addr.street,
-          city: addr.city,
-          state: addr.state,
-          zip_code: addr.zipCode,
-          formatted_address:
-            `${addr.street}, ${addr.city}, ${addr.state} ${addr.zipCode}`.trim()
-        }) as Address
-    ),
-    status: originalPatient.status,
-    custom_fields: customFieldIds,
-    studies: originalPatient.studies,
-    treatments: originalPatient.treatments,
-    insurance: originalPatient.insurance,
-    appointments: originalPatient.appointments
-  } as unknown as Patient)
+    const response = await api.request.request<Patient>({
+      method: 'PUT',
+      url: `/api/patients/${patientId}/`,
+      body: updateData
+    })
+    console.log('Update response:', response)
+    return response
+  } catch (error) {
+    console.error('Error in updatePatient:', error)
+    throw error
+  }
 }

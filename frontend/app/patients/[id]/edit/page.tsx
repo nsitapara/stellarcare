@@ -19,8 +19,7 @@ interface CustomField {
   value_number: number | null
 }
 
-interface CustomFieldWithId {
-  id: string
+interface FormCustomField {
   name: string
   type: 'text' | 'number'
   value: string | number
@@ -28,7 +27,7 @@ interface CustomFieldWithId {
 
 interface PatientFormDataWithCustomFields
   extends Omit<PatientFormData, 'customFields'> {
-  customFields: CustomFieldWithId[]
+  customFields: FormCustomField[]
 }
 
 interface PatientWithCustomFields extends Omit<Patient, 'custom_fields'> {
@@ -64,15 +63,18 @@ export default function EditPatientPage({
             zipCode: addr.zip_code
           })),
           customFields: (response.custom_fields || []).map((field) => ({
-            id: field.id.toString(),
             name: field.name,
             type: field.type,
             value:
               field.type === 'text'
                 ? field.value_text || ''
                 : field.value_number || 0
-          }))
-        })
+          })),
+          studies: response.studies,
+          treatments: response.treatments,
+          insurance: response.insurance,
+          appointments: response.appointments
+        } as PatientFormDataWithCustomFields)
       } catch (error) {
         console.error('Failed to load patient:', error)
         if (error instanceof Error) {

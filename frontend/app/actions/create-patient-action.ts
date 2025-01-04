@@ -7,62 +7,56 @@ import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 
-interface CustomFieldResponse {
-  id: number
-  name: string
-  type: string
-  value_text: string | null
-  value_number: number | null
-}
-
 export async function createPatient(formData: PatientFormData) {
   const session = await getServerSession(authOptions)
   if (!session) {
     throw new Error('You must be logged in to create a patient')
   }
 
-  const api = await getApiClient(session)
+  try {
+    const api = await getApiClient(session)
 
-  // Create custom fields first
-  const customFieldsPromises =
-    formData.customFields?.map(async (field) => {
-      const response = await api.request.request<CustomFieldResponse>({
-        method: 'POST',
-        url: '/api/custom-fields/',
-        body: {
-          name: field.name,
-          type: field.type,
-          value_text: field.type === 'text' ? field.value : null,
-          value_number: field.type === 'number' ? Number(field.value) : null
-        }
-      })
-      return response.id
-    }) || []
+    // Create patient with custom fields
+    const createData = {
+      first: formData.firstName,
+      middle: formData.middleName || null,
+      last: formData.lastName,
+      date_of_birth: formData.dateOfBirth,
+      addresses: formData.addresses.map(
+        (addr) =>
+          ({
+            street: addr.street,
+            city: addr.city,
+            state: addr.state,
+            zip_code: addr.zipCode,
+            formatted_address:
+              `${addr.street}, ${addr.city}, ${addr.state} ${addr.zipCode}`.trim()
+          }) as Address
+      ),
+      status: 'Inquiry',
+      custom_fields: (formData.customFields || []).map((field) => ({
+        name: field.name,
+        type: field.type,
+        value_text: field.type === 'text' ? field.value : null,
+        value_number: field.type === 'number' ? Number(field.value) : null
+      })),
+      studies: [],
+      treatments: [],
+      insurance: [],
+      appointments: []
+    }
 
-  const customFieldIds = await Promise.all(customFieldsPromises)
+    console.log('Create data:', createData)
 
-  // Create patient with the custom field IDs
-  return await api.patients.patientsCreate({
-    first: formData.firstName,
-    middle: formData.middleName || null,
-    last: formData.lastName,
-    date_of_birth: formData.dateOfBirth,
-    addresses: formData.addresses.map(
-      (addr) =>
-        ({
-          street: addr.street,
-          city: addr.city,
-          state: addr.state,
-          zip_code: addr.zipCode,
-          formatted_address:
-            `${addr.street}, ${addr.city}, ${addr.state} ${addr.zipCode}`.trim()
-        }) as Address
-    ),
-    status: 'Inquiry',
-    custom_fields: customFieldIds,
-    studies: [],
-    treatments: [],
-    insurance: [],
-    appointments: []
-  } as unknown as Patient)
+    const response = await api.request.request<Patient>({
+      method: 'POST',
+      url: '/api/patients/',
+      body: createData
+    })
+    console.log('Create response:', response)
+    return response
+  } catch (error) {
+    console.error('Error in createPatient:', error)
+    throw error
+  }
 }

@@ -1,8 +1,14 @@
 import type { Appointment } from '@/types/api/models/Appointment'
-import type { CustomField } from '@/types/api/models/CustomField'
 import type { Insurance } from '@/types/api/models/Insurance'
 import type { Study } from '@/types/api/models/Study'
 import type { Treatment } from '@/types/api/models/Treatment'
+
+export interface CustomFieldData {
+  id: string
+  name: string
+  type: 'text' | 'number'
+  value: string | number
+}
 
 export interface PatientFormData {
   firstName: string
@@ -15,7 +21,7 @@ export interface PatientFormData {
     state: string
     zipCode: string
   }[]
-  customFields: CustomField[]
+  customFields: CustomFieldData[]
   studies: Study[]
   treatments: Treatment[]
   insurance: Insurance[]

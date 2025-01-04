@@ -1,9 +1,5 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useFieldArray, useForm } from 'react-hook-form'
-import * as z from 'zod'
-
 import { Button } from '@/app/components/ui/button'
 import {
   Form,
@@ -14,85 +10,54 @@ import {
   FormMessage
 } from '@/app/components/ui/form'
 import { Input } from '@/app/components/ui/input'
-import { Label } from '@/app/components/ui/label'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { useFieldArray, useForm } from 'react-hook-form'
+import * as z from 'zod'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/app/components/ui/select'
-import { Trash } from 'lucide-react'
-import { useState } from 'react'
+} from './ui/select'
 
-interface CustomFieldWithId {
+interface FormCustomField {
   id: string
   name: string
   type: 'text' | 'number'
   value: string | number
 }
 
-const formSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  middleName: z.string().optional(),
-  lastName: z.string().min(1, 'Last name is required'),
-  dateOfBirth: z.string().min(1, 'Date of birth is required'),
-  addresses: z.array(
-    z.object({
-      street: z.string().min(1, 'Street is required'),
-      city: z.string().min(1, 'City is required'),
-      state: z.string().min(1, 'State is required'),
-      zipCode: z.string().min(1, 'ZIP code is required')
-    })
-  )
-})
-
-type FormData = z.infer<typeof formSchema>
+interface FormData {
+  firstName: string
+  middleName?: string
+  lastName: string
+  dateOfBirth: string
+  addresses: {
+    street: string
+    city: string
+    state: string
+    zipCode: string
+  }[]
+  customFields: FormCustomField[]
+}
 
 interface PatientFormProps {
-  onSubmit: (data: FormData & { customFields: CustomFieldWithId[] }) => void
-  initialData?: FormData & { customFields?: CustomFieldWithId[] }
+  onSubmit: (data: FormData) => void
+  initialData?: FormData
 }
 
 export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
-  const [customFields, setCustomFields] = useState<CustomFieldWithId[]>(
+  const [customFields, setCustomFields] = useState<FormCustomField[]>(
     initialData?.customFields?.map((field) => ({
       ...field,
       id: crypto.randomUUID()
-    })) || [
-      {
-        id: crypto.randomUUID(),
-        name: '',
-        type: 'text',
-        value: ''
-      }
-    ]
+    })) || []
   )
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
-      firstName: '',
-      middleName: '',
-      lastName: '',
-      dateOfBirth: '',
-      addresses: [
-        {
-          street: '',
-          city: '',
-          state: '',
-          zipCode: ''
-        }
-      ]
-    }
-  })
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'addresses'
-  })
-
-  const handleAddCustomField = () => {
+  const addCustomField = () => {
     setCustomFields([
       ...customFields,
       {
@@ -104,17 +69,78 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
     ])
   }
 
-  const handleSubmit = (data: FormData) => {
-    onSubmit({ ...data, customFields })
+  const removeCustomField = (id: string) => {
+    setCustomFields(customFields.filter((field) => field.id !== id))
+  }
+
+  const handleCustomFieldChange = (
+    id: string,
+    field: keyof Omit<FormCustomField, 'id'>,
+    value: string | number
+  ) => {
+    const updatedFields = [...customFields]
+    const index = updatedFields.findIndex((f) => f.id === id)
+    if (index === -1) return
+
+    if (field === 'type') {
+      updatedFields[index] = {
+        ...updatedFields[index],
+        type: value as 'text' | 'number',
+        value: value === 'text' ? '' : 0
+      }
+    } else {
+      updatedFields[index] = {
+        ...updatedFields[index],
+        [field]: value
+      }
+    }
+    setCustomFields(updatedFields)
+  }
+
+  const formSchema = z.object({
+    firstName: z.string().min(1, 'First name is required'),
+    middleName: z.string().optional(),
+    lastName: z.string().min(1, 'Last name is required'),
+    dateOfBirth: z.string().min(1, 'Date of birth is required'),
+    addresses: z.array(
+      z.object({
+        street: z.string().min(1, 'Street is required'),
+        city: z.string().min(1, 'City is required'),
+        state: z.string().min(1, 'State is required'),
+        zipCode: z.string().min(1, 'ZIP code is required')
+      })
+    )
+  })
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: initialData?.firstName || '',
+      middleName: initialData?.middleName || '',
+      lastName: initialData?.lastName || '',
+      dateOfBirth: initialData?.dateOfBirth || '',
+      addresses: initialData?.addresses || [
+        { street: '', city: '', state: '', zipCode: '' }
+      ]
+    }
+  })
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'addresses'
+  })
+
+  const onFormSubmit = (data: z.infer<typeof formSchema>) => {
+    onSubmit({
+      ...data,
+      customFields
+    })
   }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-6 max-w-3xl mx-auto"
-      >
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="firstName"
@@ -122,13 +148,12 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               <FormItem>
                 <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input {...field} className="max-w-sm" />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="middleName"
@@ -136,13 +161,12 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               <FormItem>
                 <FormLabel>Middle Name</FormLabel>
                 <FormControl>
-                  <Input {...field} className="max-w-sm" />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="lastName"
@@ -150,21 +174,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               <FormItem>
                 <FormLabel>Last Name</FormLabel>
                 <FormControl>
-                  <Input {...field} className="max-w-sm" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="dateOfBirth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date of Birth</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} className="max-w-sm" />
+                  <Input {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -172,12 +182,26 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           />
         </div>
 
+        <FormField
+          control={form.control}
+          name="dateOfBirth"
+          render={({ field }) => (
+            <FormItem className="max-w-sm">
+              <FormLabel>Date of Birth</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <Label>Addresses</Label>
+            <h3 className="text-lg font-medium">Addresses</h3>
             <Button
               type="button"
-              variant="default"
+              variant="outline"
               size="sm"
               onClick={() =>
                 append({ street: '', city: '', state: '', zipCode: '' })
@@ -186,78 +210,74 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               Add Address
             </Button>
           </div>
-
           {fields.map((field, index) => (
-            <div
-              key={field.id}
-              className="grid grid-cols-2 gap-4 p-4 border rounded-lg"
-            >
-              <FormField
-                control={form.control}
-                name={`addresses.${index}.street`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Street</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="max-w-sm" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+            <div key={field.id} className="space-y-4 p-4 border rounded-lg">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">Address {index + 1}</h4>
+                {fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => remove(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`addresses.${index}.city`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="max-w-sm" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`addresses.${index}.state`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="max-w-sm" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex items-end gap-4">
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name={`addresses.${index}.zipCode`}
+                  name={`addresses.${index}.street`}
                   render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>ZIP Code</FormLabel>
+                    <FormItem>
+                      <FormLabel>Street</FormLabel>
                       <FormControl>
-                        <Input {...field} className="max-w-sm" />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => remove(index)}
-                  className="h-9 w-9"
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
+                <FormField
+                  control={form.control}
+                  name={`addresses.${index}.city`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`addresses.${index}.state`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`addresses.${index}.zipCode`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ZIP Code</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
           ))}
@@ -265,106 +285,94 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
 
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <Label>Custom Fields</Label>
+            <h3 className="text-lg font-medium">Custom Fields</h3>
             <Button
               type="button"
-              variant="default"
+              variant="outline"
               size="sm"
-              onClick={handleAddCustomField}
+              onClick={addCustomField}
             >
+              <Plus className="h-4 w-4 mr-2" />
               Add Custom Field
             </Button>
           </div>
-
           {customFields.map((field) => (
-            <div
-              key={field.id}
-              className="grid grid-cols-3 gap-4 p-4 border rounded-lg"
-            >
-              <div>
-                <Label>Field Name</Label>
-                <Input
-                  placeholder="Field Name"
-                  value={field.name}
-                  onChange={(e) => {
-                    const newFields = customFields.map((f) =>
-                      f.id === field.id ? { ...f, name: e.target.value } : f
-                    )
-                    setCustomFields(newFields)
-                  }}
-                  className="max-w-sm"
-                />
-              </div>
-              <div>
-                <Label>Type</Label>
-                <Select
-                  value={field.type}
-                  onValueChange={(value: 'text' | 'number') => {
-                    const newFields = customFields.map((f) =>
-                      f.id === field.id
-                        ? {
-                            ...f,
-                            type: value,
-                            value: value === 'number' ? 0 : ''
-                          }
-                        : f
-                    )
-                    setCustomFields(newFields)
-                  }}
-                >
-                  <SelectTrigger className="max-w-sm">
-                    <SelectValue placeholder="Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">Text</SelectItem>
-                    <SelectItem value="number">Number</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end gap-4">
-                <div className="flex-1">
-                  <Label>Value</Label>
-                  <Input
-                    type={field.type}
-                    value={field.value}
-                    onChange={(e) => {
-                      const newFields = customFields.map((f) =>
-                        f.id === field.id
-                          ? {
-                              ...f,
-                              value:
-                                field.type === 'number'
-                                  ? Number(e.target.value)
-                                  : e.target.value
-                            }
-                          : f
-                      )
-                      setCustomFields(newFields)
-                    }}
-                    className="max-w-sm"
-                  />
-                </div>
+            <div key={field.id} className="space-y-4 p-4 border rounded-lg">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">Custom Field {field.name}</h4>
                 <Button
                   type="button"
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => {
-                    setCustomFields(
-                      customFields.filter((f) => f.id !== field.id)
-                    )
-                  }}
-                  className="h-9 w-9"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeCustomField(field.id)}
                 >
-                  <Trash className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <FormLabel>Name</FormLabel>
+                  <Input
+                    value={field.name}
+                    onChange={(e) =>
+                      handleCustomFieldChange(field.id, 'name', e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <FormLabel>Type</FormLabel>
+                  <Select
+                    value={field.type}
+                    onValueChange={(value) =>
+                      handleCustomFieldChange(
+                        field.id,
+                        'type',
+                        value as 'text' | 'number'
+                      )
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text">Text</SelectItem>
+                      <SelectItem value="number">Number</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <FormLabel>Value</FormLabel>
+                  {field.type === 'text' ? (
+                    <Input
+                      value={field.value}
+                      onChange={(e) =>
+                        handleCustomFieldChange(
+                          field.id,
+                          'value',
+                          e.target.value
+                        )
+                      }
+                    />
+                  ) : (
+                    <Input
+                      type="number"
+                      value={field.value}
+                      onChange={(e) =>
+                        handleCustomFieldChange(
+                          field.id,
+                          'value',
+                          Number.parseFloat(e.target.value) || 0
+                        )
+                      }
+                    />
+                  )}
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="flex justify-end">
-          <Button type="submit">Save Changes</Button>
-        </div>
+        <Button type="submit">Save Patient</Button>
       </form>
     </Form>
   )

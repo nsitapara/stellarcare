@@ -151,7 +151,7 @@ class CustomFieldSerializer(serializers.ModelSerializer):
 
 class PatientSerializer(serializers.ModelSerializer):
     addresses = AddressSerializer(many=True)
-    custom_fields = CustomFieldSerializer(many=True, required=False, read_only=True)
+    custom_fields = CustomFieldSerializer(many=True, required=False)
 
     class Meta:
         model = Patient
@@ -164,6 +164,7 @@ class PatientSerializer(serializers.ModelSerializer):
         treatments = validated_data.pop("treatments", [])
         insurance = validated_data.pop("insurance", [])
         appointments = validated_data.pop("appointments", [])
+        custom_fields_data = validated_data.pop("custom_fields", [])
 
         # Create the patient first
         patient = Patient.objects.create(**validated_data)
@@ -172,6 +173,11 @@ class PatientSerializer(serializers.ModelSerializer):
         for address_data in addresses_data:
             address = Address.objects.create(**address_data)
             patient.addresses.add(address)
+
+        # Handle custom fields
+        for custom_field_data in custom_fields_data:
+            custom_field = CustomField.objects.create(**custom_field_data)
+            patient.custom_fields.add(custom_field)
 
         # Handle many-to-many relationships
         if studies:
@@ -191,6 +197,7 @@ class PatientSerializer(serializers.ModelSerializer):
         treatments = validated_data.pop("treatments", [])
         insurance = validated_data.pop("insurance", [])
         appointments = validated_data.pop("appointments", [])
+        custom_fields_data = validated_data.pop("custom_fields", [])
 
         # Update regular fields
         for attr, value in validated_data.items():
@@ -202,6 +209,12 @@ class PatientSerializer(serializers.ModelSerializer):
         for address_data in addresses_data:
             address = Address.objects.create(**address_data)
             instance.addresses.add(address)
+
+        # Handle custom fields
+        instance.custom_fields.clear()
+        for custom_field_data in custom_fields_data:
+            custom_field = CustomField.objects.create(**custom_field_data)
+            instance.custom_fields.add(custom_field)
 
         # Handle many-to-many relationships
         if studies is not None:
