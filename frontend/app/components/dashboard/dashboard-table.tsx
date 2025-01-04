@@ -59,12 +59,26 @@ export function DashboardTable({
 
   const handleSearch = (value: string) => {
     setSearchQuery(value)
+
+    // Always allow empty search
     if (value.length === 0) {
       setIsSearchValid(true)
       onSearch('')
       return
     }
 
+    // For numeric input, wait for 6 digits
+    if (/^\d+$/.test(value)) {
+      if (value.length === 6) {
+        setIsSearchValid(true)
+        onSearch(value)
+      } else {
+        setIsSearchValid(false)
+      }
+      return
+    }
+
+    // For text search, require 3 characters minimum
     if (value.length < 3) {
       setIsSearchValid(false)
       return
@@ -84,7 +98,7 @@ export function DashboardTable({
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-foreground dark:text-gray-300" />
           <Input
-            placeholder="Search patients (minimum 3 characters)..."
+            placeholder="Search by name (min 3 chars) or patient ID (6 digits)..."
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             className={cn(
@@ -100,7 +114,9 @@ export function DashboardTable({
           )}
           {!isSearchValid && searchQuery.length > 0 && (
             <p className="mt-1 text-sm text-red-500">
-              Please enter at least 3 characters to search
+              {/^\d+$/.test(searchQuery)
+                ? 'Please enter all 6 digits of the patient ID'
+                : 'Please enter at least 3 characters to search by name'}
             </p>
           )}
         </div>
