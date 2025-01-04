@@ -193,26 +193,39 @@ class PatientSerializer(serializers.ModelSerializer):
 
         # Handle custom fields
         for field_data in custom_fields_data:
-            field_definition = CustomFieldDefinition.objects.get_or_create(
-                name=field_data["name"],
-                type=field_data["type"],
-                defaults={
-                    "description": field_data.get("description", ""),
-                    "is_active": True,
-                },
-            )[0]
-
-            value_field = f"value_{field_definition.type}"
-            value = field_data.get(f"value_{field_definition.type}") or field_data.get(
-                "value_text"
+            print(f"Processing custom field data: {field_data}")
+            print(
+                f"Custom field definition ID: {field_data.get('custom_field_definition_id')}, Type: {type(field_data.get('custom_field_definition_id'))}"
             )
-
-            if value is not None:
-                PatientCustomField.objects.create(
-                    patient=patient,
-                    field_definition=field_definition,
-                    **{value_field: value},
+            try:
+                field_definition = CustomFieldDefinition.objects.get(
+                    id=field_data["custom_field_definition_id"]
                 )
+                print(
+                    f"Found custom field definition: {field_definition.id}, Name: {field_definition.name}"
+                )
+
+                value_field = f"value_{field_definition.type}"
+                value = field_data.get(
+                    f"value_{field_definition.type}"
+                ) or field_data.get("value_text")
+                print(f"Value field: {value_field}, Value: {value}")
+
+                if value is not None:
+                    custom_field = PatientCustomField.objects.create(
+                        patient=patient,
+                        field_definition=field_definition,
+                        **{value_field: value},
+                    )
+                    print(f"Created patient custom field: {custom_field.id}")
+            except CustomFieldDefinition.DoesNotExist:
+                print(
+                    f"Custom field definition not found for ID: {field_data.get('custom_field_definition_id')}"
+                )
+                continue
+            except Exception as e:
+                print(f"Error creating custom field: {str(e)}")
+                continue
 
         # Handle many-to-many relationships
         if studies:
@@ -249,26 +262,24 @@ class PatientSerializer(serializers.ModelSerializer):
         if custom_fields_data:
             instance.patient_custom_fields.all().delete()
             for field_data in custom_fields_data:
-                field_definition = CustomFieldDefinition.objects.get_or_create(
-                    name=field_data["name"],
-                    type=field_data["type"],
-                    defaults={
-                        "description": field_data.get("description", ""),
-                        "is_active": True,
-                    },
-                )[0]
-
-                value_field = f"value_{field_definition.type}"
-                value = field_data.get(
-                    f"value_{field_definition.type}"
-                ) or field_data.get("value_text")
-
-                if value is not None:
-                    PatientCustomField.objects.create(
-                        patient=instance,
-                        field_definition=field_definition,
-                        **{value_field: value},
+                try:
+                    field_definition = CustomFieldDefinition.objects.get(
+                        id=field_data["custom_field_definition_id"]
                     )
+
+                    value_field = f"value_{field_definition.type}"
+                    value = field_data.get(
+                        f"value_{field_definition.type}"
+                    ) or field_data.get("value_text")
+
+                    if value is not None:
+                        PatientCustomField.objects.create(
+                            patient=instance,
+                            field_definition=field_definition,
+                            **{value_field: value},
+                        )
+                except CustomFieldDefinition.DoesNotExist:
+                    continue
 
         # Handle many-to-many relationships
         if studies is not None:
