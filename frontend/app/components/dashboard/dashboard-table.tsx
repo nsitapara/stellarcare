@@ -4,13 +4,6 @@ import type { DashboardData } from '@/types/dashboard'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@components/ui/select'
-import {
   Table,
   TableBody,
   TableCell,
@@ -19,7 +12,6 @@ import {
   TableRow
 } from '@components/ui/table'
 import { cn } from '@lib/utils'
-import { format } from 'date-fns'
 import { Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -31,6 +23,7 @@ interface DashboardTableProps {
   pageSize: number
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
+  onSearch: (query: string) => void
 }
 
 const getStatusColor = (status: string) => {
@@ -54,21 +47,34 @@ export function DashboardTable({
   page,
   pageSize,
   onPageChange,
-  onPageSizeChange
+  onPageSizeChange,
+  onSearch
 }: DashboardTableProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchValid, setIsSearchValid] = useState(true)
   const totalPages = Math.ceil(total / pageSize)
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value)
+    if (value.length === 0) {
+      setIsSearchValid(true)
+      onSearch('')
+      return
+    }
+
+    if (value.length < 3) {
+      setIsSearchValid(false)
+      return
+    }
+
+    setIsSearchValid(true)
+    onSearch(value)
+  }
 
   const handleRowClick = (patientId: string) => {
     router.push(`/patients/${patientId}`)
   }
-
-  const filteredData = data.filter((item) =>
-    `${item.first} ${item.last}`
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase())
-  )
 
   return (
     <div className="space-y-4">
@@ -76,11 +82,19 @@ export function DashboardTable({
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-foreground dark:text-gray-300" />
           <Input
-            placeholder="Search patients..."
+            placeholder="Search patients (minimum 3 characters)..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+            onChange={(e) => handleSearch(e.target.value)}
+            className={cn(
+              'pl-8 bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 placeholder:text-gray-500 dark:placeholder:text-gray-400',
+              !isSearchValid && searchQuery.length > 0 && 'border-red-500'
+            )}
           />
+          {!isSearchValid && searchQuery.length > 0 && (
+            <p className="mt-1 text-sm text-red-500">
+              Please enter at least 3 characters to search
+            </p>
+          )}
         </div>
       </div>
 
@@ -106,7 +120,7 @@ export function DashboardTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData.length === 0 ? (
+            {data.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={5}
@@ -116,7 +130,7 @@ export function DashboardTable({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredData.map((item) => (
+              data.map((item) => (
                 <TableRow
                   key={item.id}
                   className="cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 border-b border-border dark:border-zinc-700"

@@ -70,13 +70,17 @@ class PatientQueryView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Perform a case-insensitive search on ID, first_name, last_name, or middle_name
+        logger.info(f"Searching patients with query: {query}")
+
+        # Perform a case-insensitive search on ID, first, last, or middle name
         patients = Patient.objects.filter(
             Q(id__icontains=query)
-            | Q(first_name__icontains=query)
-            | Q(last_name__icontains=query)
-            | Q(middle_name__icontains=query)
+            | Q(first__icontains=query)
+            | Q(last__icontains=query)
+            | Q(middle__icontains=query)
         )
+
+        logger.info(f"Found {patients.count()} matching patients")
 
         # Serialize and return the data
         serializer = PatientSerializer(patients, many=True)
