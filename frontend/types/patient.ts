@@ -19,13 +19,14 @@ export type SleepStudy = {
   ahi: number
   sleepEfficiency: number
   remLatency: number
-  notes: string
+  notes?: string
   fileUrl?: string
 }
 
-export type Medication = {
+export type Treatment = {
   id: string
   name: string
+  type: string
   dosage: string
   frequency: string
   startDate: string
@@ -73,8 +74,10 @@ export type Patient = {
   addresses: Address[]
   customFields: CustomField[]
   sleepStudies: SleepStudy[]
-  medications: Medication[]
+  medications: Treatment[]
   cpapUsage: CPAPUsage[]
   insurance: Insurance[]
   appointments: Appointment[]
+  createdAt: string
+  modifiedAt: string
 }

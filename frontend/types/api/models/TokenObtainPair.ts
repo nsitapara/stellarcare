@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type TokenObtainPair = {
-	username: string;
-	password: string;
-	readonly access: string;
-	readonly refresh: string;
+    username: string;
+    password: string;
+    readonly access: string;
+    readonly refresh: string;
 };
