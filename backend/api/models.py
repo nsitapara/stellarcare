@@ -52,8 +52,9 @@ class SleepStudy(models.Model):
     file_url = models.URLField(blank=True, null=True)
 
 
-class Medication(models.Model):
+class Treatments(models.Model):
     name = models.CharField(max_length=255)
+    type = models.CharField(max_length=100)
     dosage = models.CharField(max_length=100)
     frequency = models.CharField(max_length=100)
     start_date = models.DateField()
@@ -79,13 +80,13 @@ class Insurance(models.Model):
     authorization_expiry = models.DateField(blank=True, null=True)
 
 
-class Appointment(models.Model):
-    APPOINTMENT_TYPES = [
+class Visits(models.Model):
+    VISITS_TYPES = [
         ("In-Person", "In-Person"),
         ("Telehealth", "Telehealth"),
     ]
 
-    APPOINTMENT_STATUSES = [
+    VISITS_STATUSES = [
         ("Scheduled", "Scheduled"),
         ("Completed", "Completed"),
         ("Cancelled", "Cancelled"),
@@ -94,8 +95,8 @@ class Appointment(models.Model):
 
     date = models.DateField()
     time = models.TimeField()
-    type = models.CharField(max_length=20, choices=APPOINTMENT_TYPES)
-    status = models.CharField(max_length=20, choices=APPOINTMENT_STATUSES)
+    type = models.CharField(max_length=20, choices=VISITS_TYPES)
+    status = models.CharField(max_length=20, choices=VISITS_STATUSES)
     notes = models.TextField(blank=True, null=True)
     zoom_link = models.URLField(blank=True, null=True)
 
@@ -108,19 +109,18 @@ class Patient(models.Model):
         ("Churned", "Churned"),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    first_name = models.CharField(max_length=100)
-    middle_name = models.CharField(max_length=100, blank=True, null=True)
-    last_name = models.CharField(max_length=100)
+    first = models.CharField(max_length=100)
+    middle = models.CharField(max_length=100, blank=True, null=True)
+    last = models.CharField(max_length=100)
     date_of_birth = models.DateField()
     status = models.CharField(max_length=20, choices=PATIENT_STATUSES)
 
     addresses = models.ManyToManyField(Address)
     custom_fields = models.ManyToManyField(CustomField)
-    sleep_studies = models.ManyToManyField(SleepStudy)
-    medications = models.ManyToManyField(Medication)
-    cpap_usage = models.ManyToManyField(CPAPUsage)
+    studies = models.ManyToManyField(SleepStudy)
+    treatments = models.ManyToManyField(Treatments)
     insurance = models.ManyToManyField(Insurance)
-    appointments = models.ManyToManyField(Appointment)
+    appointments = models.ManyToManyField(Visits)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
