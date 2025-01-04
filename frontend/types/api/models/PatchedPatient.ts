@@ -5,7 +5,7 @@
 import type { Address } from './Address';
 import type { StatusEnum } from './StatusEnum';
 export type PatchedPatient = {
-    readonly id?: string;
+    readonly id?: number;
     readonly addresses?: Array<Address>;
     first?: string;
     middle?: string | null;

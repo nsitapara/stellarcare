@@ -1,5 +1,3 @@
-import uuid
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -108,7 +106,16 @@ class Patient(models.Model):
         ("Active", "Active"),
         ("Churned", "Churned"),
     ]
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    def generate_patient_id():
+        last_patient = Patient.objects.order_by("-id").first()
+        if last_patient:
+            return max(100000, last_patient.id + 1)
+        return 100000
+
+    id = models.IntegerField(
+        primary_key=True, editable=False, default=generate_patient_id
+    )
     first = models.CharField(max_length=100)
     middle = models.CharField(max_length=100, blank=True, null=True)
     last = models.CharField(max_length=100)
