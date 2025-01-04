@@ -6,7 +6,7 @@ import type { PaginatedResponse } from '@/types/dashboard'
 import { Button } from '@components/ui/button'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DashboardTable } from './dashboard-table'
 
 interface DashboardClientProps {
@@ -15,27 +15,22 @@ interface DashboardClientProps {
 
 export function DashboardClient({ initialData }: DashboardClientProps) {
   const router = useRouter()
-  const [data, setData] = useState<PaginatedResponse>(initialData)
+  const [data, setData] = useState(initialData)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: searchQuery is intentionally omitted to prevent unnecessary rerenders
   const fetchData = useCallback(
-    async (page: number, pageSize: number) => {
+    async (page: number, pageSize: number, query: string = searchQuery) => {
       try {
         setLoading(true)
         setError(null)
-        console.log('Fetching data for page:', page, 'pageSize:', pageSize)
 
         let response: { results: Patient[]; count: number } | Patient[]
-        if (searchQuery.length >= 3) {
-          try {
-            response = (await searchPatients(searchQuery)) as Patient[]
-          } catch (error) {
-            console.error('Search error:', error)
-            throw new Error('Failed to search patients')
-          }
-        } else {
+        if (query.length >= 3) {
+          response = (await searchPatients(query)) as Patient[]
+        } else if (query.length === 0) {
           const apiResponse = await fetch(
             `/api/patients?page=${page}&page_size=${pageSize}`,
             {
@@ -51,6 +46,10 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
             return res.json()
           })
           response = apiResponse as { results: Patient[]; count: number }
+        } else {
+          // For queries between 1-2 characters, don't fetch
+          setLoading(false)
+          return
         }
 
         const patients = Array.isArray(response) ? response : response.results
@@ -58,7 +57,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           ? response.length
           : response.count
 
-        const newData = {
+        setData({
           data: patients.map((patient: Patient) => ({
             id: patient.id,
             first: patient.first || '',
@@ -71,11 +70,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               patient.addresses?.map((addr) => addr.formatted_address) || []
           })),
           total: totalCount,
-          page: searchQuery.length >= 3 ? 1 : page,
+          page: query.length >= 3 ? 1 : page,
           pageSize
-        }
-
-        setData(newData)
+        })
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error)
         setError(
@@ -87,37 +84,39 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         setLoading(false)
       }
     },
-    [searchQuery]
+    []
   )
 
-  // Debounced search handler
-  // biome-ignore lint/correctness/useExhaustiveDependencies: fetchData is needed for latest searchQuery state
-  const debouncedSearch = useCallback(
-    debounce((query: string) => {
+  const debouncedFetch = useMemo(
+    () =>
+      debounce((query: string) => {
+        fetchData(1, data.pageSize, query)
+      }, 300),
+    [fetchData, data.pageSize]
+  )
+
+  const handleSearch = useCallback(
+    (query: string) => {
       setSearchQuery(query)
-      if (query.length >= 3 || query.length === 0) {
-        fetchData(1, data.pageSize)
-      }
-    }, 300),
-    [fetchData]
+      debouncedFetch(query)
+    },
+    [debouncedFetch]
   )
 
   useEffect(() => {
     return () => {
-      debouncedSearch.cancel()
+      debouncedFetch.cancel()
     }
-  }, [debouncedSearch])
+  }, [debouncedFetch])
 
   const handlePageChange = (page: number) => {
     if (searchQuery.length >= 3) return // Disable pagination during search
-    console.log('Page change requested:', page)
-    fetchData(page, data.pageSize)
+    fetchData(page, data.pageSize, searchQuery)
   }
 
   const handlePageSizeChange = (pageSize: number) => {
     if (searchQuery.length >= 3) return // Disable page size change during search
-    console.log('Page size change requested:', pageSize)
-    fetchData(1, pageSize)
+    fetchData(1, pageSize, searchQuery)
   }
 
   return (
@@ -137,13 +136,11 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       </div>
 
       {loading && data.data.length === 0 ? (
-        <div className="flex justify-center items-center min-h-[200px]">
-          Loading...
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
         </div>
       ) : error ? (
-        <div className="flex justify-center items-center min-h-[200px] text-red-500">
-          {error}
-        </div>
+        <div className="p-4 text-red-700 bg-red-100 rounded-md">{error}</div>
       ) : (
         <DashboardTable
           data={data.data}
@@ -152,7 +149,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           pageSize={data.pageSize}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
-          onSearch={debouncedSearch}
+          onSearch={handleSearch}
+          isLoading={loading}
         />
       )}
     </div>

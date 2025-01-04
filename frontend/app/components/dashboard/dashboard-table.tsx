@@ -24,6 +24,7 @@ interface DashboardTableProps {
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
   onSearch: (query: string) => void
+  isLoading: boolean
 }
 
 const getStatusColor = (status: string) => {
@@ -48,7 +49,8 @@ export function DashboardTable({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  onSearch
+  onSearch,
+  isLoading
 }: DashboardTableProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
@@ -87,9 +89,15 @@ export function DashboardTable({
             onChange={(e) => handleSearch(e.target.value)}
             className={cn(
               'pl-8 bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 placeholder:text-gray-500 dark:placeholder:text-gray-400',
-              !isSearchValid && searchQuery.length > 0 && 'border-red-500'
+              !isSearchValid && searchQuery.length > 0 && 'border-red-500',
+              isLoading && 'pr-8'
             )}
           />
+          {isLoading && (
+            <div className="absolute right-2 top-2.5">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-foreground border-t-transparent" />
+            </div>
+          )}
           {!isSearchValid && searchQuery.length > 0 && (
             <p className="mt-1 text-sm text-red-500">
               Please enter at least 3 characters to search
@@ -184,6 +192,15 @@ export function DashboardTable({
           <span className="text-foreground dark:text-gray-200">
             Page {page} of {totalPages}
           </span>
+          <select
+            className="border rounded px-2 py-1 text-sm bg-background dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+          >
+            <option value="10">10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+          </select>
           <div className="space-x-2">
             <Button
               variant="default"
