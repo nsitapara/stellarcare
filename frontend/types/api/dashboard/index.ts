@@ -68,6 +68,8 @@ export interface PaginationProps {
   pageSize: number
   onPageChange: (page: number) => void
   onPageSizeChange: (pageSize: number) => void
+  isLoading: boolean
+  loadingPage: number | null
 }
 
 /**

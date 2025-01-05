@@ -4,7 +4,7 @@
  * A client-side component that provides a dynamic interface for managing patient data.
  * Features:
  * - Real-time search with debouncing
- * - Pagination with server-side data fetching
+ * - Pagination with server-side data fetching and loading states
  * - Loading states and error handling
  * - Navigation to patient details and edit pages
  */
@@ -53,9 +53,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
   // Handle pagination changes
   const handlePageChange = useCallback(
-    (page: number) => {
+    async (page: number) => {
       if (searchQuery.length >= 3) return // Disable pagination during search
-      fetchData(page, data.pageSize, searchQuery)
+      await fetchData(page, data.pageSize, searchQuery)
     },
     [fetchData, data.pageSize, searchQuery]
   )
