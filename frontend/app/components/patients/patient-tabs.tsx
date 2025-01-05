@@ -105,7 +105,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
             Overview
           </TabsTrigger>
           <TabsTrigger className="tabs-trigger" value="appointments">
-            Appointments
+            Past Visits
           </TabsTrigger>
           <TabsTrigger className="tabs-trigger" value="studies">
             Sleep Studies
