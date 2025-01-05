@@ -13,7 +13,7 @@ from .models import (
     PatientCustomField,
     SleepStudy,
     Treatment,
-    Visits,
+    Visit,
 )
 
 User = get_user_model()
@@ -202,23 +202,15 @@ class PatientSerializer(serializers.ModelSerializer):
 
         # Handle custom fields
         for field_data in custom_fields_data:
-            print(f"Processing custom field data: {field_data}")
-            print(
-                f"Custom field definition ID: {field_data.get('custom_field_definition_id')}, Type: {type(field_data.get('custom_field_definition_id'))}"
-            )
             try:
                 field_definition = CustomFieldDefinition.objects.get(
                     id=field_data["custom_field_definition_id"]
-                )
-                print(
-                    f"Found custom field definition: {field_definition.id}, Name: {field_definition.name}"
                 )
 
                 value_field = f"value_{field_definition.type}"
                 value = field_data.get(
                     f"value_{field_definition.type}"
                 ) or field_data.get("value_text")
-                print(f"Value field: {value_field}, Value: {value}")
 
                 if value is not None:
                     custom_field = PatientCustomField.objects.create(
@@ -228,12 +220,8 @@ class PatientSerializer(serializers.ModelSerializer):
                     )
                     print(f"Created patient custom field: {custom_field.id}")
             except CustomFieldDefinition.DoesNotExist:
-                print(
-                    f"Custom field definition not found for ID: {field_data.get('custom_field_definition_id')}"
-                )
                 continue
-            except Exception as e:
-                print(f"Error creating custom field: {str(e)}")
+            except Exception:
                 continue
 
         # Handle many-to-many relationships
@@ -305,7 +293,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
 class VisitSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Visits
+        model = Visit
         fields = ["id", "date", "time", "type", "status", "notes", "zoom_link"]
 
 

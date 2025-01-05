@@ -21,7 +21,6 @@ export async function getPatientCustomFields(
   }
 
   try {
-    console.log('Fetching custom fields for patient:', patientId)
     const api = await getApiClient(session)
     const response = await api.request.request<
       PaginatedResponse<PatientCustomField>
@@ -29,10 +28,9 @@ export async function getPatientCustomFields(
       method: 'GET',
       url: `/api/patients/${patientId}/custom-fields/`
     })
-    console.log('Patient custom fields API response:', response)
     return response.results
   } catch (error) {
-    console.error('Error fetching patient custom fields:', error)
+    console.error('Failed to fetch patient custom fields:', error)
     throw error
   }
 }

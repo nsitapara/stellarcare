@@ -5,17 +5,25 @@
 import type { BaseHttpRequest } from './core/BaseHttpRequest';
 import type { OpenAPIConfig } from './core/OpenAPI';
 import { FetchHttpRequest } from './core/FetchHttpRequest';
+import { AppointmentsService } from './services/AppointmentsService';
 import { CustomFieldDefinitionsService } from './services/CustomFieldDefinitionsService';
+import { InsuranceService } from './services/InsuranceService';
 import { PatientsService } from './services/PatientsService';
 import { SchemaService } from './services/SchemaService';
+import { SleepStudiesService } from './services/SleepStudiesService';
 import { TokenService } from './services/TokenService';
+import { TreatmentsService } from './services/TreatmentsService';
 import { UsersService } from './services/UsersService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class ApiClient {
+    public readonly appointments: AppointmentsService;
     public readonly customFieldDefinitions: CustomFieldDefinitionsService;
+    public readonly insurance: InsuranceService;
     public readonly patients: PatientsService;
     public readonly schema: SchemaService;
+    public readonly sleepStudies: SleepStudiesService;
     public readonly token: TokenService;
+    public readonly treatments: TreatmentsService;
     public readonly users: UsersService;
     public readonly request: BaseHttpRequest;
     constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
@@ -30,10 +38,14 @@ export class ApiClient {
             HEADERS: config?.HEADERS,
             ENCODE_PATH: config?.ENCODE_PATH,
         });
+        this.appointments = new AppointmentsService(this.request);
         this.customFieldDefinitions = new CustomFieldDefinitionsService(this.request);
+        this.insurance = new InsuranceService(this.request);
         this.patients = new PatientsService(this.request);
         this.schema = new SchemaService(this.request);
+        this.sleepStudies = new SleepStudiesService(this.request);
         this.token = new TokenService(this.request);
+        this.treatments = new TreatmentsService(this.request);
         this.users = new UsersService(this.request);
     }
 }

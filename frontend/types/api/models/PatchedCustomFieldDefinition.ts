@@ -2,11 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { TypeEnum } from './TypeEnum';
+import type { CustomFieldDefinitionTypeEnum } from './CustomFieldDefinitionTypeEnum';
 export type PatchedCustomFieldDefinition = {
     readonly id?: number;
     name?: string;
-    type?: TypeEnum;
+    type?: CustomFieldDefinitionTypeEnum;
     description?: string | null;
     /**
      * For select type fields, stores the available options

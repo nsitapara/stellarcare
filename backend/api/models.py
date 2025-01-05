@@ -109,14 +109,6 @@ class Treatment(models.Model):
     notes = models.TextField(blank=True, null=True)
 
 
-class CPAPUsage(models.Model):
-    date = models.DateField()
-    hours_used = models.FloatField()
-    events_per_hour = models.FloatField()
-    mask_leak = models.FloatField()
-    notes = models.TextField(blank=True, null=True)
-
-
 class Insurance(models.Model):
     provider = models.CharField(max_length=255)
     policy_number = models.CharField(max_length=100)
@@ -127,7 +119,7 @@ class Insurance(models.Model):
     authorization_expiry = models.DateField(blank=True, null=True)
 
 
-class Visits(models.Model):
+class Visit(models.Model):
     VISITS_TYPES = [
         ("In-Person", "In-Person"),
         ("Telehealth", "Telehealth"),
@@ -180,7 +172,7 @@ class Patient(models.Model):
     studies = models.ManyToManyField(SleepStudy, blank=True)
     treatments = models.ManyToManyField(Treatment, blank=True)
     insurance = models.ManyToManyField(Insurance, blank=True)
-    appointments = models.ManyToManyField(Visits, blank=True)
+    appointments = models.ManyToManyField(Visit, blank=True)
 
     def __str__(self):
         return f"{self.first} {self.last}"

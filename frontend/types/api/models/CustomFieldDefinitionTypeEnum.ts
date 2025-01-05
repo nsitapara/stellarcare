@@ -6,7 +6,7 @@
  * * `text` - Text
  * * `number` - Number
  */
-export enum TypeEnum {
+export enum CustomFieldDefinitionTypeEnum {
     TEXT = 'text',
     NUMBER = 'number',
 }

@@ -52,11 +52,9 @@ export default function EditPatientPage({
       try {
         setLoading(true)
         const patientData = await getPatient(id)
-        console.log('Patient data:', patientData)
 
         // Fetch patient's custom field values
         const customFields = await getPatientCustomFields(Number(id))
-        console.log('Patient custom fields:', customFields)
 
         // Transform custom fields to match form data structure
         const formattedCustomFields = customFields.map((field) => ({
