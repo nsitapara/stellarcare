@@ -120,8 +120,8 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   }
 
   return (
-    <div className="container-wrapper py-8">
-      <div className="space-y-6">
+    <div className="container-wrapper">
+      <div className="space-y-2">
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">

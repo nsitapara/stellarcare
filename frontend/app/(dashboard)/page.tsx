@@ -1,7 +1,7 @@
+import type { Patient } from '@/types/api/models/Patient'
 import { DashboardClient } from '@components/dashboard/dashboard-client'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
-import type { Patient } from '@types/api/models/Patient'
 import { getServerSession } from 'next-auth'
 import { Suspense } from 'react'
 
