@@ -1,6 +1,7 @@
 'use client'
 
 import type { DashboardData } from '@/types/dashboard'
+import { cn } from '@components/lib/utils'
 import { Button } from '@components/ui/button'
 import { Input } from '@components/ui/input'
 import {
@@ -11,7 +12,6 @@ import {
   TableHeader,
   TableRow
 } from '@components/ui/table'
-import { cn } from '@lib/utils'
 import { Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -195,7 +195,9 @@ export function DashboardTable({
                         className="hover:opacity-90 dark:text-white"
                         onClick={(e) => {
                           e.stopPropagation()
-                          router.push(`/patients/${item.id}/edit`)
+                          router.push(
+                            `/patients/${item.id}/edit?redirect=/dashboard`
+                          )
                         }}
                       >
                         Edit

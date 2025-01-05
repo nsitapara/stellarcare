@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class CustomPagination(PageNumberPagination):
+    """
+    Custom pagination class that extends Django REST Framework's PageNumberPagination.
+    Provides pagination with configurable page size and maximum page size limits.
+    """
+
     page_size = 10
     page_size_query_param = "page_size"
     max_page_size = 100
@@ -66,6 +71,13 @@ class PatientRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class PatientQueryView(APIView):
+    """
+    API endpoint for searching patients by name or ID.
+    Supports:
+    - Exact ID match for numeric queries
+    - Case-insensitive partial name match for text queries
+    """
+
     def get(self, request):
         query = request.query_params.get("q", None)
         if not query:
@@ -96,6 +108,10 @@ class PatientQueryView(APIView):
 class CustomFieldDefinitionListCreateView(generics.ListCreateAPIView):
     """
     Handles listing all custom field definitions and creating new ones.
+    When creating a new custom field:
+    1. Creates the custom field definition
+    2. Associates it with the creating user
+    3. Logs the creation process and any errors
     """
 
     queryset = CustomFieldDefinition.objects.all().order_by("display_order", "name")
