@@ -2,19 +2,41 @@
 
 import type { Address } from '@api/models/Address'
 import type { Patient } from '@api/models/Patient'
+import type { FormCustomField, PatientFormData } from '@api/patient/form'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
-import type { PatientFormData } from '@types/patient'
 import { getServerSession } from 'next-auth'
 
-interface FormCustomField {
-  id: string
-  name: string
-  type: 'text' | 'number'
-  value: string | number
-  customFieldDefinitionId: number
-}
-
+/**
+ * Updates an existing patient's information in the system.
+ * This is a server action that requires authentication.
+ *
+ * @param {string} patientId - The unique identifier of the patient to update
+ * @param {Omit<PatientFormData, 'customFields'> & { customFields: FormCustomField[] }} formData - The updated patient data
+ * @param {Patient} originalPatient - The original patient data before updates
+ * @returns {Promise<Patient>} The updated patient data from the API
+ * @throws {Error} If user is not authenticated with message 'You must be logged in to update a patient'
+ * @throws {Error} If the API request fails
+ *
+ * @example
+ * try {
+ *   const updatedPatient = await updatePatient("123", {
+ *     firstName: "John",
+ *     lastName: "Doe",
+ *     dateOfBirth: "1990-01-01",
+ *     addresses: [{
+ *       street: "123 Main St",
+ *       city: "Anytown",
+ *       state: "CA",
+ *       zipCode: "12345"
+ *     }],
+ *     customFields: []
+ *   }, originalPatient);
+ *   // Handle updated patient
+ * } catch (error) {
+ *   // Handle error
+ * }
+ */
 export async function updatePatient(
   patientId: string,
   formData: Omit<PatientFormData, 'customFields'> & {

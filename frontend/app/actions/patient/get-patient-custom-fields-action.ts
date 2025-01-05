@@ -1,17 +1,28 @@
 'use server'
 
+import type { PaginatedResponse } from '@api/common/pagination'
 import type { PatientCustomField } from '@api/models/PatientCustomField'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 
-interface PaginatedResponse<T> {
-  count: number
-  next: string | null
-  previous: string | null
-  results: T[]
-}
-
+/**
+ * Fetches custom fields associated with a specific patient.
+ * This is a server action that requires authentication.
+ *
+ * @param {number} patientId - The unique identifier of the patient
+ * @returns {Promise<PatientCustomField[]>} Array of custom fields associated with the patient
+ * @throws {Error} If user is not authenticated with message 'You must be logged in to view patient custom fields'
+ * @throws {Error} If the API request fails
+ *
+ * @example
+ * try {
+ *   const customFields = await getPatientCustomFields(123);
+ *   // Handle custom fields data
+ * } catch (error) {
+ *   // Handle error
+ * }
+ */
 export async function getPatientCustomFields(
   patientId: number
 ): Promise<PatientCustomField[]> {

@@ -8,9 +8,9 @@
 
 'use server'
 
+import { ApiError } from '@api/core'
 import { getApiClient } from '@lib/api'
 import type { loginFormSchema } from '@lib/validation'
-import { ApiError } from '@types/api'
 import type { z } from 'zod'
 
 export type LoginFormSchema = z.infer<typeof loginFormSchema>

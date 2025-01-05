@@ -2,19 +2,40 @@
 
 import type { Address } from '@api/models/Address'
 import type { Patient } from '@api/models/Patient'
+import type { FormCustomField, PatientFormData } from '@api/patient/form'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
-import type { PatientFormData } from '@types/patient'
 import { getServerSession } from 'next-auth'
 
-interface FormCustomField {
-  id: string
-  name: string
-  type: 'text' | 'number'
-  value: string | number
-  customFieldDefinitionId: number
-}
-
+/**
+ * Creates a new patient record in the system with the provided information.
+ * This is a server action that requires authentication.
+ *
+ * @param {Omit<PatientFormData, 'customFields'> & { customFields: FormCustomField[] }} formData - The patient data to create
+ * @returns {Promise<Patient>} The created patient data from the API
+ * @throws {Error} If the user is not authenticated
+ * @throws {Error} If the API request fails
+ *
+ * @example
+ * try {
+ *   const patientData = {
+ *     firstName: "John",
+ *     lastName: "Doe",
+ *     dateOfBirth: "1990-01-01",
+ *     addresses: [{
+ *       street: "123 Main St",
+ *       city: "Anytown",
+ *       state: "CA",
+ *       zipCode: "12345"
+ *     }],
+ *     customFields: []
+ *   };
+ *   const patient = await createPatient(patientData);
+ *   // Handle created patient
+ * } catch (error) {
+ *   // Handle error
+ * }
+ */
 export async function createPatient(
   formData: Omit<PatientFormData, 'customFields'> & {
     customFields: FormCustomField[]

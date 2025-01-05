@@ -1,17 +1,19 @@
 'use server'
 
+import type { PaginatedResponse } from '@api/common/pagination'
 import type { CustomFieldDefinition } from '@api/models/CustomFieldDefinition'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 
-interface PaginatedResponse<T> {
-  count: number
-  next: string | null
-  previous: string | null
-  results: T[]
-}
-
+/**
+ * Fetches all custom field definitions from the API.
+ * This is a server action that requires authentication.
+ *
+ * @returns {Promise<CustomFieldDefinition[]>} Array of custom field definitions
+ * @throws {Error} If user is not authenticated
+ * @throws {Error} If the API request fails
+ */
 export async function getCustomFields(): Promise<CustomFieldDefinition[]> {
   const session = await getServerSession(authOptions)
   if (!session) {
@@ -33,6 +35,14 @@ export async function getCustomFields(): Promise<CustomFieldDefinition[]> {
   }
 }
 
+/**
+ * Fetches custom field definitions assigned to the current user.
+ * This is a server action that requires authentication.
+ *
+ * @returns {Promise<CustomFieldDefinition[]>} Array of custom field definitions assigned to the user
+ * @throws {Error} If user is not authenticated
+ * @throws {Error} If the API request fails
+ */
 export async function getUserCustomFields(): Promise<CustomFieldDefinition[]> {
   const session = await getServerSession(authOptions)
   if (!session) {
@@ -54,6 +64,18 @@ export async function getUserCustomFields(): Promise<CustomFieldDefinition[]> {
   }
 }
 
+/**
+ * Creates a new custom field definition.
+ * This is a server action that requires authentication.
+ *
+ * @param {Object} data - The custom field data
+ * @param {string} data.name - Name of the custom field
+ * @param {'text' | 'number'} data.type - Type of the custom field
+ * @param {string} [data.description] - Optional description of the custom field
+ * @returns {Promise<CustomFieldDefinition>} The created custom field definition
+ * @throws {Error} If user is not authenticated
+ * @throws {Error} If the API request fails
+ */
 export async function createCustomField(data: {
   name: string
   type: 'text' | 'number'
@@ -83,6 +105,15 @@ export async function createCustomField(data: {
   }
 }
 
+/**
+ * Assigns a custom field definition to the current user.
+ * This is a server action that requires authentication.
+ *
+ * @param {number} customFieldId - ID of the custom field to assign
+ * @returns {Promise<void>}
+ * @throws {Error} If user is not authenticated
+ * @throws {Error} If the API request fails
+ */
 export async function assignCustomFieldToUser(
   customFieldId: number
 ): Promise<void> {

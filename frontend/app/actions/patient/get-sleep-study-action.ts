@@ -4,6 +4,23 @@ import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 
+/**
+ * Fetches a sleep study record by ID from the API.
+ * This is a server action that requires authentication.
+ *
+ * @param {string} id - The unique identifier of the sleep study
+ * @returns {Promise<any>} The sleep study data from the API
+ * @throws {Error} If user is not authenticated
+ * @throws {Error} If the API request fails with 'Failed to fetch sleep study'
+ *
+ * @example
+ * try {
+ *   const sleepStudy = await getSleepStudy("123");
+ *   // Handle sleep study data
+ * } catch (error) {
+ *   // Handle error
+ * }
+ */
 export async function getSleepStudy(id: string) {
   const session = await getServerSession(authOptions)
   if (!session) {
