@@ -3,9 +3,23 @@ import type { Patient } from '@/types/api/models/Patient'
 import { DashboardClient } from '@components/dashboard/dashboard-client'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
+import type { Metadata } from 'next'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
+
+export const metadata: Metadata = {
+  title: 'Dashboard - StellarCare',
+  description: 'Patient Management Dashboard',
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml'
+      }
+    ]
+  }
+}
 
 /**
  * Type definition for transformed patient data displayed in the dashboard UI.
