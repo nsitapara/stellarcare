@@ -228,100 +228,87 @@ export function AppointmentCalendar() {
         <div className="space-y-4">
           <h4 className="font-medium text-lg">Upcoming Appointments</h4>
           <div className="space-y-3 max-h-[800px] overflow-y-auto pr-2">
-            {appointments
-              .filter((apt) => {
-                const appointmentDate = new Date(apt.date)
-                const today = new Date()
-                today.setHours(0, 0, 0, 0)
-                return appointmentDate >= today
-              })
-              .sort(
-                (a, b) =>
-                  new Date(a.date).getTime() - new Date(b.date).getTime()
-              )
-              .map((appointment) => (
-                <Card
-                  key={appointment.id}
-                  className="group bg-card hover:bg-accent/5 transition-colors"
-                >
-                  <CardHeader className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-base">
-                          {new Date(appointment.date).toLocaleDateString(
-                            'en-US',
-                            {
-                              weekday: 'long',
-                              month: 'long',
-                              day: 'numeric'
-                            }
-                          )}{' '}
-                          at {appointment.time}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                          {appointment.patientName} - {appointment.type}
-                        </CardDescription>
-                      </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="outline" size="sm" className="h-8">
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-destructive hover:text-destructive-foreground hover:bg-destructive"
-                          onClick={() =>
-                            handleCancelAppointment(appointment.id)
+            {appointments?.map((appointment) => (
+              <Card
+                key={appointment.id}
+                className="group bg-card hover:bg-accent/5 transition-colors"
+              >
+                <CardHeader className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-base">
+                        {new Date(appointment.date).toLocaleDateString(
+                          'en-US',
+                          {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric'
                           }
+                        )}{' '}
+                        at {appointment.time}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        {appointment.patientName} - {appointment.type}
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="outline" size="sm" className="h-8">
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                        onClick={() => handleCancelAppointment(appointment.id)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="inline-flex items-center gap-1">
+                        <span>Duration:</span>
+                        <span className="text-foreground">
+                          {appointment.duration}
+                        </span>
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span>Status:</span>
+                        <span
+                          className={`text-foreground ${
+                            appointment.status === 'Confirmed'
+                              ? 'text-green-500'
+                              : ''
+                          }`}
                         >
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="px-4 pb-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="inline-flex items-center gap-1">
-                          <span>Duration:</span>
-                          <span className="text-foreground">
-                            {appointment.duration}
-                          </span>
+                          {appointment.status}
                         </span>
-                        <span className="inline-flex items-center gap-1">
-                          <span>Status:</span>
-                          <span
-                            className={`text-foreground ${
-                              appointment.status === 'Confirmed'
-                                ? 'text-green-500'
-                                : ''
-                            }`}
-                          >
-                            {appointment.status}
-                          </span>
-                        </span>
-                      </div>
-                      {appointment.zoomLink && (
-                        <div>
-                          <a
-                            href={appointment.zoomLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline text-sm inline-flex items-center gap-1"
-                          >
-                            Join Telehealth Session
-                          </a>
-                        </div>
-                      )}
-                      {appointment.notes && (
-                        <div className="text-sm text-muted-foreground">
-                          {appointment.notes}
-                        </div>
-                      )}
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    {appointment.zoomLink && (
+                      <div>
+                        <a
+                          href={appointment.zoomLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline text-sm inline-flex items-center gap-1"
+                        >
+                          Join Telehealth Session
+                        </a>
+                      </div>
+                    )}
+                    {appointment.notes && (
+                      <div className="text-sm text-muted-foreground">
+                        {appointment.notes}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>
