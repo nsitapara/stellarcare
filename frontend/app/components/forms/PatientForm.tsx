@@ -29,15 +29,15 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from './ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+} from '../ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from './ui/select'
+} from '../ui/select'
 
 interface FormCustomField {
   id: string

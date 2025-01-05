@@ -1,7 +1,7 @@
 'use client'
 
 import { createPatient } from '@actions/patient/create-patient-action'
-import { PatientForm } from '@components/PatientForm'
+import { PatientForm } from '@components/forms/PatientForm'
 import { Button } from '@components/ui/button'
 import type { PatientFormData } from '@types/patient'
 import { X } from 'lucide-react'
