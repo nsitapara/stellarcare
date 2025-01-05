@@ -206,10 +206,7 @@ export function DashboardTable({
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border-border rounded-lg p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-6 text-sm">
-          <span className="text-gray-700 dark:text-gray-200 font-medium">
-            Page {page} of {totalPages}
-          </span>
+        <div>
           <select
             className="border rounded-md px-3 py-2 bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border-border"
             value={pageSize}
@@ -219,22 +216,27 @@ export function DashboardTable({
             <option value="25">25 per page</option>
             <option value="50">50 per page</option>
           </select>
-          <div className="space-x-2">
+        </div>
+        <div className="flex items-center gap-4 text-sm">
+          <span className="text-gray-700 dark:text-gray-200 font-medium">
+            Page {page} of {totalPages}
+          </span>
+          <div className="flex gap-2">
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() => onPageChange(page - 1)}
               disabled={page <= 1}
-              className="border-border text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800"
+              className="bg-primary hover:bg-primary/90 text-white disabled:opacity-50"
             >
               Previous
             </Button>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages}
-              className="border-border text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800"
+              className="bg-primary hover:bg-primary/90 text-white disabled:opacity-50"
             >
               Next
             </Button>
