@@ -1,5 +1,6 @@
 'use client'
 
+import { getPatients } from '@/app/actions/get-patients-action'
 import { searchPatients } from '@/app/actions/patient-search-action'
 import type { Patient } from '@/types/api/models/Patient'
 import { Button } from '@components/ui/button'
@@ -48,21 +49,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         if (query.length >= 3) {
           response = (await searchPatients(query)) as Patient[]
         } else if (query.length === 0) {
-          const apiResponse = await fetch(
-            `/api/patients?page=${page}&page_size=${pageSize}`,
-            {
-              headers: {
-                'Cache-Control': 'no-cache',
-                Pragma: 'no-cache',
-                'Content-Type': 'application/json'
-              },
-              cache: 'no-store'
-            }
-          ).then((res) => {
-            if (!res.ok) throw new Error('Failed to fetch data')
-            return res.json()
-          })
-          response = apiResponse as { results: Patient[]; count: number }
+          response = await getPatients(page, pageSize)
         } else {
           // For queries between 1-2 characters, don't fetch
           setLoading(false)
