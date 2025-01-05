@@ -15,6 +15,7 @@ from .views import (
     PatientListCreateView,
     PatientQueryView,
     PatientRetrieveUpdateDeleteView,
+    SleepStudyDetailView,
     TreatmentDetailView,
 )
 
@@ -75,5 +76,10 @@ urlpatterns = [
         "api/treatments/<int:pk>/",
         TreatmentDetailView.as_view(),
         name="treatment-detail",
+    ),
+    path(
+        "api/sleep-studies/<int:pk>/",
+        SleepStudyDetailView.as_view(),
+        name="sleep-study-detail",
     ),
 ]

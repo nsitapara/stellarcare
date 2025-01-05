@@ -10,6 +10,7 @@ from .models import (
     CustomFieldDefinition,
     Patient,
     PatientCustomField,
+    SleepStudy,
     Treatment,
     Visits,
 )
@@ -319,4 +320,18 @@ class TreatmentSerializer(serializers.ModelSerializer):
             "start_date",
             "end_date",
             "notes",
+        ]
+
+
+class SleepStudySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SleepStudy
+        fields = [
+            "id",
+            "date",
+            "ahi",
+            "sleep_efficiency",
+            "rem_latency",
+            "notes",
+            "file_url",
         ]

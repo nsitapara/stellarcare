@@ -10,6 +10,7 @@ from .models import (
     CustomFieldDefinition,
     Patient,
     PatientCustomField,
+    SleepStudy,
     Treatment,
     Visits,
 )
@@ -17,6 +18,7 @@ from .serializers import (
     CustomFieldDefinitionSerializer,
     PatientCustomFieldSerializer,
     PatientSerializer,
+    SleepStudySerializer,
     TreatmentSerializer,
     VisitSerializer,
 )
@@ -225,3 +227,12 @@ class TreatmentDetailView(generics.RetrieveAPIView):
 
     queryset = Treatment.objects.all()
     serializer_class = TreatmentSerializer
+
+
+class SleepStudyDetailView(generics.RetrieveAPIView):
+    """
+    Retrieves a single sleep study by ID.
+    """
+
+    queryset = SleepStudy.objects.all()
+    serializer_class = SleepStudySerializer
