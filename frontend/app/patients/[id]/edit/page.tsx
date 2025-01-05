@@ -1,147 +1,148 @@
 'use client'
 
 import { getPatient } from '@/app/actions/get-patient-action'
+import { getPatientCustomFields } from '@/app/actions/get-patient-custom-fields-action'
 import { updatePatient } from '@/app/actions/update-patient-action'
 import { PatientForm } from '@/app/components/PatientForm'
 import { Button } from '@/app/components/ui/button'
 import type { Patient } from '@/types/api/models/Patient'
-import type { PatientFormData } from '@/types/patient'
 import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { use } from 'react'
-
-interface CustomField {
-  id: number
-  name: string
-  type: 'text' | 'number'
-  value_text: string | null
-  value_number: number | null
-}
+import { use, useEffect, useState } from 'react'
 
 interface FormCustomField {
   id: string
   name: string
   type: 'text' | 'number'
   value: string | number
+  customFieldDefinitionId: number
 }
 
-interface PatientFormDataWithCustomFields
-  extends Omit<PatientFormData, 'customFields'> {
+interface FormData {
+  firstName: string
+  middleName?: string
+  lastName: string
+  dateOfBirth: string
+  addresses: {
+    street: string
+    city: string
+    state: string
+    zipCode: string
+  }[]
   customFields: FormCustomField[]
 }
 
-interface PatientWithCustomFields extends Omit<Patient, 'custom_fields'> {
-  custom_fields: CustomField[]
+interface PatientWithCustomFields extends Patient {
+  customFields: FormCustomField[]
 }
 
 export default function EditPatientPage({
   params
-}: { params: Promise<{ id: string }> }) {
+}: {
+  params: Promise<{ id: string }>
+}) {
   const router = useRouter()
+  const [patient, setPatient] = useState<PatientWithCustomFields | null>(null)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [patient, setPatient] =
-    useState<PatientFormDataWithCustomFields | null>(null)
-  const [originalPatient, setOriginalPatient] = useState<Patient | null>(null)
-  const { id: patientId } = use(params)
+  const { id } = use(params)
 
   useEffect(() => {
-    async function loadPatient() {
+    const fetchPatientData = async () => {
       try {
-        const response = (await getPatient(
-          patientId
-        )) as unknown as PatientWithCustomFields
-        setOriginalPatient(response as unknown as Patient)
-        setPatient({
-          firstName: response.first,
-          middleName: response.middle || undefined,
-          lastName: response.last,
-          dateOfBirth: response.date_of_birth,
-          addresses: response.addresses.map((addr) => ({
-            street: addr.street,
-            city: addr.city,
-            state: addr.state,
-            zipCode: addr.zip_code
-          })),
-          customFields: (response.custom_fields || []).map((field) => ({
-            id: field.id.toString(),
-            name: field.name,
-            type: field.type,
-            value:
-              field.type === 'text'
-                ? field.value_text || ''
-                : field.value_number || 0
-          })),
-          studies: response.studies,
-          treatments: response.treatments,
-          insurance: response.insurance,
-          appointments: response.appointments
-        } as PatientFormDataWithCustomFields)
-      } catch (error) {
-        console.error('Failed to load patient:', error)
-        if (error instanceof Error) {
-          setError(error.message)
-        } else {
-          setError('Failed to load patient. Please try again.')
+        setLoading(true)
+        const patientData = await getPatient(id)
+        console.log('Patient data:', patientData)
+
+        // Fetch patient's custom field values
+        const customFields = await getPatientCustomFields(Number(id))
+        console.log('Patient custom fields:', customFields)
+
+        // Transform custom fields to match form data structure
+        const formattedCustomFields = customFields.map((field) => ({
+          id: crypto.randomUUID(),
+          name: field.field_definition.name,
+          type: field.field_definition.type as 'text' | 'number',
+          value: field.value,
+          customFieldDefinitionId: field.field_definition.id
+        }))
+
+        // Merge patient data with custom fields
+        const patientWithCustomFields: PatientWithCustomFields = {
+          ...patientData,
+          customFields: formattedCustomFields
         }
+
+        setPatient(patientWithCustomFields)
+        setError(null)
+      } catch (err) {
+        console.error('Error fetching patient:', err)
+        setError('Failed to load patient data')
+      } finally {
+        setLoading(false)
       }
     }
-    loadPatient()
-  }, [patientId])
 
-  async function handleSubmit(formData: PatientFormDataWithCustomFields) {
+    fetchPatientData()
+  }, [id])
+
+  const handleSubmit = async (formData: FormData) => {
     try {
-      if (!originalPatient) {
-        setError('Original patient data not found')
-        return
-      }
+      if (!patient) return
 
       await updatePatient(
-        patientId,
-        formData as PatientFormData,
-        originalPatient
+        id,
+        {
+          ...formData,
+          customFields: formData.customFields
+        },
+        patient
       )
-      router.push('/dashboard')
+      router.push('/patients')
     } catch (error) {
-      console.error('Failed to update patient:', error)
-      if (error instanceof Error) {
-        setError(error.message)
-      } else {
-        setError('Failed to update patient. Please try again.')
-      }
+      console.error('Error updating patient:', error)
     }
   }
 
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
+
+  if (!patient) {
+    return <div>Patient not found</div>
+  }
+
+  const initialData: FormData = {
+    firstName: patient.first,
+    middleName: patient.middle || undefined,
+    lastName: patient.last,
+    dateOfBirth: patient.date_of_birth,
+    addresses: patient.addresses.map((addr) => ({
+      street: addr.street,
+      city: addr.city,
+      state: addr.state,
+      zipCode: addr.zip_code
+    })),
+    customFields: patient.customFields
+  }
+
   return (
-    <div className="container mx-auto py-10 max-w-4xl">
-      <div className="flex justify-between items-center mb-8 px-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Edit Patient
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Update patient information
-          </p>
-        </div>
+    <div className="container mx-auto py-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Edit Patient</h1>
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon"
-          onClick={() => router.push('/dashboard')}
-          className="hover:bg-destructive hover:text-destructive-foreground"
+          onClick={() => router.push('/patients')}
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4" />
         </Button>
       </div>
-      {error && (
-        <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-md whitespace-pre-line">
-          {error}
-        </div>
-      )}
-      <div className="bg-card p-6 rounded-lg border shadow-sm">
-        {patient && (
-          <PatientForm onSubmit={handleSubmit} initialData={patient} />
-        )}
-      </div>
+      <PatientForm onSubmit={handleSubmit} initialData={initialData} />
     </div>
   )
 }
