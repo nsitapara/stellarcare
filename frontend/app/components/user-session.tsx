@@ -16,10 +16,27 @@ export function UserSession() {
 
   return (
     <div className="flex items-center gap-4">
-      <span className="text-sm text-foreground">
-        {session?.user?.username || session?.user?.email}
-      </span>
-      <Button onClick={() => signOut()}>Sign Out</Button>
+      <Button onClick={() => signOut()} className="flex items-center gap-2">
+        {session?.user?.username?.split('@')[0]}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          role="img"
+          aria-label="Sign out"
+        >
+          <title>Sign out</title>
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </Button>
     </div>
   )
 }
