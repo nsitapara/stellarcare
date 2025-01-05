@@ -5,6 +5,7 @@ import { UserSession } from '@components/user-session'
 import { Moon } from 'lucide-react'
 import { SessionProvider, useSession } from 'next-auth/react'
 import '@/app/styles/globals.css'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 function NavigationBar() {
@@ -34,7 +35,7 @@ function NavigationBar() {
           </span>
         </button>
         <div className="hidden md:flex items-center space-x-8">
-          <a
+          <Link
             href="/dashboard"
             className="text-foreground hover:text-primary flex items-center gap-2"
           >
@@ -58,8 +59,8 @@ function NavigationBar() {
               <rect width="7" height="5" x="3" y="16" rx="1" />
             </svg>
             Dashboard
-          </a>
-          <a
+          </Link>
+          <Link
             href="/appointments"
             className="text-foreground hover:text-primary flex items-center gap-2"
           >
@@ -83,7 +84,7 @@ function NavigationBar() {
               <line x1="3" x2="21" y1="10" y2="10" />
             </svg>
             Appointments
-          </a>
+          </Link>
         </div>
         <div className="flex items-center space-x-4">
           <ThemeToggle />
