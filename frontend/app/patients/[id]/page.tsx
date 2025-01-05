@@ -8,8 +8,8 @@
  * - Redirection for unauthorized access or missing patients
  */
 
-import { getPatient } from '@/app/actions/get-patient-action'
-import { authOptions } from '@/app/lib/auth'
+import { getPatient } from '@actions/patient/get-patient-action'
+import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { PatientTabs } from './patient-tabs'

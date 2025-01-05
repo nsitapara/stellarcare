@@ -5,8 +5,8 @@ import {
   createCustomField,
   getCustomFields,
   getUserCustomFields
-} from '@/app/actions/get-custom-fields-action'
-import { Button } from '@/app/components/ui/button'
+} from '@actions/patient/get-custom-fields-action'
+import { Button } from '@components/ui/button'
 import {
   Form,
   FormControl,
@@ -14,10 +14,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@/app/components/ui/form'
-import { Input } from '@/app/components/ui/input'
-import type { CustomFieldDefinition } from '@/types/api/models/CustomFieldDefinition'
+} from '@components/ui/form'
+import { Input } from '@components/ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
+import type { CustomFieldDefinition } from '@types/api/models/CustomFieldDefinition'
 import { Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'

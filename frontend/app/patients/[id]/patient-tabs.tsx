@@ -1,18 +1,13 @@
 'use client'
 
-import { AppointmentCard } from '@/app/components/AppointmentCard'
-import { BasicInformation } from '@/app/components/BasicInformation'
-import { InsuranceCard } from '@/app/components/InsuranceCard'
-import { SleepStudyCard } from '@/app/components/SleepStudyCard'
-import { TreatmentCard } from '@/app/components/TreatmentCard'
-import { Button } from '@/app/components/ui/button'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@/app/components/ui/tabs'
-import type { Patient } from '@/types/api/models/Patient'
+import { AppointmentCard } from '@components/AppointmentCard'
+import { BasicInformation } from '@components/BasicInformation'
+import { InsuranceCard } from '@components/InsuranceCard'
+import { SleepStudyCard } from '@components/SleepStudyCard'
+import { TreatmentCard } from '@components/TreatmentCard'
+import { Button } from '@components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
+import type { Patient } from '@types/api/models/Patient'
 import { format, parseISO } from 'date-fns'
 import { Pencil } from 'lucide-react'
 import Link from 'next/link'

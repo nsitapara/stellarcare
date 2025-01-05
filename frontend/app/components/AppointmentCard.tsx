@@ -1,13 +1,8 @@
 'use client'
 
-import { getAppointment } from '@/app/actions/get-appointment-action'
-import { Badge } from '@/app/components/ui/badge'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@/app/components/ui/card'
+import { getAppointment } from '@actions/patient/get-appointment-action'
+import { Badge } from '@components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card'
 import { format } from 'date-fns'
 import { useEffect, useState } from 'react'
 

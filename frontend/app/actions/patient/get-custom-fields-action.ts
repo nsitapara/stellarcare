@@ -1,8 +1,8 @@
 'use server'
 
-import type { CustomFieldDefinition } from '@/types/api/models/CustomFieldDefinition'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
+import type { CustomFieldDefinition } from '@types/api/models/CustomFieldDefinition'
 import { getServerSession } from 'next-auth'
 
 interface PaginatedResponse<T> {

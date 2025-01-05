@@ -1,8 +1,8 @@
 'use server'
 
-import type { PatientCustomField } from '@/types/api/models/PatientCustomField'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
+import type { PatientCustomField } from '@types/api/models/PatientCustomField'
 import { getServerSession } from 'next-auth'
 
 interface PaginatedResponse<T> {

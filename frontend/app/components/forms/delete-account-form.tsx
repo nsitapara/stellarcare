@@ -3,7 +3,7 @@
 import type {
   DeleteAccountFormSchema,
   deleteAccountAction
-} from '@actions/delete-account-action'
+} from '@actions/user/delete-account-action'
 import { FormHeader } from '@components/forms/form-header'
 import { SubmitField } from '@components/forms/submit-field'
 import { TextField } from '@components/forms/text-field'

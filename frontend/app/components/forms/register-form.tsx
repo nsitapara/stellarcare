@@ -3,7 +3,7 @@
 import type {
   RegisterFormSchema,
   registerAction
-} from '@actions/register-action'
+} from '@actions/user/register-action'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { fieldApiError } from '@lib/forms'
 import { registerFormSchema } from '@lib/validation'

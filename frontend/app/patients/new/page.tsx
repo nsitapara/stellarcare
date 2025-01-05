@@ -1,9 +1,9 @@
 'use client'
 
-import { createPatient } from '@/app/actions/create-patient-action'
-import { PatientForm } from '@/app/components/PatientForm'
-import { Button } from '@/app/components/ui/button'
-import type { PatientFormData } from '@/types/patient'
+import { createPatient } from '@actions/patient/create-patient-action'
+import { PatientForm } from '@components/PatientForm'
+import { Button } from '@components/ui/button'
+import type { PatientFormData } from '@types/patient'
 import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'

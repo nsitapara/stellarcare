@@ -1,12 +1,7 @@
 'use client'
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@/app/components/ui/card'
-import type { Patient } from '@/types/api/models/Patient'
+import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card'
+import type { Patient } from '@types/api/models/Patient'
 
 interface BasicInformationProps {
   patient: Patient

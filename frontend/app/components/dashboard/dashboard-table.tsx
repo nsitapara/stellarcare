@@ -1,6 +1,5 @@
 'use client'
 
-import type { DashboardData } from '@/types/dashboard'
 import { cn } from '@components/lib/utils'
 import { Button } from '@components/ui/button'
 import {
@@ -11,6 +10,7 @@ import {
   TableHeader,
   TableRow
 } from '@components/ui/table'
+import type { DashboardData } from '@types/dashboard'
 import { Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'

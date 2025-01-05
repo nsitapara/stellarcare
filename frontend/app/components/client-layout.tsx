@@ -3,7 +3,7 @@
 import { ThemeToggle } from '@components/theme-toggle'
 import { UserSession } from '@components/user-session'
 import { SessionProvider, useSession } from 'next-auth/react'
-import '@/app/styles/globals.css'
+import '@styles/globals.css'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 

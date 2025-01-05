@@ -1,6 +1,6 @@
 'use client'
 
-import { loginAction } from '@/app/actions/auth-action'
+import { loginAction } from '@actions/user/auth-action'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'

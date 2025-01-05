@@ -1,10 +1,10 @@
 'use server'
 
-import type { Address } from '@/types/api/models/Address'
-import type { Patient } from '@/types/api/models/Patient'
-import type { PatientFormData } from '@/types/patient'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
+import type { Address } from '@types/api/models/Address'
+import type { Patient } from '@types/api/models/Patient'
+import type { PatientFormData } from '@types/patient'
 import { getServerSession } from 'next-auth'
 
 interface FormCustomField {

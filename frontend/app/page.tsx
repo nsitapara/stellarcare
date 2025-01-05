@@ -1,4 +1,4 @@
-import { UserSession } from '@/app/components/user-session'
+import { UserSession } from '@components/user-session'
 
 export default function HomePage() {
   return (

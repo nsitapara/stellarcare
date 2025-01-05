@@ -1,10 +1,10 @@
 'use client'
 
-import type { UserCurrent } from '@/types/api'
-import type { profileAction } from '@actions/profile-action'
+import type { profileAction } from '@actions/user/profile-action'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { fieldApiError } from '@lib/forms'
 import { profileFormSchema } from '@lib/validation'
+import type { UserCurrent } from '@types/api'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'

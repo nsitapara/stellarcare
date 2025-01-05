@@ -9,7 +9,7 @@
  * - Credentials provider setup
  */
 
-import { refreshTokenAction } from '@/app/actions/auth-action'
+import { refreshTokenAction } from '@actions/user/auth-action'
 import type { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 

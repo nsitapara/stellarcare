@@ -1,9 +1,9 @@
 'use client'
 
-import { getPatients } from '@/app/actions/get-patients-action'
-import { searchPatients } from '@/app/actions/patient-search-action'
-import type { Patient } from '@/types/api/models/Patient'
+import { getPatients } from '@actions/patient/get-patients-action'
+import { searchPatients } from '@actions/patient/patient-search-action'
 import { Button } from '@components/ui/button'
+import type { Patient } from '@types/api/models/Patient'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
