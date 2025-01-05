@@ -87,7 +87,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto">
       <Suspense
         fallback={
           <div className="flex justify-center items-center h-32">

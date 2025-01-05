@@ -4,7 +4,7 @@ import { AppointmentCalendar } from '@components/AppointmentCalendar'
 
 export default function AppointmentsPage() {
   return (
-    <div className="container-wrapper py-8">
+    <div className="container-wrapper">
       <div className="dashboard-header">
         <h1 className="dashboard-title">Appointments</h1>
         <p className="dashboard-subtitle">

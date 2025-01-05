@@ -149,7 +149,7 @@ export function AppointmentCalendar() {
   }
 
   return (
-    <div className="p-6">
+    <div className="container-wrapper">
       <div className="flex justify-end mb-6">
         <Dialog
           open={isAddingAppointment}
