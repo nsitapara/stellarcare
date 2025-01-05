@@ -5,6 +5,7 @@ import { BasicInformation } from '@/app/components/BasicInformation'
 import { InsuranceCard } from '@/app/components/InsuranceCard'
 import { SleepStudyCard } from '@/app/components/SleepStudyCard'
 import { TreatmentCard } from '@/app/components/TreatmentCard'
+import { Button } from '@/app/components/ui/button'
 import {
   Tabs,
   TabsContent,
@@ -13,6 +14,8 @@ import {
 } from '@/app/components/ui/tabs'
 import type { Patient } from '@/types/api/models/Patient'
 import { format, parseISO } from 'date-fns'
+import { Pencil } from 'lucide-react'
+import Link from 'next/link'
 
 interface PatientTabsProps {
   patient: Patient
@@ -29,11 +32,19 @@ export function PatientTabs({ patient }: PatientTabsProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-white">
-            {patient.first} {patient.middle} {patient.last}
-          </h1>
-          <p className="text-sm text-gray-400">Patient ID: {patient.id}</p>
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              {patient.first} {patient.middle} {patient.last}
+            </h1>
+            <p className="text-sm text-gray-400">Patient ID: {patient.id}</p>
+          </div>
+          <Link href={`/patients/${patient.id}/edit`}>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Pencil className="h-4 w-4" />
+              <span className="sr-only">Edit patient</span>
+            </Button>
+          </Link>
         </div>
         <div className="text-right">
           <span className="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-1 text-sm font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">
@@ -51,7 +62,12 @@ export function PatientTabs({ patient }: PatientTabsProps) {
           <TabsTrigger value="insurance">Insurance</TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
-          <BasicInformation patient={patient} formattedDates={formattedDates} />
+          <div className="grid gap-6">
+            <BasicInformation
+              patient={patient}
+              formattedDates={formattedDates}
+            />
+          </div>
         </TabsContent>
         <TabsContent value="appointments">
           <div className="grid gap-4">
