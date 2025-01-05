@@ -12,12 +12,12 @@
 'use client'
 
 import type { DashboardClientProps } from '@api/dashboard'
+import { DashboardTable } from '@components/dashboard/dashboard-table'
+import { usePatientData } from '@components/dashboard/use-patient-data'
 import { Button } from '@components/ui/button'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo } from 'react'
-import { DashboardTable } from './dashboard-table'
-import { usePatientData } from './use-patient-data'
 
 /**
  * DashboardClient component manages the state and interactions for the patient dashboard

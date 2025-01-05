@@ -12,11 +12,11 @@
 'use client'
 
 import type { DashboardTableProps } from '@api/dashboard'
+import { Pagination } from '@components/dashboard/pagination'
+import { SearchBar } from '@components/dashboard/search-bar'
+import { PatientTable } from '@components/patients/patient-table'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Pagination } from './pagination'
-import { PatientTable } from './patient-table'
-import { SearchBar } from './search-bar'
 
 /**
  * DashboardTable component combines search, table, and pagination functionality
