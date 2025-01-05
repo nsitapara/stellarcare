@@ -1,3 +1,14 @@
+/**
+ * PatientForm Component
+ *
+ * A comprehensive form for patient data management that handles:
+ * - Basic patient information (name, DOB)
+ * - Multiple addresses
+ * - Dynamic custom fields with different types
+ * - Field validation
+ * - Integration with custom fields API
+ */
+
 'use client'
 
 import {
@@ -7,6 +18,7 @@ import {
   getUserCustomFields
 } from '@actions/patient/get-custom-fields-action'
 import type { CustomFieldDefinition } from '@api/models/CustomFieldDefinition'
+import type { FormCustomField, PatientFormData } from '@api/patient/form'
 import { Button } from '@components/ui/button'
 import {
   Form,
@@ -39,31 +51,9 @@ import {
   SelectValue
 } from '../ui/select'
 
-interface FormCustomField {
-  id: string
-  name: string
-  type: 'text' | 'number'
-  value: string | number
-  customFieldDefinitionId: number
-}
-
-interface FormData {
-  firstName: string
-  middleName?: string
-  lastName: string
-  dateOfBirth: string
-  addresses: {
-    street: string
-    city: string
-    state: string
-    zipCode: string
-  }[]
-  customFields: FormCustomField[]
-}
-
 interface PatientFormProps {
-  onSubmit: (data: FormData) => void
-  initialData?: FormData
+  onSubmit: (data: PatientFormData) => void
+  initialData?: PatientFormData
 }
 
 export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
@@ -268,7 +258,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   })
 
   const onFormSubmit = (data: z.infer<typeof formSchema>) => {
-    const formData: FormData = {
+    const formData: PatientFormData = {
       firstName: data.firstName,
       middleName: data.middleName,
       lastName: data.lastName,

@@ -11,9 +11,9 @@
 
 'use client'
 
+import { usePatientData } from '@actions/patient/use-patient-data'
 import type { DashboardClientProps } from '@api/dashboard'
 import { DashboardTable } from '@components/dashboard/dashboard-table'
-import { usePatientData } from '@components/dashboard/use-patient-data'
 import { Button } from '@components/ui/button'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'

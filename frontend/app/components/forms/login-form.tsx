@@ -1,20 +1,29 @@
+/**
+ * LoginForm Component
+ *
+ * A form component for user authentication that handles:
+ * - Username/email and password input
+ * - Form validation
+ * - Error handling
+ * - Loading states
+ * - Successful login redirection
+ */
+
 'use client'
 
 import { loginAction } from '@actions/user/auth-action'
+import type { LoginFormSchema } from '@api/forms/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import type { z } from 'zod'
 import { loginFormSchema } from '../../lib/validation'
 import { FormFooter } from '../forms/form-footer'
 import { FormHeader } from '../forms/form-header'
 import { TextField } from '../forms/text-field'
 import { ErrorMessage } from '../messages/error-message'
 import { Button } from '../ui/button'
-
-type LoginFormSchema = z.infer<typeof loginFormSchema>
 
 export function LoginForm() {
   const search = useSearchParams()
