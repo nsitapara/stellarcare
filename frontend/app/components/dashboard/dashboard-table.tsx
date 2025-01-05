@@ -118,22 +118,26 @@ export function DashboardTable({
         )}
       </div>
 
-      <div className="table-container">
+      <div className="table-container bg-white dark:bg-zinc-900 border-border">
         <Table>
-          <TableHeader className="table-header">
-            <TableRow>
-              <TableHead className="table-header-cell w-[100px]">ID</TableHead>
-              <TableHead className="table-header-cell w-[200px]">
+          <TableHeader className="bg-gray-50 dark:bg-zinc-800/50">
+            <TableRow className="border-b-2 border-border hover:bg-transparent">
+              <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[100px]">
+                ID
+              </TableHead>
+              <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[200px]">
                 Name
               </TableHead>
-              <TableHead className="table-header-cell w-[120px]">
+              <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[120px]">
                 Date of Birth
               </TableHead>
-              <TableHead className="table-header-cell">Address</TableHead>
-              <TableHead className="table-header-cell w-[120px]">
+              <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">
+                Address
+              </TableHead>
+              <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[120px]">
                 Status
               </TableHead>
-              <TableHead className="table-header-cell w-[100px]">
+              <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[100px]">
                 Actions
               </TableHead>
             </TableRow>
@@ -143,7 +147,7 @@ export function DashboardTable({
               <TableRow>
                 <TableCell
                   colSpan={6}
-                  className="h-24 text-center text-muted-foreground"
+                  className="h-24 text-center text-gray-500 dark:text-gray-400"
                 >
                   No results found.
                 </TableCell>
@@ -152,24 +156,24 @@ export function DashboardTable({
               data.map((item) => (
                 <TableRow
                   key={item.id}
-                  className="table-row cursor-pointer"
+                  className="border-b border-border hover:bg-gray-50 dark:hover:bg-zinc-800/50 cursor-pointer"
                   onClick={() => handleRowClick(item.id)}
                 >
-                  <TableCell className="table-cell table-cell-id">
+                  <TableCell className="font-mono text-gray-700 dark:text-gray-200 bg-gray-50/50 dark:bg-zinc-800/30">
                     {item.id}
                   </TableCell>
-                  <TableCell className="table-cell font-medium">
+                  <TableCell className="text-gray-700 dark:text-gray-200 font-medium">
                     {item.first} {item.middle} {item.last}
                   </TableCell>
-                  <TableCell className="table-cell">
+                  <TableCell className="text-gray-700 dark:text-gray-200">
                     {item.date_of_birth}
                   </TableCell>
-                  <TableCell className="table-cell">
+                  <TableCell className="text-gray-700 dark:text-gray-200">
                     {item.addresses && item.addresses.length > 0
                       ? item.addresses[0]
                       : 'No address'}
                   </TableCell>
-                  <TableCell className="table-cell">
+                  <TableCell className="text-gray-700 dark:text-gray-200">
                     <span
                       className={cn(
                         'table-status-badge',
@@ -179,11 +183,11 @@ export function DashboardTable({
                       {item.status}
                     </span>
                   </TableCell>
-                  <TableCell className="table-cell">
+                  <TableCell>
                     <Button
                       variant="default"
                       size="sm"
-                      className="action-button"
+                      className="bg-primary hover:bg-primary/90 text-white"
                       onClick={(e) => {
                         e.stopPropagation()
                         router.push(
@@ -201,13 +205,13 @@ export function DashboardTable({
         </Table>
       </div>
 
-      <div className="table-pagination">
+      <div className="bg-white dark:bg-zinc-900 border-border rounded-lg p-4 flex items-center justify-between">
         <div className="flex items-center space-x-6 text-sm">
-          <span className="text-foreground/80 dark:text-white/80 font-medium">
+          <span className="text-gray-700 dark:text-gray-200 font-medium">
             Page {page} of {totalPages}
           </span>
           <select
-            className="pagination-select"
+            className="border rounded-md px-3 py-2 bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 border-border"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
           >
@@ -221,7 +225,7 @@ export function DashboardTable({
               size="sm"
               onClick={() => onPageChange(page - 1)}
               disabled={page <= 1}
-              className="action-button-outline"
+              className="border-border text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800"
             >
               Previous
             </Button>
@@ -230,7 +234,7 @@ export function DashboardTable({
               size="sm"
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages}
-              className="action-button-outline"
+              className="border-border text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-800"
             >
               Next
             </Button>
