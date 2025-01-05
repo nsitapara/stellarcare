@@ -24,9 +24,18 @@ import {
 
 interface BasicInformationProps {
   patient: Patient
+  /** Pre-formatted dates for consistent display */
+  formattedDates: {
+    dateOfBirth: string
+    created: string
+    updated: string
+  }
 }
 
-export function BasicInformation({ patient }: BasicInformationProps) {
+export function BasicInformation({
+  patient,
+  formattedDates
+}: BasicInformationProps) {
   return (
     <Card className="w-full">
       <CardHeader>
@@ -67,7 +76,7 @@ export function BasicInformation({ patient }: BasicInformationProps) {
               Date of Birth
             </h3>
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              {new Date(patient.date_of_birth).toLocaleDateString()}
+              {formattedDates.dateOfBirth}
             </p>
           </div>
           <div className="space-y-2">

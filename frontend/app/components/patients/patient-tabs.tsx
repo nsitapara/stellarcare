@@ -12,19 +12,53 @@ import { format, parseISO } from 'date-fns'
 import { Pencil } from 'lucide-react'
 import Link from 'next/link'
 
+/**
+ * Props for the PatientTabs component
+ */
 interface PatientTabsProps {
   patient: Patient
 }
 
+/**
+ * Formatted dates object structure
+ */
+interface FormattedDates {
+  dateOfBirth: string
+  created: string
+  updated: string
+}
+
+/**
+ * PatientTabs Component
+ *
+ * A comprehensive tabbed interface for displaying patient information. Provides
+ * organized access to different aspects of patient data including basic information,
+ * appointments, sleep studies, treatments, and insurance details.
+ *
+ * Features:
+ * - Patient header with name, ID, and edit functionality
+ * - Status indicator with appropriate styling
+ * - Tabbed navigation for different categories of patient information
+ * - Empty state handling for each category
+ * - UTC date formatting for consistency
+ *
+ * @param {PatientTabsProps} props - The component props
+ * @returns {JSX.Element} A tabbed interface displaying patient information
+ */
 export function PatientTabs({ patient }: PatientTabsProps) {
   // Format dates in UTC to ensure consistency between server and client
-  const formattedDates = {
+  const formattedDates: FormattedDates = {
     dateOfBirth: format(parseISO(patient.date_of_birth), 'MMMM d, yyyy'),
     created: format(parseISO(patient.created_at), 'MMMM d, yyyy'),
     updated: format(parseISO(patient.modified_at), 'MMMM d, yyyy')
   }
 
-  const getStatusClass = (status: string) => {
+  /**
+   * Determines the CSS class for the status badge based on patient status
+   * @param {string} status - The patient's current status
+   * @returns {string} The corresponding CSS class name
+   */
+  const getStatusClass = (status: string): string => {
     switch (status.toLowerCase()) {
       case 'active':
         return 'status-active'

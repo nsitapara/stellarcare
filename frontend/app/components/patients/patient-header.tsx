@@ -4,6 +4,20 @@ import { Button } from '@components/ui/button'
 import { X } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+/**
+ * PatientHeader Component
+ *
+ * A header component for the patient details page that displays the title and
+ * provides navigation functionality. Features a close button that redirects
+ * users back to their previous location or dashboard.
+ *
+ * Features:
+ * - Title and subtitle for patient details page
+ * - Close button with hover effect
+ * - Smart redirection based on URL parameters
+ *
+ * @returns {JSX.Element} A header component for the patient details page
+ */
 export function PatientHeader() {
   const router = useRouter()
   const searchParams = useSearchParams()
