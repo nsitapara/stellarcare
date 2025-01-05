@@ -1,8 +1,8 @@
 'use server'
 
+import type { PaginatedPatientList } from '@api/models/PaginatedPatientList'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
-import type { PaginatedPatientList } from '@types/api/models/PaginatedPatientList'
 import { getServerSession } from 'next-auth'
 
 /**

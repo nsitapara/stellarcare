@@ -2,8 +2,8 @@
 
 import { getPatients } from '@actions/patient/get-patients-action'
 import { searchPatients } from '@actions/patient/patient-search-action'
+import type { Patient } from '@api/models/Patient'
 import { Button } from '@components/ui/button'
-import type { Patient } from '@types/api/models/Patient'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'

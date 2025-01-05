@@ -7,9 +7,9 @@
 
 'use server'
 
+import type { Patient } from '@api/models/Patient'
 import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
-import type { Patient } from '@types/api/models/Patient'
 import { getServerSession } from 'next-auth'
 
 /**
