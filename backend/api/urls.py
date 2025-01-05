@@ -6,14 +6,18 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .api import UserViewSet
 from .views import (
+    AppointmentDetailView,
     CustomFieldDefinitionAssignedView,
     CustomFieldDefinitionAssignView,
     CustomFieldDefinitionListCreateView,
     CustomFieldDefinitionRetrieveUpdateDeleteView,
+    InsuranceDetailView,
     PatientCustomFieldListView,
     PatientListCreateView,
     PatientQueryView,
     PatientRetrieveUpdateDeleteView,
+    SleepStudyDetailView,
+    TreatmentDetailView,
 )
 
 router = routers.DefaultRouter()
@@ -63,5 +67,25 @@ urlpatterns = [
         "api/patients/<int:patient_id>/custom-fields/",
         PatientCustomFieldListView.as_view(),
         name="patient-custom-fields",
+    ),
+    path(
+        "api/appointments/<int:pk>/",
+        AppointmentDetailView.as_view(),
+        name="appointment-detail",
+    ),
+    path(
+        "api/treatments/<int:pk>/",
+        TreatmentDetailView.as_view(),
+        name="treatment-detail",
+    ),
+    path(
+        "api/sleep-studies/<int:pk>/",
+        SleepStudyDetailView.as_view(),
+        name="sleep-study-detail",
+    ),
+    path(
+        "api/insurance/<int:pk>/",
+        InsuranceDetailView.as_view(),
+        name="insurance-detail",
     ),
 ]

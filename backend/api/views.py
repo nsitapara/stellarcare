@@ -6,11 +6,23 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CustomFieldDefinition, Patient, PatientCustomField
+from .models import (
+    CustomFieldDefinition,
+    Insurance,
+    Patient,
+    PatientCustomField,
+    SleepStudy,
+    Treatment,
+    Visits,
+)
 from .serializers import (
     CustomFieldDefinitionSerializer,
+    InsuranceSerializer,
     PatientCustomFieldSerializer,
     PatientSerializer,
+    SleepStudySerializer,
+    TreatmentSerializer,
+    VisitSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -199,3 +211,39 @@ class CustomFieldDefinitionAssignView(generics.GenericAPIView):
         except Exception as e:
             logger.error(f"Error assigning custom field to user: {e}")
             raise
+
+
+class AppointmentDetailView(generics.RetrieveAPIView):
+    """
+    Retrieves a single appointment by ID.
+    """
+
+    queryset = Visits.objects.all()
+    serializer_class = VisitSerializer
+
+
+class TreatmentDetailView(generics.RetrieveAPIView):
+    """
+    Retrieves a single treatment by ID.
+    """
+
+    queryset = Treatment.objects.all()
+    serializer_class = TreatmentSerializer
+
+
+class SleepStudyDetailView(generics.RetrieveAPIView):
+    """
+    Retrieves a single sleep study by ID.
+    """
+
+    queryset = SleepStudy.objects.all()
+    serializer_class = SleepStudySerializer
+
+
+class InsuranceDetailView(generics.RetrieveAPIView):
+    """
+    Retrieves a single insurance record by ID.
+    """
+
+    queryset = Insurance.objects.all()
+    serializer_class = InsuranceSerializer

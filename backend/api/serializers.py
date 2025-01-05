@@ -5,7 +5,16 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions, serializers
 
-from .models import Address, CustomFieldDefinition, Patient, PatientCustomField
+from .models import (
+    Address,
+    CustomFieldDefinition,
+    Insurance,
+    Patient,
+    PatientCustomField,
+    SleepStudy,
+    Treatment,
+    Visits,
+)
 
 User = get_user_model()
 
@@ -292,3 +301,53 @@ class PatientSerializer(serializers.ModelSerializer):
             instance.appointments.set(appointments)
 
         return instance
+
+
+class VisitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Visits
+        fields = ["id", "date", "time", "type", "status", "notes", "zoom_link"]
+
+
+class TreatmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Treatment
+        fields = [
+            "id",
+            "name",
+            "type",
+            "dosage",
+            "frequency",
+            "start_date",
+            "end_date",
+            "notes",
+        ]
+
+
+class SleepStudySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SleepStudy
+        fields = [
+            "id",
+            "date",
+            "ahi",
+            "sleep_efficiency",
+            "rem_latency",
+            "notes",
+            "file_url",
+        ]
+
+
+class InsuranceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Insurance
+        fields = [
+            "id",
+            "provider",
+            "policy_number",
+            "group_number",
+            "primary_holder",
+            "relationship",
+            "authorization_status",
+            "authorization_expiry",
+        ]
