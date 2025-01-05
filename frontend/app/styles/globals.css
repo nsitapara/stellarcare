@@ -349,4 +349,25 @@
       stop-opacity: 0;
     }
   }
+
+  /* Tab styles */
+  .tabs-list {
+    @apply inline-flex h-11 items-center justify-center rounded-lg bg-card p-1
+    border-2 border-border/80 dark:border-border/60
+    shadow-sm dark:shadow-md;
+  }
+
+  .tabs-trigger {
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2.5
+    text-sm font-medium ring-offset-background transition-all
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+    disabled:pointer-events-none disabled:opacity-50
+    data-[state=active]:bg-accent data-[state=active]:text-white data-[state=active]:shadow-sm
+    hover:bg-accent/10 dark:hover:bg-accent/20
+    data-[state=active]:hover:bg-accent/90;
+  }
+
+  .tabs-content {
+    @apply mt-6 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
 }

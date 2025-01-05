@@ -71,14 +71,24 @@ export function PatientTabs({ patient }: PatientTabsProps) {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-card border-2 border-border/80">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="appointments">Appointments</TabsTrigger>
-          <TabsTrigger value="studies">Sleep Studies</TabsTrigger>
-          <TabsTrigger value="treatments">Treatments</TabsTrigger>
-          <TabsTrigger value="insurance">Insurance</TabsTrigger>
+        <TabsList className="tabs-list">
+          <TabsTrigger className="tabs-trigger" value="overview">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger className="tabs-trigger" value="appointments">
+            Appointments
+          </TabsTrigger>
+          <TabsTrigger className="tabs-trigger" value="studies">
+            Sleep Studies
+          </TabsTrigger>
+          <TabsTrigger className="tabs-trigger" value="treatments">
+            Treatments
+          </TabsTrigger>
+          <TabsTrigger className="tabs-trigger" value="insurance">
+            Insurance
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className="mt-6">
+        <TabsContent className="tabs-content" value="overview">
           <div className="space-y-6">
             <BasicInformation
               patient={patient}
@@ -86,7 +96,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
             />
           </div>
         </TabsContent>
-        <TabsContent value="appointments" className="mt-6">
+        <TabsContent className="tabs-content" value="appointments">
           <div className="space-y-4">
             {patient.appointments?.length ? (
               patient.appointments.map((appointmentId) => (
@@ -102,7 +112,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
             )}
           </div>
         </TabsContent>
-        <TabsContent value="studies" className="mt-6">
+        <TabsContent className="tabs-content" value="studies">
           <div className="space-y-4">
             {patient.studies?.length ? (
               patient.studies.map((studyId) => (
@@ -115,7 +125,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
             )}
           </div>
         </TabsContent>
-        <TabsContent value="treatments" className="mt-6">
+        <TabsContent className="tabs-content" value="treatments">
           <div className="space-y-4">
             {patient.treatments?.length ? (
               patient.treatments.map((treatmentId) => (
@@ -131,7 +141,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
             )}
           </div>
         </TabsContent>
-        <TabsContent value="insurance" className="mt-6">
+        <TabsContent className="tabs-content" value="insurance">
           <div className="space-y-4">
             {patient.insurance?.length ? (
               patient.insurance.map((insuranceId) => (
