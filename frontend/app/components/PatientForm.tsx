@@ -46,13 +46,6 @@ interface FormCustomField {
   customFieldDefinitionId: number
 }
 
-interface ApiCustomField {
-  custom_field_definition_id: number
-  type: 'text' | 'number'
-  value_text: string | null
-  value_number: number | null
-}
-
 interface FormData {
   firstName: string
   middleName?: string
@@ -64,7 +57,7 @@ interface FormData {
     state: string
     zipCode: string
   }[]
-  customFields: ApiCustomField[]
+  customFields: FormCustomField[]
 }
 
 interface PatientFormProps {
@@ -97,6 +90,10 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         // Get user's assigned fields
         const assignedFields = await getUserCustomFields()
         console.log('User assigned fields:', assignedFields)
+        console.log(
+          'Assigned fields IDs:',
+          assignedFields.map((f) => f.id)
+        )
         setUserAssignedFields(assignedFields)
 
         if (initialData?.customFields) {
@@ -109,24 +106,23 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
 
           for (const field of initialData.customFields) {
             const fieldDef = allFields.find(
-              (def) => def.id === field.custom_field_definition_id
+              (def) => def.id === field.customFieldDefinitionId
             )
             if (!fieldDef) {
               console.warn(
-                `Could not find field definition for ID: ${field.custom_field_definition_id}`
+                `Could not find field definition for ID: ${field.customFieldDefinitionId}`
               )
               continue
             }
-            initialCustomFields.push({
+            const initialField: FormCustomField = {
               id: crypto.randomUUID(),
               name: fieldDef.name,
               type: fieldDef.type,
-              value:
-                field.type === 'text'
-                  ? field.value_text || ''
-                  : field.value_number || 0,
-              customFieldDefinitionId: field.custom_field_definition_id
-            })
+              value: field.value,
+              customFieldDefinitionId: field.customFieldDefinitionId
+            }
+            console.log('Created initial field:', initialField)
+            initialCustomFields.push(initialField)
           }
 
           console.log('Formatted initial custom fields:', initialCustomFields)
@@ -134,13 +130,18 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         } else {
           // If no initial data, populate with user's assigned fields
           console.log('No initial data, using assigned fields')
-          const defaultFields = assignedFields.map((field) => ({
-            id: crypto.randomUUID(),
-            name: field.name,
-            type: field.type,
-            value: field.type === 'text' ? '' : 0,
-            customFieldDefinitionId: field.id
-          }))
+          const defaultFields = assignedFields.map((field) => {
+            console.log('Creating field from:', field)
+            console.log('Field ID:', field.id)
+            return {
+              id: crypto.randomUUID(),
+              name: field.name,
+              type: field.type,
+              value: field.type === 'text' ? '' : 0,
+              customFieldDefinitionId: field.id
+            }
+          })
+          console.log('Created default fields:', defaultFields)
           setCustomFields(defaultFields)
         }
       } catch (error) {
@@ -213,13 +214,13 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           }
           console.log('Adding new field to form:', formField)
           setCustomFields([formField, ...customFields])
+          setSearchQuery('')
+          setIsSearchOpen(false)
         }
       } catch (error) {
         console.error('Error creating custom field:', error)
       }
     }
-    setIsSearchOpen(false)
-    setSearchQuery('')
   }
 
   const removeCustomField = (id: string) => {
@@ -231,22 +232,37 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
     field: keyof Omit<FormCustomField, 'id'>,
     value: string | number
   ) => {
+    console.log('Handling custom field change:')
+    console.log('Field ID:', id)
+    console.log('Field key:', field)
+    console.log('New value:', value)
+
     const updatedFields = [...customFields]
     const index = updatedFields.findIndex((f) => f.id === id)
     if (index === -1) return
+
+    console.log('Current field:', updatedFields[index])
+    console.log(
+      'Current customFieldDefinitionId:',
+      updatedFields[index].customFieldDefinitionId
+    )
 
     if (field === 'type') {
       updatedFields[index] = {
         ...updatedFields[index],
         type: value as 'text' | 'number',
-        value: value === 'text' ? '' : 0
+        value: value === 'text' ? '' : 0,
+        customFieldDefinitionId: updatedFields[index].customFieldDefinitionId
       }
     } else {
       updatedFields[index] = {
         ...updatedFields[index],
-        [field]: value
+        [field]: value,
+        customFieldDefinitionId: updatedFields[index].customFieldDefinitionId
       }
     }
+
+    console.log('Updated field:', updatedFields[index])
     setCustomFields(updatedFields)
   }
 
@@ -284,36 +300,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   })
 
   const onFormSubmit = (data: z.infer<typeof formSchema>) => {
-    const formattedCustomFields: ApiCustomField[] = customFields.map(
-      (field) => {
-        console.log('Formatting custom field:', field)
-        console.log(
-          'Custom field definition ID:',
-          field.customFieldDefinitionId,
-          'Type:',
-          typeof field.customFieldDefinitionId
-        )
-
-        // Determine the correct value based on field type
-        let value_text = null
-        let value_number = null
-
-        if (field.type === 'text') {
-          value_text = String(field.value)
-        } else if (field.type === 'number') {
-          value_number = Number(field.value)
-        }
-
-        return {
-          custom_field_definition_id: field.customFieldDefinitionId,
-          type: field.type,
-          value_text,
-          value_number
-        }
-      }
-    )
-
-    console.log('Submitting form with custom fields:', formattedCustomFields)
+    console.log('Raw custom fields before formatting:', customFields)
 
     const formData: FormData = {
       firstName: data.firstName,
@@ -321,9 +308,10 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       lastName: data.lastName,
       dateOfBirth: data.dateOfBirth,
       addresses: data.addresses,
-      customFields: formattedCustomFields
+      customFields: customFields
     }
 
+    console.log('Final form data:', formData)
     onSubmit(formData)
   }
 

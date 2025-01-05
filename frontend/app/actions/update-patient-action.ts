@@ -7,9 +7,19 @@ import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 
+interface FormCustomField {
+  id: string
+  name: string
+  type: 'text' | 'number'
+  value: string | number
+  customFieldDefinitionId: number
+}
+
 export async function updatePatient(
   patientId: string,
-  formData: PatientFormData,
+  formData: Omit<PatientFormData, 'customFields'> & {
+    customFields: FormCustomField[]
+  },
   originalPatient: Patient
 ) {
   const session = await getServerSession(authOptions)
@@ -38,12 +48,22 @@ export async function updatePatient(
           }) as Address
       ),
       status: originalPatient.status,
-      custom_fields: (formData.customFields || []).map((field) => ({
-        name: field.name,
-        type: field.type,
-        value_text: field.type === 'text' ? field.value : null,
-        value_number: field.type === 'number' ? Number(field.value) : null
-      })),
+      custom_fields: (formData.customFields || []).map((field) => {
+        console.log('Processing custom field:', field)
+        console.log(
+          'Field customFieldDefinitionId:',
+          field.customFieldDefinitionId
+        )
+        console.log('Field type:', field.type)
+        console.log('Field value:', field.value)
+
+        return {
+          custom_field_definition_id: field.customFieldDefinitionId,
+          type: field.type,
+          value_text: field.type === 'text' ? String(field.value) : null,
+          value_number: field.type === 'number' ? Number(field.value) : null
+        }
+      }),
       studies: originalPatient.studies,
       treatments: originalPatient.treatments,
       insurance: originalPatient.insurance,

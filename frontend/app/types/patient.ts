@@ -3,11 +3,12 @@ import type { Insurance } from '@/types/api/models/Insurance'
 import type { Study } from '@/types/api/models/Study'
 import type { Treatment } from '@/types/api/models/Treatment'
 
-export interface CustomFieldData {
+export type CustomField = {
   id: string
   name: string
   type: 'text' | 'number'
   value: string | number
+  customFieldDefinitionId: number
 }
 
 export interface PatientFormData {
@@ -21,7 +22,7 @@ export interface PatientFormData {
     state: string
     zipCode: string
   }[]
-  customFields: CustomFieldData[]
+  customFields: CustomField[]
   studies: Study[]
   treatments: Treatment[]
   insurance: Insurance[]
