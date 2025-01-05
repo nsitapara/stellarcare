@@ -87,6 +87,8 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
     const fetchCustomFields = async () => {
       try {
         console.log('Fetching custom fields...')
+        console.log('Initial data:', initialData)
+
         // Get all available fields for search
         const allFields = await getCustomFields()
         console.log('All available fields:', allFields)
@@ -97,34 +99,49 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         console.log('User assigned fields:', assignedFields)
         setUserAssignedFields(assignedFields)
 
-        // Auto-populate form with user's assigned custom fields only
-        const initialFields = assignedFields.map((field) => ({
-          id: crypto.randomUUID(),
-          name: field.name,
-          type: field.type,
-          value: field.type === 'text' ? '' : 0,
-          customFieldDefinitionId: field.id
-        }))
-        setCustomFields(initialFields)
-
-        // If we have initial data, update the values
         if (initialData?.customFields) {
-          const initialCustomFields = initialData.customFields.map((field) => {
+          // If we have initial data, use those custom fields
+          console.log(
+            'Loading initial custom fields:',
+            initialData.customFields
+          )
+          const initialCustomFields: FormCustomField[] = []
+
+          for (const field of initialData.customFields) {
             const fieldDef = allFields.find(
               (def) => def.id === field.custom_field_definition_id
             )
-            return {
+            if (!fieldDef) {
+              console.warn(
+                `Could not find field definition for ID: ${field.custom_field_definition_id}`
+              )
+              continue
+            }
+            initialCustomFields.push({
               id: crypto.randomUUID(),
-              name: fieldDef?.name || 'Unknown Field',
-              type: field.type,
+              name: fieldDef.name,
+              type: fieldDef.type,
               value:
                 field.type === 'text'
                   ? field.value_text || ''
                   : field.value_number || 0,
               customFieldDefinitionId: field.custom_field_definition_id
-            }
-          })
+            })
+          }
+
+          console.log('Formatted initial custom fields:', initialCustomFields)
           setCustomFields(initialCustomFields)
+        } else {
+          // If no initial data, populate with user's assigned fields
+          console.log('No initial data, using assigned fields')
+          const defaultFields = assignedFields.map((field) => ({
+            id: crypto.randomUUID(),
+            name: field.name,
+            type: field.type,
+            value: field.type === 'text' ? '' : 0,
+            customFieldDefinitionId: field.id
+          }))
+          setCustomFields(defaultFields)
         }
       } catch (error) {
         console.error('Error fetching custom fields:', error)
@@ -172,11 +189,21 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         if (newField) {
           console.log('Successfully created new field:', newField)
           console.log('New field ID:', newField.id, 'Type:', typeof newField.id)
+
+          // Update available fields
           setAvailableCustomFields((prev) => {
             const updated = [newField, ...prev]
             console.log('Updated available custom fields:', updated)
             return updated
           })
+
+          // Update user assigned fields
+          setUserAssignedFields((prev) => {
+            const updated = [newField, ...prev]
+            console.log('Updated user assigned fields:', updated)
+            return updated
+          })
+
           const formField = {
             id: crypto.randomUUID(),
             name: newField.name,
@@ -266,11 +293,22 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           'Type:',
           typeof field.customFieldDefinitionId
         )
+
+        // Determine the correct value based on field type
+        let value_text = null
+        let value_number = null
+
+        if (field.type === 'text') {
+          value_text = String(field.value)
+        } else if (field.type === 'number') {
+          value_number = Number(field.value)
+        }
+
         return {
           custom_field_definition_id: field.customFieldDefinitionId,
           type: field.type,
-          value_text: field.type === 'text' ? String(field.value) : null,
-          value_number: field.type === 'number' ? Number(field.value) : null
+          value_text,
+          value_number
         }
       }
     )

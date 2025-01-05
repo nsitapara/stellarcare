@@ -103,7 +103,10 @@ class CustomFieldDefinitionListCreateView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         logger.info(f"Creating custom field definition with data: {request.data}")
+        logger.info(f"Request user: {request.user.email}")
+
         response = super().create(request, *args, **kwargs)
+        logger.info(f"Created custom field definition response: {response.data}")
 
         # Associate the new custom field with the creating user
         custom_field = CustomFieldDefinition.objects.get(id=response.data["id"])
@@ -111,9 +114,14 @@ class CustomFieldDefinitionListCreateView(generics.ListCreateAPIView):
         logger.info(
             f"Associating custom field {custom_field.id} with user {user.email}"
         )
-        user.available_custom_fields.add(custom_field)
 
-        logger.info(f"Created custom field definition with ID: {response.data['id']}")
+        try:
+            user.available_custom_fields.add(custom_field)
+            logger.info("Successfully associated custom field with user")
+        except Exception as e:
+            logger.error(f"Error associating custom field with user: {e}")
+            raise
+
         return response
 
 
