@@ -5,7 +5,14 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions, serializers
 
-from .models import Address, CustomFieldDefinition, Patient, PatientCustomField, Visits
+from .models import (
+    Address,
+    CustomFieldDefinition,
+    Patient,
+    PatientCustomField,
+    Treatment,
+    Visits,
+)
 
 User = get_user_model()
 
@@ -298,3 +305,18 @@ class VisitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Visits
         fields = ["id", "date", "time", "type", "status", "notes", "zoom_link"]
+
+
+class TreatmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Treatment
+        fields = [
+            "id",
+            "name",
+            "type",
+            "dosage",
+            "frequency",
+            "start_date",
+            "end_date",
+            "notes",
+        ]

@@ -15,6 +15,7 @@ from .views import (
     PatientListCreateView,
     PatientQueryView,
     PatientRetrieveUpdateDeleteView,
+    TreatmentDetailView,
 )
 
 router = routers.DefaultRouter()
@@ -69,5 +70,10 @@ urlpatterns = [
         "api/appointments/<int:pk>/",
         AppointmentDetailView.as_view(),
         name="appointment-detail",
+    ),
+    path(
+        "api/treatments/<int:pk>/",
+        TreatmentDetailView.as_view(),
+        name="treatment-detail",
     ),
 ]

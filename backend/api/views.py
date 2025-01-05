@@ -6,11 +6,18 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CustomFieldDefinition, Patient, PatientCustomField, Visits
+from .models import (
+    CustomFieldDefinition,
+    Patient,
+    PatientCustomField,
+    Treatment,
+    Visits,
+)
 from .serializers import (
     CustomFieldDefinitionSerializer,
     PatientCustomFieldSerializer,
     PatientSerializer,
+    TreatmentSerializer,
     VisitSerializer,
 )
 
@@ -209,3 +216,12 @@ class AppointmentDetailView(generics.RetrieveAPIView):
 
     queryset = Visits.objects.all()
     serializer_class = VisitSerializer
+
+
+class TreatmentDetailView(generics.RetrieveAPIView):
+    """
+    Retrieves a single treatment by ID.
+    """
+
+    queryset = Treatment.objects.all()
+    serializer_class = TreatmentSerializer

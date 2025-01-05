@@ -1,6 +1,7 @@
 'use client'
 
 import { AppointmentCard } from '@/app/components/AppointmentCard'
+import { TreatmentCard } from '@/app/components/TreatmentCard'
 import {
   Tabs,
   TabsContent,
@@ -24,15 +25,26 @@ export function PatientTabs({ patient }: PatientTabsProps) {
       </TabsList>
       <TabsContent value="overview">{/* Overview content */}</TabsContent>
       <TabsContent value="appointments">
-        {patient.appointments?.map((appointmentId) => (
-          <AppointmentCard
-            key={appointmentId}
-            appointmentId={appointmentId.toString()}
-          />
-        ))}
+        <div className="grid gap-4">
+          {patient.appointments?.map((appointmentId) => (
+            <AppointmentCard
+              key={appointmentId}
+              appointmentId={appointmentId.toString()}
+            />
+          ))}
+        </div>
       </TabsContent>
       <TabsContent value="studies">{/* Studies content */}</TabsContent>
-      <TabsContent value="treatments">{/* Treatments content */}</TabsContent>
+      <TabsContent value="treatments">
+        <div className="grid gap-4">
+          {patient.treatments?.map((treatmentId) => (
+            <TreatmentCard
+              key={treatmentId}
+              treatmentId={treatmentId.toString()}
+            />
+          ))}
+        </div>
+      </TabsContent>
     </Tabs>
   )
 }
