@@ -109,15 +109,33 @@ export default function EditPatientPage({
   }
 
   if (loading) {
-    return <div>Loading...</div>
+    return (
+      <div className="container-wrapper py-8">
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+        </div>
+      </div>
+    )
   }
 
   if (error) {
-    return <div>Error: {error}</div>
+    return (
+      <div className="container-wrapper py-8">
+        <div className="p-4 text-destructive bg-destructive/10 rounded-md">
+          {error}
+        </div>
+      </div>
+    )
   }
 
   if (!patient) {
-    return <div>Patient not found</div>
+    return (
+      <div className="container-wrapper py-8">
+        <div className="p-4 text-muted-foreground bg-muted rounded-md">
+          Patient not found
+        </div>
+      </div>
+    )
   }
 
   const initialData: FormData = {
@@ -135,22 +153,33 @@ export default function EditPatientPage({
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Edit Patient</h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            const searchParams = new URLSearchParams(window.location.search)
-            const redirectPath = searchParams.get('redirect') || '/dashboard'
-            router.push(redirectPath)
-          }}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+    <div className="container-wrapper py-8">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Edit Patient</h2>
+            <p className="text-muted-foreground">
+              Update patient information and details
+            </p>
+          </div>
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => {
+              const searchParams = new URLSearchParams(window.location.search)
+              const redirectPath = searchParams.get('redirect') || '/dashboard'
+              router.push(redirectPath)
+            }}
+            className="hover:bg-destructive hover:text-destructive-foreground"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <div className="form-card">
+          <PatientForm onSubmit={handleSubmit} initialData={initialData} />
+        </div>
       </div>
-      <PatientForm onSubmit={handleSubmit} initialData={initialData} />
     </div>
   )
 }

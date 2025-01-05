@@ -327,42 +327,58 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <form onSubmit={form.handleSubmit(onFormSubmit)} className="form-base">
+        <div className="form-section">
+          <div className="form-grid-3">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} className="form-input" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="middleName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Middle Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} className="form-input" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} className="form-input" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
             control={form.control}
-            name="firstName"
+            name="dateOfBirth"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>First Name</FormLabel>
+              <FormItem className="max-w-sm">
+                <FormLabel>Date of Birth</FormLabel>
                 <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="middleName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Middle Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Last Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
+                  <Input type="date" {...field} className="form-input" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -370,119 +386,110 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="dateOfBirth"
-          render={({ field }) => (
-            <FormItem className="max-w-sm">
-              <FormLabel>Date of Birth</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Addresses</h3>
+        <div className="form-section">
+          <div className="form-section-header">
+            <h3 className="form-section-title">Addresses</h3>
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() =>
                 append({ street: '', city: '', state: '', zipCode: '' })
               }
+              className="form-button"
             >
+              <Plus className="form-button-icon" />
               Add Address
             </Button>
           </div>
-          {fields.map((field, index) => (
-            <div key={field.id} className="space-y-4 p-4 border rounded-lg">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Address {index + 1}</h4>
-                {fields.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+          <div className="space-y-3">
+            {fields.map((field, index) => (
+              <div key={field.id} className="form-card">
+                <div className="form-card-header">
+                  <h4 className="form-section-title">Address {index + 1}</h4>
+                  {fields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => remove(index)}
+                      className="delete-button"
+                    >
+                      <Trash2 className="form-button-icon" />
+                    </Button>
+                  )}
+                </div>
+                <div className="form-grid-2">
+                  <FormField
+                    control={form.control}
+                    name={`addresses.${index}.street`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Street</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="form-input" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`addresses.${index}.city`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="form-input" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`addresses.${index}.state`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="form-input" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`addresses.${index}.zipCode`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ZIP Code</FormLabel>
+                        <FormControl>
+                          <Input {...field} className="form-input" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name={`addresses.${index}.street`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Street</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`addresses.${index}.city`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`addresses.${index}.state`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`addresses.${index}.zipCode`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ZIP Code</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Custom Fields</h3>
+        <div className="form-section">
+          <div className="form-section-header">
+            <h3 className="form-section-title">Custom Fields</h3>
             <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="default"
                   size="sm"
-                  className="flex items-center"
+                  className="form-button"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="form-button-icon" />
                   Add Custom Field
                 </Button>
               </PopoverTrigger>
@@ -529,83 +536,99 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               </PopoverContent>
             </Popover>
           </div>
-          {customFields.map((field) => (
-            <div key={field.id} className="space-y-4 p-4 border rounded-lg">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Custom Field {field.name}</h4>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeCustomField(field.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <FormLabel>Name</FormLabel>
-                  <Input
-                    value={field.name}
-                    onChange={(e) =>
-                      handleCustomFieldChange(field.id, 'name', e.target.value)
-                    }
-                  />
-                </div>
-                <div>
-                  <FormLabel>Type</FormLabel>
-                  <Select
-                    value={field.type}
-                    onValueChange={(value) =>
-                      handleCustomFieldChange(
-                        field.id,
-                        'type',
-                        value as 'text' | 'number'
-                      )
-                    }
+          <div className="space-y-3">
+            {customFields.map((field) => (
+              <div key={field.id} className="form-card">
+                <div className="form-card-header">
+                  <h4 className="form-section-title">
+                    Custom Field: {field.name}
+                  </h4>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeCustomField(field.id)}
+                    className="delete-button"
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text">Text</SelectItem>
-                      <SelectItem value="number">Number</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Trash2 className="form-button-icon" />
+                  </Button>
                 </div>
-                <div>
-                  <FormLabel>Value</FormLabel>
-                  {field.type === 'text' ? (
+                <div className="form-grid-2">
+                  <div>
+                    <FormLabel>Name</FormLabel>
                     <Input
-                      value={field.value}
+                      value={field.name}
                       onChange={(e) =>
                         handleCustomFieldChange(
                           field.id,
-                          'value',
+                          'name',
                           e.target.value
                         )
                       }
+                      className="form-input"
                     />
-                  ) : (
-                    <Input
-                      type="number"
-                      value={field.value}
-                      onChange={(e) =>
+                  </div>
+                  <div>
+                    <FormLabel>Type</FormLabel>
+                    <Select
+                      value={field.type}
+                      onValueChange={(value) =>
                         handleCustomFieldChange(
                           field.id,
-                          'value',
-                          Number.parseFloat(e.target.value) || 0
+                          'type',
+                          value as 'text' | 'number'
                         )
                       }
-                    />
-                  )}
+                    >
+                      <SelectTrigger className="form-input">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="number">Number</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <FormLabel>Value</FormLabel>
+                    {field.type === 'text' ? (
+                      <Input
+                        value={field.value}
+                        onChange={(e) =>
+                          handleCustomFieldChange(
+                            field.id,
+                            'value',
+                            e.target.value
+                          )
+                        }
+                        className="form-input"
+                      />
+                    ) : (
+                      <Input
+                        type="number"
+                        value={field.value}
+                        onChange={(e) =>
+                          handleCustomFieldChange(
+                            field.id,
+                            'value',
+                            Number.parseFloat(e.target.value) || 0
+                          )
+                        }
+                        className="form-input"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <Button type="submit">Save Patient</Button>
+        <div className="flex justify-end">
+          <Button type="submit" size="sm" className="px-6">
+            Save Patient
+          </Button>
+        </div>
       </form>
     </Form>
   )

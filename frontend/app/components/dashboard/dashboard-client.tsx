@@ -120,39 +120,43 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Patient Management Dashboard
-          </h2>
-          <p className="text-muted-foreground">
-            Efficiently manage and track your patient data
-          </p>
+    <div className="container-wrapper py-8">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Patient Management Dashboard
+            </h2>
+            <p className="text-muted-foreground">
+              Efficiently manage and track your patient data
+            </p>
+          </div>
+          <Button onClick={() => router.push('/patients/new')}>
+            Add New Patient
+          </Button>
         </div>
-        <Button onClick={() => router.push('/patients/new')}>
-          Add New Patient
-        </Button>
-      </div>
 
-      {loading && data.data.length === 0 ? (
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
-        </div>
-      ) : error ? (
-        <div className="p-4 text-red-700 bg-red-100 rounded-md">{error}</div>
-      ) : (
-        <DashboardTable
-          data={data.data}
-          total={data.total}
-          page={data.page}
-          pageSize={data.pageSize}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-          onSearch={handleSearch}
-          isLoading={loading}
-        />
-      )}
+        {loading && data.data.length === 0 ? (
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+          </div>
+        ) : error ? (
+          <div className="p-4 text-red-700 bg-red-100 rounded-md">{error}</div>
+        ) : (
+          <div className="form-card">
+            <DashboardTable
+              data={data.data}
+              total={data.total}
+              page={data.page}
+              pageSize={data.pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              onSearch={handleSearch}
+              isLoading={loading}
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
