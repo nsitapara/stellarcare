@@ -392,10 +392,12 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
             control={form.control}
             name="dateOfBirth"
             render={({ field }) => (
-              <FormItem className="max-w-sm">
+              <FormItem className="max-w-[150px]">
                 <FormLabel>Date of Birth</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} className="form-input" />
+                  <div className="relative">
+                    <Input type="date" {...field} className="form-input pr-8" />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
