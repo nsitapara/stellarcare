@@ -4,10 +4,10 @@ import { ThemeToggle } from '@components/theme-toggle'
 import { UserSession } from '@components/user-session'
 import { SessionProvider, useSession } from 'next-auth/react'
 import '@/app/styles/globals.css'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 
-function MoonIcon() {
+function MoonIcon({ animate }: { animate: boolean }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -19,7 +19,7 @@ function MoonIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="moon-icon"
+      className={`moon-icon ${animate ? 'animate-fill' : ''}`}
       role="img"
       aria-label="StellarCare Logo"
     >
@@ -49,13 +49,35 @@ function MoonIcon() {
 function NavigationBar() {
   const { data: session } = useSession()
   const router = useRouter()
+  const [shouldAnimate, setShouldAnimate] = useState(false)
+
+  const triggerAnimation = useCallback(() => {
+    setShouldAnimate(true)
+    const timer = setTimeout(() => {
+      setShouldAnimate(false)
+    }, 700)
+    return timer
+  }, [])
+
+  useEffect(() => {
+    // Initial animation on mount
+    const timer = triggerAnimation()
+    return () => clearTimeout(timer)
+  }, [triggerAnimation])
 
   const handleLogoClick = () => {
     if (session) {
       router.push('/dashboard')
+      triggerAnimation()
     } else {
       router.push('/')
+      triggerAnimation()
     }
+  }
+
+  const handleNavigation = (path: string) => {
+    router.push(path)
+    triggerAnimation()
   }
 
   return (
@@ -67,14 +89,15 @@ function NavigationBar() {
           className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           aria-label="Go to home page"
         >
-          <MoonIcon />
+          <MoonIcon animate={shouldAnimate} />
           <span className="text-xl font-semibold text-foreground">
             StellarCare
           </span>
         </button>
         <div className="hidden md:flex items-center space-x-8">
-          <Link
-            href="/dashboard"
+          <button
+            type="button"
+            onClick={() => handleNavigation('/dashboard')}
             className="text-foreground hover:text-primary flex items-center gap-2"
           >
             <svg
@@ -97,9 +120,10 @@ function NavigationBar() {
               <rect width="7" height="5" x="3" y="16" rx="1" />
             </svg>
             Dashboard
-          </Link>
-          <Link
-            href="/appointments"
+          </button>
+          <button
+            type="button"
+            onClick={() => handleNavigation('/appointments')}
             className="text-foreground hover:text-primary flex items-center gap-2"
           >
             <svg
@@ -122,7 +146,7 @@ function NavigationBar() {
               <line x1="3" x2="21" y1="10" y2="10" />
             </svg>
             Appointments
-          </Link>
+          </button>
         </div>
         <div className="flex items-center space-x-4">
           <ThemeToggle />

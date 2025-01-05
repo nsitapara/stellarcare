@@ -286,30 +286,24 @@
     stop-opacity: 0;
   }
 
-  /* Light mode animation */
-  :root:not(.dark) .gradient-stop-1 {
-    animation: emptyStart 0.7s ease forwards;
-  }
-
-  :root:not(.dark) .gradient-stop-2 {
-    animation: emptyMiddle 0.7s ease forwards;
-  }
-
-  :root:not(.dark) .gradient-stop-3 {
-    animation: emptyEnd 0.7s ease forwards;
-  }
-
-  /* Dark mode animation */
-  .dark .gradient-stop-1 {
+  /* Animation trigger class */
+  .animate-fill .gradient-stop-1 {
     animation: fillStart 0.7s ease forwards;
   }
 
-  .dark .gradient-stop-2 {
+  .animate-fill .gradient-stop-2 {
     animation: fillMiddle 0.7s ease forwards;
   }
 
-  .dark .gradient-stop-3 {
+  .animate-fill .gradient-stop-3 {
     animation: fillEnd 0.7s ease forwards 0.1s;
+  }
+
+  /* Reset animation when not animating */
+  .moon-icon:not(.animate-fill) .gradient-stop-1,
+  .moon-icon:not(.animate-fill) .gradient-stop-2,
+  .moon-icon:not(.animate-fill) .gradient-stop-3 {
+    animation: emptyAll 0.7s ease forwards;
   }
 
   /* Fill animations */
@@ -346,36 +340,12 @@
     }
   }
 
-  /* Empty animations */
-  @keyframes emptyStart {
+  /* Empty animation */
+  @keyframes emptyAll {
     from {
-      stop-color: rgb(249, 115, 22);
       stop-opacity: 1;
     }
     to {
-      stop-color: rgb(249, 115, 22);
-      stop-opacity: 0;
-    }
-  }
-
-  @keyframes emptyMiddle {
-    from {
-      stop-color: rgb(255, 255, 255);
-      stop-opacity: 1;
-    }
-    to {
-      stop-color: rgb(249, 115, 22);
-      stop-opacity: 0;
-    }
-  }
-
-  @keyframes emptyEnd {
-    from {
-      stop-color: rgb(255, 255, 255);
-      stop-opacity: 1;
-    }
-    to {
-      stop-color: rgb(249, 115, 22);
       stop-opacity: 0;
     }
   }
