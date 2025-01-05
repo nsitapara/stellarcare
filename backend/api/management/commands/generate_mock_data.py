@@ -75,13 +75,15 @@ class Command(BaseCommand):
         ]
 
         for config in field_configs:
-            field = CustomFieldDefinition.objects.create(
+            field, created = CustomFieldDefinition.objects.get_or_create(
                 name=config["name"],
-                type=config["type"],
-                description=config["description"],
-                is_required=config["is_required"],
-                display_order=config["display_order"],
-                is_active=True,
+                defaults={
+                    "type": config["type"],
+                    "description": config["description"],
+                    "is_required": config["is_required"],
+                    "display_order": config["display_order"],
+                    "is_active": True,
+                },
             )
             field_definitions.append(field)
 
