@@ -228,4 +228,43 @@
     text-foreground dark:text-white font-medium
     transition-colors duration-150;
   }
+
+  /* Form layout and components */
+  .form-card {
+    @apply bg-card p-6 rounded-lg border shadow-sm;
+  }
+
+  .form-grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  .form-grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+  }
+
+  .form-input {
+    @apply h-9 text-sm bg-secondary;
+  }
+
+  .form-button {
+    @apply flex items-center gap-2;
+  }
+
+  .form-button-icon {
+    @apply h-4 w-4;
+  }
+
+  .form-card-header {
+    @apply flex justify-between items-center mb-4;
+  }
+
+  /* Close button styles */
+  .close-button {
+    @apply absolute top-4 right-4 h-9 w-9 rounded-md bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center;
+  }
+
+  /* Delete button styles */
+  .delete-button {
+    @apply bg-destructive/10 text-destructive hover:bg-[#ef4444] hover:text-white;
+  }
 }
