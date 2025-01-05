@@ -1,24 +1,28 @@
 /**
  * Custom hook for managing patient data with search and pagination
+ *
+ * Features:
+ * - Server-side pagination
+ * - Search functionality with server-side filtering
+ * - Loading and error states
+ * - Data caching and state management
  */
 
 import { formatPatientData } from '@actions/patient/format-patient-action'
 import { getPatients } from '@actions/patient/get-patients-action'
 import { searchPatients } from '@actions/patient/patient-search-action'
-import type { DashboardData } from '@api/dashboard'
+import type { UsePatientDataProps, UsePatientDataReturn } from '@api/dashboard'
 import { useSession } from 'next-auth/react'
 import { useCallback, useState } from 'react'
 
-interface UsePatientDataProps {
-  initialData: {
-    data: DashboardData[]
-    total: number
-    page: number
-    pageSize: number
-  }
-}
-
-export function usePatientData({ initialData }: UsePatientDataProps) {
+/**
+ * Hook for managing patient data state and interactions
+ * @param initialData - Initial patient data and pagination state
+ * @returns Object containing data, loading state, error state, and data fetching functions
+ */
+export function usePatientData({
+  initialData
+}: UsePatientDataProps): UsePatientDataReturn {
   const { data: session } = useSession()
   const [data, setData] = useState(initialData)
   const [loading, setLoading] = useState(false)

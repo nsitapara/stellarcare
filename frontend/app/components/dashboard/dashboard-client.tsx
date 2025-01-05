@@ -2,7 +2,11 @@
  * Dashboard Client Component
  *
  * A client-side component that provides a dynamic interface for managing patient data.
- * Features include pagination, search functionality, and real-time updates.
+ * Features:
+ * - Real-time search with debouncing
+ * - Pagination with server-side data fetching
+ * - Loading states and error handling
+ * - Navigation to patient details and edit pages
  */
 
 'use client'
@@ -15,6 +19,9 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { DashboardTable } from './dashboard-table'
 import { usePatientData } from './use-patient-data'
 
+/**
+ * DashboardClient component manages the state and interactions for the patient dashboard
+ */
 export function DashboardClient({ initialData }: DashboardClientProps) {
   const router = useRouter()
   const { data, loading, error, searchQuery, setSearchQuery, fetchData } =

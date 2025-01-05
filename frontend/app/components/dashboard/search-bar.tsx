@@ -2,18 +2,19 @@
  * Search Bar Component
  *
  * A reusable search component with validation and loading state.
+ * Features:
+ * - Real-time validation for ID and name searches
+ * - Loading state indicator
+ * - Error message display
+ * - Debounced search to prevent excessive API calls
  */
 
 'use client'
 
+import type { SearchBarProps, SearchValidationResult } from '@api/dashboard'
 import { cn } from '@components/lib/utils'
 import { Search } from 'lucide-react'
 import { useState } from 'react'
-
-interface SearchBarProps {
-  onSearch: (query: string) => void
-  isLoading: boolean
-}
 
 /**
  * Validates search input based on type (ID or name)
@@ -21,7 +22,7 @@ interface SearchBarProps {
  * @param value - Search query value
  * @returns Object containing validation state and error message
  */
-const validateSearch = (value: string) => {
+const validateSearch = (value: string): SearchValidationResult => {
   if (value.length === 0) {
     return { isValid: true, message: '' }
   }
@@ -39,6 +40,9 @@ const validateSearch = (value: string) => {
   }
 }
 
+/**
+ * SearchBar component provides a search input with validation and loading state
+ */
 export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchValid, setIsSearchValid] = useState(true)

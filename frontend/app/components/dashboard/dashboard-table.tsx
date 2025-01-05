@@ -2,7 +2,11 @@
  * Dashboard Table Component
  *
  * A responsive table component for displaying and managing patient data.
- * Features include sorting, filtering, and pagination controls.
+ * Features:
+ * - Search functionality with validation
+ * - Pagination controls
+ * - Patient data display with status badges
+ * - Edit and view actions
  */
 
 'use client'
@@ -13,6 +17,9 @@ import { Pagination } from './pagination'
 import { PatientTable } from './patient-table'
 import { SearchBar } from './search-bar'
 
+/**
+ * DashboardTable component combines search, table, and pagination functionality
+ */
 export function DashboardTable({
   data,
   total,

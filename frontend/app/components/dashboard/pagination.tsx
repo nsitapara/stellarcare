@@ -2,20 +2,21 @@
  * Pagination Component
  *
  * A reusable pagination component with page size selection.
+ * Features:
+ * - Page size selection (10, 25, 50 items per page)
+ * - Previous/Next navigation buttons
+ * - Current page indicator
+ * - Automatic button disabling at boundaries
  */
 
 'use client'
 
+import type { PaginationProps } from '@api/dashboard'
 import { Button } from '@components/ui/button'
 
-interface PaginationProps {
-  total: number
-  page: number
-  pageSize: number
-  onPageChange: (page: number) => void
-  onPageSizeChange: (pageSize: number) => void
-}
-
+/**
+ * Pagination component provides navigation controls for paginated data
+ */
 export function Pagination({
   total,
   page,

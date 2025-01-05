@@ -2,11 +2,16 @@
  * Patient Table Component
  *
  * A table component for displaying patient data with status badges and address formatting.
+ * Features:
+ * - Clickable rows for viewing patient details
+ * - Status badges with color coding
+ * - Address badges with color cycling
+ * - Edit button for quick access to patient editing
  */
 
 'use client'
 
-import type { DashboardData } from '@api/dashboard'
+import type { PatientTableProps } from '@api/dashboard'
 import { cn } from '@components/lib/utils'
 import {
   Table,
@@ -17,14 +22,10 @@ import {
   TableRow
 } from '@components/ui/table'
 
-interface PatientTableProps {
-  data: DashboardData[]
-  onEdit: (id: string) => void
-  onView: (id: string) => void
-}
-
 /**
  * Maps patient status to corresponding CSS classes for visual styling
+ * @param status - Patient status string
+ * @returns CSS class string for the status badge
  */
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -43,6 +44,8 @@ const getStatusColor = (status: string) => {
 
 /**
  * Gets the color class for address badges based on index
+ * @param index - Index of the address in the list
+ * @returns CSS class string for the address badge
  */
 const getAddressColor = (index: number) => {
   const colors = [
@@ -54,6 +57,9 @@ const getAddressColor = (index: number) => {
   return colors[index % colors.length]
 }
 
+/**
+ * PatientTable component displays patient data in a tabular format with interactive elements
+ */
 export function PatientTable({ data, onEdit, onView }: PatientTableProps) {
   return (
     <div className="table-container bg-white dark:bg-zinc-900 border-border">
