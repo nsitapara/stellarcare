@@ -266,4 +266,117 @@
   .delete-button {
     @apply bg-destructive/10 text-destructive hover:bg-[#ef4444] hover:text-white;
   }
+
+  /* Add this new section for the moon icon */
+  .moon-icon {
+    @apply h-6 w-6 text-foreground;
+  }
+
+  .moon-path {
+    @apply transition-all duration-700;
+    stroke: currentColor;
+    fill: url(#moonGradient);
+  }
+
+  /* Base states for gradient stops */
+  .gradient-stop-1,
+  .gradient-stop-2,
+  .gradient-stop-3 {
+    stop-color: rgb(249, 115, 22);
+    stop-opacity: 0;
+  }
+
+  /* Light mode animation */
+  :root:not(.dark) .gradient-stop-1 {
+    animation: emptyStart 0.7s ease forwards;
+  }
+
+  :root:not(.dark) .gradient-stop-2 {
+    animation: emptyMiddle 0.7s ease forwards;
+  }
+
+  :root:not(.dark) .gradient-stop-3 {
+    animation: emptyEnd 0.7s ease forwards;
+  }
+
+  /* Dark mode animation */
+  .dark .gradient-stop-1 {
+    animation: fillStart 0.7s ease forwards;
+  }
+
+  .dark .gradient-stop-2 {
+    animation: fillMiddle 0.7s ease forwards;
+  }
+
+  .dark .gradient-stop-3 {
+    animation: fillEnd 0.7s ease forwards 0.1s;
+  }
+
+  /* Fill animations */
+  @keyframes fillStart {
+    from {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+    to {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 1;
+    }
+  }
+
+  @keyframes fillMiddle {
+    from {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+    to {
+      stop-color: rgb(255, 255, 255);
+      stop-opacity: 1;
+    }
+  }
+
+  @keyframes fillEnd {
+    from {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+    to {
+      stop-color: rgb(255, 255, 255);
+      stop-opacity: 1;
+    }
+  }
+
+  /* Empty animations */
+  @keyframes emptyStart {
+    from {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 1;
+    }
+    to {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+  }
+
+  @keyframes emptyMiddle {
+    from {
+      stop-color: rgb(255, 255, 255);
+      stop-opacity: 1;
+    }
+    to {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+  }
+
+  @keyframes emptyEnd {
+    from {
+      stop-color: rgb(255, 255, 255);
+      stop-opacity: 1;
+    }
+    to {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+  }
 }
