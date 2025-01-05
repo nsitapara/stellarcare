@@ -9,6 +9,9 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DashboardTable } from './dashboard-table'
 
+/**
+ * Type for the transformed patient data used in the dashboard UI
+ */
 interface TransformedPatient {
   id: string
   first: string
@@ -20,6 +23,9 @@ interface TransformedPatient {
   addresses: string[]
 }
 
+/**
+ * Type for the dashboard's data structure including pagination info
+ */
 interface DashboardData {
   data: TransformedPatient[]
   total: number
@@ -38,7 +44,12 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: searchQuery is intentionally omitted to prevent unnecessary rerenders
+  /**
+   * Fetches patient data based on the current page, page size, and search query.
+   * - For search queries >= 3 characters: Uses search endpoint
+   * - For empty search: Uses paginated list endpoint
+   * - For 1-2 characters: Skips fetching to avoid unnecessary API calls
+   */
   const fetchData = useCallback(
     async (page: number, pageSize: number, query: string = searchQuery) => {
       try {
@@ -47,15 +58,18 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
         let response: { results: Patient[]; count: number } | Patient[]
         if (query.length >= 3) {
+          // Search mode
           response = (await searchPatients(query)) as Patient[]
         } else if (query.length === 0) {
+          // Normal paginated list mode
           response = await getPatients(page, pageSize)
         } else {
-          // For queries between 1-2 characters, don't fetch
+          // Skip fetching for 1-2 character queries
           setLoading(false)
           return
         }
 
+        // Transform the response to match the dashboard data structure
         const patients = Array.isArray(response) ? response : response.results
         const totalCount = Array.isArray(response)
           ? response.length
@@ -74,7 +88,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
               patient.addresses?.map((addr) => addr.formatted_address) || []
           })),
           total: totalCount,
-          page: query.length >= 3 ? 1 : page,
+          page: query.length >= 3 ? 1 : page, // Reset to page 1 for search results
           pageSize
         })
       } catch (error) {
@@ -88,9 +102,10 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         setLoading(false)
       }
     },
-    []
+    [searchQuery] // searchQuery is intentionally included to maintain reference in useCallback
   )
 
+  // Debounce search queries to avoid excessive API calls
   const debouncedFetch = useMemo(
     () =>
       debounce((query: string) => {
@@ -107,12 +122,14 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     [debouncedFetch]
   )
 
+  // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
       debouncedFetch.cancel()
     }
   }, [debouncedFetch])
 
+  // Handle pagination changes
   const handlePageChange = (page: number) => {
     if (searchQuery.length >= 3) return // Disable pagination during search
     fetchData(page, data.pageSize, searchQuery)
