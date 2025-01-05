@@ -37,6 +37,7 @@ export function Pagination({
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
           disabled={isLoading}
         >
+          <option value="5">5 per page</option>
           <option value="10">10 per page</option>
           <option value="25">25 per page</option>
           <option value="50">50 per page</option>

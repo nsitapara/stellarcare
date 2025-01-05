@@ -33,11 +33,18 @@ export function DashboardTable({
 }: DashboardTableProps) {
   const router = useRouter()
   const [loadingPage, setLoadingPage] = useState<number | null>(null)
+  const [loadingPageSize, setLoadingPageSize] = useState(false)
 
   const handlePageChange = async (newPage: number) => {
     setLoadingPage(newPage)
     await onPageChange(newPage)
     setLoadingPage(null)
+  }
+
+  const handlePageSizeChange = async (newPageSize: number) => {
+    setLoadingPageSize(true)
+    await onPageSizeChange(newPageSize)
+    setLoadingPageSize(false)
   }
 
   return (
@@ -57,8 +64,8 @@ export function DashboardTable({
         page={page}
         pageSize={pageSize}
         onPageChange={handlePageChange}
-        onPageSizeChange={onPageSizeChange}
-        isLoading={isLoading}
+        onPageSizeChange={handlePageSizeChange}
+        isLoading={isLoading || loadingPageSize}
         loadingPage={loadingPage}
       />
     </div>

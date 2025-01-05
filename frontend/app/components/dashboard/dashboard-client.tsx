@@ -61,9 +61,9 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   )
 
   const handlePageSizeChange = useCallback(
-    (pageSize: number) => {
+    async (pageSize: number) => {
       if (searchQuery.length >= 3) return // Disable page size change during search
-      fetchData(1, pageSize, searchQuery)
+      await fetchData(1, pageSize, searchQuery)
     },
     [fetchData, searchQuery]
   )
