@@ -66,21 +66,24 @@ export function BasicInformation({
               </dd>
             ))}
           </div>
-          {patient.custom_fields && patient.custom_fields.length > 0 && (
-            <div className="col-span-2">
-              <dt className="text-sm text-gray-400 mb-2">
-                Clinical Information
-              </dt>
-              <div className="grid grid-cols-2 gap-4">
-                {patient.custom_fields.map((field) => (
-                  <div key={`${field.name}-${field.value}`}>
-                    <dt className="text-sm text-gray-400">{field.name}</dt>
-                    <dd className="text-white">{field.value}</dd>
-                  </div>
-                ))}
+          {patient.patient_custom_fields &&
+            patient.patient_custom_fields.length > 0 && (
+              <div className="col-span-2">
+                <dt className="text-sm text-gray-400 mb-2">
+                  Additional Information
+                </dt>
+                <div className="grid grid-cols-2 gap-4">
+                  {patient.patient_custom_fields.map((field) => (
+                    <div key={`${field.field_definition.name}-${field.value}`}>
+                      <dt className="text-sm text-gray-400">
+                        {field.field_definition.name}
+                      </dt>
+                      <dd className="text-white">{field.value}</dd>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </dl>
       </CardContent>
     </Card>
