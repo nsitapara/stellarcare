@@ -1,34 +1,38 @@
 'use client'
 
-import { InsuranceInfo } from '@components/InsuranceInfo'
-import { MedicationTracker } from '@components/MedicationTracker'
-import { SleepAssessment } from '@components/SleepAssessment'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
+import { AppointmentCard } from '@/app/components/AppointmentCard'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/app/components/ui/tabs'
+import type { Patient } from '@/types/api/models/Patient'
 
 interface PatientTabsProps {
-  patientId: string
+  patient: Patient
 }
 
-export function PatientTabs({ patientId }: PatientTabsProps) {
+export function PatientTabs({ patient }: PatientTabsProps) {
   return (
-    <Tabs defaultValue="insurance" className="w-full">
-      <TabsList className="mb-4">
-        <TabsTrigger value="insurance">Insurance</TabsTrigger>
-        <TabsTrigger value="medications">Medications</TabsTrigger>
-        <TabsTrigger value="sleep">Sleep Assessment</TabsTrigger>
+    <Tabs defaultValue="overview" className="w-full">
+      <TabsList>
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="appointments">Appointments</TabsTrigger>
+        <TabsTrigger value="studies">Sleep Studies</TabsTrigger>
+        <TabsTrigger value="treatments">Treatments</TabsTrigger>
       </TabsList>
-
-      <TabsContent value="insurance">
-        <InsuranceInfo patientId={patientId} />
+      <TabsContent value="overview">{/* Overview content */}</TabsContent>
+      <TabsContent value="appointments">
+        {patient.appointments?.map((appointmentId) => (
+          <AppointmentCard
+            key={appointmentId}
+            appointmentId={appointmentId.toString()}
+          />
+        ))}
       </TabsContent>
-
-      <TabsContent value="medications">
-        <MedicationTracker patientId={patientId} />
-      </TabsContent>
-
-      <TabsContent value="sleep">
-        <SleepAssessment patientId={patientId} />
-      </TabsContent>
+      <TabsContent value="studies">{/* Studies content */}</TabsContent>
+      <TabsContent value="treatments">{/* Treatments content */}</TabsContent>
     </Tabs>
   )
 }

@@ -6,11 +6,12 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CustomFieldDefinition, Patient, PatientCustomField
+from .models import CustomFieldDefinition, Patient, PatientCustomField, Visits
 from .serializers import (
     CustomFieldDefinitionSerializer,
     PatientCustomFieldSerializer,
     PatientSerializer,
+    VisitSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -199,3 +200,12 @@ class CustomFieldDefinitionAssignView(generics.GenericAPIView):
         except Exception as e:
             logger.error(f"Error assigning custom field to user: {e}")
             raise
+
+
+class AppointmentDetailView(generics.RetrieveAPIView):
+    """
+    Retrieves a single appointment by ID.
+    """
+
+    queryset = Visits.objects.all()
+    serializer_class = VisitSerializer

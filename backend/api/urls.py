@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .api import UserViewSet
 from .views import (
+    AppointmentDetailView,
     CustomFieldDefinitionAssignedView,
     CustomFieldDefinitionAssignView,
     CustomFieldDefinitionListCreateView,
@@ -63,5 +64,10 @@ urlpatterns = [
         "api/patients/<int:patient_id>/custom-fields/",
         PatientCustomFieldListView.as_view(),
         name="patient-custom-fields",
+    ),
+    path(
+        "api/appointments/<int:pk>/",
+        AppointmentDetailView.as_view(),
+        name="appointment-detail",
     ),
 ]
