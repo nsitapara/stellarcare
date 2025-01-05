@@ -8,7 +8,8 @@
 
 'use server'
 
-import { ApiError } from '@api/core'
+import { ApiError } from '@api/core/ApiError'
+import type { LoginResponse } from '@api/user/auth'
 import { getApiClient } from '@lib/api'
 import type { loginFormSchema } from '@lib/validation'
 import type { z } from 'zod'
@@ -16,14 +17,27 @@ import type { z } from 'zod'
 export type LoginFormSchema = z.infer<typeof loginFormSchema>
 
 /**
- * Handles user login by authenticating with the backend API
+ * Handles user login by authenticating with the backend API.
+ * This server action validates credentials and returns authentication tokens.
  *
- * @param data - Login form data containing username and password
- * @returns Object containing either tokens on success or error message on failure
+ * @param {LoginFormSchema} data - Login credentials containing username and password
+ * @returns {Promise<{error?: string; tokens?: LoginResponse}>} Object containing either tokens on success or error message
+ *
+ * @example
+ * try {
+ *   const result = await loginAction({ username: "user", password: "pass" });
+ *   if (result.tokens) {
+ *     // Handle successful login
+ *   } else {
+ *     // Handle error
+ *   }
+ * } catch (error) {
+ *   // Handle unexpected error
+ * }
  */
 export async function loginAction(
   data: LoginFormSchema
-): Promise<{ error?: string; tokens?: { access: string; refresh: string } }> {
+): Promise<{ error?: string; tokens?: LoginResponse }> {
   try {
     const apiClient = await getApiClient()
     const res = await apiClient.token.tokenCreate({
@@ -49,10 +63,23 @@ export async function loginAction(
 }
 
 /**
- * Refreshes an expired access token using a valid refresh token
+ * Refreshes an expired access token using a valid refresh token.
+ * This server action handles token refresh for maintaining authenticated sessions.
  *
- * @param refreshToken - The refresh token to use for obtaining a new access token
- * @returns Object containing either the new access token or error message
+ * @param {string} refreshToken - The refresh token to use for obtaining a new access token
+ * @returns {Promise<{error?: string; access?: string}>} Object containing either the new access token or error message
+ *
+ * @example
+ * try {
+ *   const result = await refreshTokenAction("refresh_token_here");
+ *   if (result.access) {
+ *     // Handle successful token refresh
+ *   } else {
+ *     // Handle error
+ *   }
+ * } catch (error) {
+ *   // Handle unexpected error
+ * }
  */
 export async function refreshTokenAction(
   refreshToken: string
