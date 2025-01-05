@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  assignCustomFieldToUser,
   createCustomField,
   getCustomFields,
   getUserCustomFields
@@ -162,6 +163,22 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       ) {
         console.log('Field already exists in form')
         return
+      }
+
+      // Check if field is not in user's assigned fields
+      if (!userAssignedFields.some((f) => f.id === selectedField.id)) {
+        console.log('Assigning field to user:', selectedField.id)
+        try {
+          await assignCustomFieldToUser(selectedField.id)
+          // Update user assigned fields
+          setUserAssignedFields((prev) => {
+            const updated = [selectedField, ...prev]
+            console.log('Updated user assigned fields:', updated)
+            return updated
+          })
+        } catch (error) {
+          console.error('Error assigning field to user:', error)
+        }
       }
 
       console.log(
