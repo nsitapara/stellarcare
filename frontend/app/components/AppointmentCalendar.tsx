@@ -1,6 +1,5 @@
 'use client'
 
-import type { Appointment } from '@/types/patient'
 import { Button } from '@components/ui/button'
 import { Calendar } from '@components/ui/calendar'
 import {
@@ -28,68 +27,136 @@ import {
   SelectValue
 } from '@components/ui/select'
 import { Textarea } from '@components/ui/textarea'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-type AppointmentCalendarProps = {
-  appointments?: Appointment[]
-  onAddAppointment: (appointment: Appointment) => void
+type AppointmentType = 'In-Person' | 'Telehealth'
+
+interface AppointmentWithPatient {
+  id: string
+  date: string
+  time: string
+  type: AppointmentType
+  status: string
+  patientName: string
+  notes?: string
+  duration: string
+  zoomLink?: string
 }
 
-export function AppointmentCalendar({
-  appointments,
-  onAddAppointment
-}: AppointmentCalendarProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+// Mock data for upcoming appointments
+const mockUpcomingAppointments: AppointmentWithPatient[] = [
+  {
+    id: '1',
+    date: '2024-01-04',
+    time: '09:00',
+    type: 'In-Person',
+    status: 'Scheduled',
+    patientName: 'John Doe',
+    notes: 'Regular check-up appointment',
+    duration: '30 minutes'
+  },
+  {
+    id: '2',
+    date: '2024-01-05',
+    time: '14:30',
+    type: 'Telehealth',
+    status: 'Confirmed',
+    patientName: 'Jane Smith',
+    notes: 'Follow-up consultation',
+    duration: '45 minutes',
+    zoomLink: 'https://zoom.us/j/example'
+  },
+  {
+    id: '3',
+    date: '2024-01-08',
+    time: '11:00',
+    type: 'In-Person',
+    status: 'Scheduled',
+    patientName: 'Mike Johnson',
+    notes: 'Annual physical examination',
+    duration: '60 minutes'
+  },
+  {
+    id: '4',
+    date: '2024-01-10',
+    time: '13:15',
+    type: 'Telehealth',
+    status: 'Confirmed',
+    patientName: 'Sarah Williams',
+    notes: 'Medication review and consultation',
+    duration: '30 minutes',
+    zoomLink: 'https://zoom.us/j/example'
+  },
+  {
+    id: '5',
+    date: '2024-01-12',
+    time: '10:30',
+    type: 'In-Person',
+    status: 'Scheduled',
+    patientName: 'Robert Brown',
+    notes: 'Initial consultation',
+    duration: '45 minutes'
+  }
+]
+
+export function AppointmentCalendar() {
+  const [mounted, setMounted] = useState(false)
+  const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([])
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [isAddingAppointment, setIsAddingAppointment] = useState(false)
+
+  // Initialize state after mount to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+    setAppointments(mockUpcomingAppointments)
+    setSelectedDate(new Date())
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    const appointment: Appointment = {
+    const appointment: AppointmentWithPatient = {
       id: Date.now().toString(),
       date: formData.get('date') as string,
       time: formData.get('time') as string,
-      type: formData.get('type') as 'In-Person' | 'Telehealth',
+      type: formData.get('type') as AppointmentType,
       status: 'Scheduled',
+      patientName: 'New Patient', // This would come from patient selection
       notes: formData.get('notes') as string,
+      duration: '30 minutes',
       zoomLink:
         formData.get('type') === 'Telehealth'
           ? 'https://zoom.us/j/example'
           : undefined
     }
-    onAddAppointment(appointment)
+    setAppointments([...appointments, appointment])
     setIsAddingAppointment(false)
+  }
 
-    // Mock appointment reminder
-    if (appointment.type === 'Telehealth') {
-      console.log(
-        `SMS: Your telehealth appointment is scheduled for ${appointment.date} at ${appointment.time}. Join here: ${appointment.zoomLink}`
-      )
-    } else {
-      console.log(
-        `SMS: Your in-person appointment is scheduled for ${appointment.date} at ${appointment.time}.`
-      )
-    }
+  const handleCancelAppointment = (id: string) => {
+    setAppointments(appointments.filter((apt) => apt.id !== id))
   }
 
   const dateHasAppointment = (date: Date) => {
-    return (
-      appointments?.some(
-        (apt) => apt.date === date.toISOString().split('T')[0]
-      ) || false
+    return appointments.some(
+      (apt) => apt.date === date.toISOString().split('T')[0]
     )
   }
 
+  // Don't render until after hydration
+  if (!mounted) {
+    return null
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Appointments</h3>
+    <div className="p-6">
+      <div className="flex justify-end mb-6">
         <Dialog
           open={isAddingAppointment}
           onOpenChange={setIsAddingAppointment}
         >
           <DialogTrigger asChild>
-            <Button>Schedule Appointment</Button>
+            <Button className="action-button">Schedule Appointment</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -131,15 +198,17 @@ export function AppointmentCalendar({
                   <Textarea id="notes" name="notes" />
                 </div>
               </div>
-              <Button type="submit">Schedule</Button>
+              <Button type="submit" className="action-button">
+                Schedule
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid md:grid-cols-[1fr_300px] gap-4">
-        <Card>
-          <CardContent className="p-4">
+      <div className="grid lg:grid-cols-[1fr_400px] gap-6">
+        <Card className="bg-card">
+          <CardContent className="p-6">
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -149,52 +218,111 @@ export function AppointmentCalendar({
                 booked: (date) => dateHasAppointment(date)
               }}
               modifiersStyles={{
-                booked: { backgroundColor: 'var(--primary)' }
+                booked: { backgroundColor: 'var(--primary)', color: 'white' }
               }}
             />
           </CardContent>
         </Card>
 
+        {/* Upcoming Appointments */}
         <div className="space-y-4">
-          <h4 className="font-medium">Upcoming Appointments</h4>
-          {(appointments || [])
-            .filter((apt) => new Date(apt.date) >= new Date())
-            .sort(
-              (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-            )
-            .map((appointment) => (
-              <Card key={appointment.id}>
-                <CardHeader>
-                  <CardTitle>
-                    {new Date(appointment.date).toLocaleDateString()} at{' '}
-                    {appointment.time}
-                  </CardTitle>
-                  <CardDescription>{appointment.type}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="text-sm">Status: {appointment.status}</div>
-                    {appointment.zoomLink && (
+          <h4 className="font-medium text-lg">Upcoming Appointments</h4>
+          <div className="space-y-3 max-h-[800px] overflow-y-auto pr-2">
+            {appointments
+              .filter((apt) => {
+                const appointmentDate = new Date(apt.date)
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                return appointmentDate >= today
+              })
+              .sort(
+                (a, b) =>
+                  new Date(a.date).getTime() - new Date(b.date).getTime()
+              )
+              .map((appointment) => (
+                <Card
+                  key={appointment.id}
+                  className="group bg-card hover:bg-accent/5 transition-colors"
+                >
+                  <CardHeader className="p-4">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <a
-                          href={appointment.zoomLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-500 hover:underline"
+                        <CardTitle className="text-base">
+                          {new Date(appointment.date).toLocaleDateString(
+                            'en-US',
+                            {
+                              weekday: 'long',
+                              month: 'long',
+                              day: 'numeric'
+                            }
+                          )}{' '}
+                          at {appointment.time}
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          {appointment.patientName} - {appointment.type}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="outline" size="sm" className="h-8">
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-destructive hover:text-destructive-foreground hover:bg-destructive"
+                          onClick={() =>
+                            handleCancelAppointment(appointment.id)
+                          }
                         >
-                          Join Telehealth Session
-                        </a>
+                          Cancel
+                        </Button>
                       </div>
-                    )}
-                    {appointment.notes && (
-                      <div className="text-sm text-gray-500">
-                        {appointment.notes}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="px-4 pb-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-1">
+                          <span>Duration:</span>
+                          <span className="text-foreground">
+                            {appointment.duration}
+                          </span>
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <span>Status:</span>
+                          <span
+                            className={`text-foreground ${
+                              appointment.status === 'Confirmed'
+                                ? 'text-green-500'
+                                : ''
+                            }`}
+                          >
+                            {appointment.status}
+                          </span>
+                        </span>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                      {appointment.zoomLink && (
+                        <div>
+                          <a
+                            href={appointment.zoomLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline text-sm inline-flex items-center gap-1"
+                          >
+                            Join Telehealth Session
+                          </a>
+                        </div>
+                      )}
+                      {appointment.notes && (
+                        <div className="text-sm text-muted-foreground">
+                          {appointment.notes}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
         </div>
       </div>
     </div>
