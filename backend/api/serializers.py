@@ -13,7 +13,7 @@ from .models import (
     PatientCustomField,
     SleepStudy,
     Treatment,
-    Visits,
+    Visit,
 )
 
 User = get_user_model()
@@ -293,7 +293,7 @@ class PatientSerializer(serializers.ModelSerializer):
 
 class VisitSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Visits
+        model = Visit
         fields = ["id", "date", "time", "type", "status", "notes", "zoom_link"]
 
 

@@ -145,6 +145,10 @@ export class PatientsService {
         });
     }
     /**
+     * API endpoint for searching patients by name or ID.
+     * Supports:
+     * - Exact ID match for numeric queries
+     * - Case-insensitive partial name match for text queries
      * @returns any No response body
      * @throws ApiError
      */

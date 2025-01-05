@@ -8,7 +8,7 @@
  * * `Active` - Active
  * * `Churned` - Churned
  */
-export enum StatusEnum {
+export enum PatientStatusEnum {
     INQUIRY = 'Inquiry',
     ONBOARDING = 'Onboarding',
     ACTIVE = 'Active',

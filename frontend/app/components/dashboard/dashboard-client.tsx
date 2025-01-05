@@ -2,15 +2,32 @@
 
 import { searchPatients } from '@/app/actions/patient-search-action'
 import type { Patient } from '@/types/api/models/Patient'
-import type { PaginatedResponse } from '@/types/dashboard'
 import { Button } from '@components/ui/button'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DashboardTable } from './dashboard-table'
 
+interface TransformedPatient {
+  id: string
+  first: string
+  middle: string
+  last: string
+  status: string
+  date_of_birth: string
+  created_at: string
+  addresses: string[]
+}
+
+interface DashboardData {
+  data: TransformedPatient[]
+  total: number
+  page: number
+  pageSize: number
+}
+
 interface DashboardClientProps {
-  initialData: PaginatedResponse
+  initialData: DashboardData
 }
 
 export function DashboardClient({ initialData }: DashboardClientProps) {
@@ -59,7 +76,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
         setData({
           data: patients.map((patient: Patient) => ({
-            id: patient.id,
+            id: String(patient.id),
             first: patient.first || '',
             middle: patient.middle || '',
             last: patient.last || '',

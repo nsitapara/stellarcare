@@ -13,7 +13,7 @@ from .models import (
     PatientCustomField,
     SleepStudy,
     Treatment,
-    Visits,
+    Visit,
 )
 from .serializers import (
     CustomFieldDefinitionSerializer,
@@ -218,7 +218,7 @@ class AppointmentDetailView(generics.RetrieveAPIView):
     Retrieves a single appointment by ID.
     """
 
-    queryset = Visits.objects.all()
+    queryset = Visit.objects.all()
     serializer_class = VisitSerializer
 
 

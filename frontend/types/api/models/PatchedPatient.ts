@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { Address } from './Address';
 import type { PatientCustomField } from './PatientCustomField';
-import type { StatusEnum } from './StatusEnum';
+import type { PatientStatusEnum } from './PatientStatusEnum';
 export type PatchedPatient = {
     readonly id?: number;
     addresses?: Array<Address>;
@@ -14,7 +14,7 @@ export type PatchedPatient = {
     middle?: string | null;
     last?: string;
     date_of_birth?: string;
-    status?: StatusEnum;
+    status?: PatientStatusEnum;
     readonly created_at?: string;
     readonly modified_at?: string;
     studies?: Array<number>;

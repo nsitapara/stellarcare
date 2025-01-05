@@ -11,7 +11,7 @@ from api.models import (
     PatientCustomField,
     SleepStudy,
     Treatment,
-    Visits,
+    Visit,
 )
 
 fake = Faker()
@@ -158,7 +158,7 @@ class Command(BaseCommand):
         for _ in range(40):
             visit_date = fake.date_between(start_date="-6m", end_date="+6m")
             visits.append(
-                Visits.objects.create(
+                Visit.objects.create(
                     date=visit_date,
                     time=fake.time(),
                     type=random.choice(["In-Person", "Telehealth"]),

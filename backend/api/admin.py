@@ -7,7 +7,6 @@ from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationFo
 
 from .models import (
     Address,
-    CPAPUsage,
     CustomFieldDefinition,
     Insurance,
     Patient,
@@ -15,7 +14,7 @@ from .models import (
     SleepStudy,
     Treatment,
     User,
-    Visits,
+    Visit,
 )
 
 admin.site.unregister(Group)
@@ -104,14 +103,6 @@ class TreatmentAdmin(ModelAdmin):
     date_hierarchy = "start_date"
 
 
-@admin.register(CPAPUsage)
-class CPAPUsageAdmin(ModelAdmin):
-    list_display = ["date", "hours_used", "events_per_hour", "mask_leak"]
-    list_filter = ["date"]
-    search_fields = ["notes"]
-    date_hierarchy = "date"
-
-
 @admin.register(Insurance)
 class InsuranceAdmin(ModelAdmin):
     list_display = [
@@ -126,7 +117,7 @@ class InsuranceAdmin(ModelAdmin):
     date_hierarchy = "authorization_expiry"
 
 
-@admin.register(Visits)
+@admin.register(Visit)
 class VisitsAdmin(ModelAdmin):
     list_display = ["date", "time", "type", "status"]
     list_filter = ["type", "status", "date"]
