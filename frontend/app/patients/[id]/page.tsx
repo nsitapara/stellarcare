@@ -8,15 +8,20 @@ export default async function PatientPage({
 
   if (!patient) {
     return (
-      <div className="container mx-auto py-10">
-        <h1 className="text-3xl font-bold mb-8">Patient not found</h1>
+      <div className="container-wrapper py-8">
+        <div className="form-card">
+          <h1 className="dashboard-title">Patient not found</h1>
+          <p className="dashboard-subtitle">
+            The requested patient could not be found in the system.
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="grid gap-6">
+    <div className="container-wrapper py-8">
+      <div className="space-y-6">
         <PatientTabs patient={patient} />
       </div>
     </div>
