@@ -4,7 +4,7 @@ import { ThemeToggle } from '@components/theme-toggle'
 import { UserSession } from '@components/user-session'
 import { SessionProvider, useSession } from 'next-auth/react'
 import '@/app/styles/globals.css'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 function MoonIcon({ animate }: { animate: boolean }) {
@@ -49,7 +49,10 @@ function MoonIcon({ animate }: { animate: boolean }) {
 function NavigationBar() {
   const { data: session } = useSession()
   const router = useRouter()
+  const pathname = usePathname()
   const [shouldAnimate, setShouldAnimate] = useState(false)
+  const [isDark, setIsDark] = useState(true)
+  const [lastPathname, setLastPathname] = useState(pathname)
 
   const triggerAnimation = useCallback(() => {
     setShouldAnimate(true)
@@ -59,25 +62,49 @@ function NavigationBar() {
     return timer
   }, [])
 
+  // Watch for route changes
   useEffect(() => {
-    // Initial animation on mount
-    const timer = triggerAnimation()
-    return () => clearTimeout(timer)
-  }, [triggerAnimation])
+    if (pathname !== lastPathname) {
+      setLastPathname(pathname)
+      triggerAnimation()
+    }
+  }, [pathname, lastPathname, triggerAnimation])
+
+  // Watch for theme changes
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.target instanceof HTMLElement &&
+          mutation.attributeName === 'class'
+        ) {
+          const isDarkMode = mutation.target.classList.contains('dark')
+          if (isDark !== isDarkMode) {
+            setIsDark(isDarkMode)
+            triggerAnimation()
+          }
+        }
+      }
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => observer.disconnect()
+  }, [isDark, triggerAnimation])
 
   const handleLogoClick = () => {
     if (session) {
       router.push('/dashboard')
-      triggerAnimation()
     } else {
       router.push('/')
-      triggerAnimation()
     }
   }
 
   const handleNavigation = (path: string) => {
     router.push(path)
-    triggerAnimation()
   }
 
   return (
