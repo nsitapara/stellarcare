@@ -1,22 +1,28 @@
 'use client'
 
 import { getTreatment } from '@actions/patient/get-treatment-action'
+import type { Treatment } from '@api/models/Treatment'
 import { Badge } from '@components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card'
 import { format } from 'date-fns'
 import { useEffect, useState } from 'react'
 
-interface Treatment {
-  id: number
-  name: string
-  type: string
-  dosage: string
-  frequency: string
-  start_date: string
-  end_date?: string
-  notes?: string
-}
-
+/**
+ * Displays detailed information about a patient's treatment in a card format.
+ * Fetches treatment data based on the provided treatment ID and renders various details
+ * including name, dosage, type, frequency, and dates.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {string} props.treatmentId - Unique identifier for the treatment to display
+ *
+ * @returns {JSX.Element} A card component displaying treatment information or loading/error states
+ *
+ * @example
+ * ```tsx
+ * <TreatmentCard treatmentId="123abc" />
+ * ```
+ */
 export function TreatmentCard({ treatmentId }: { treatmentId: string }) {
   const [treatment, setTreatment] = useState<Treatment | null>(null)
   const [error, setError] = useState<string | null>(null)
