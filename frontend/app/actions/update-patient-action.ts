@@ -48,36 +48,23 @@ export async function updatePatient(
           }) as Address
       ),
       status: originalPatient.status,
-      custom_fields: (formData.customFields || []).map((field) => {
-        console.log('Processing custom field:', field)
-        console.log(
-          'Field customFieldDefinitionId:',
-          field.customFieldDefinitionId
-        )
-        console.log('Field type:', field.type)
-        console.log('Field value:', field.value)
-
-        return {
-          custom_field_definition_id: field.customFieldDefinitionId,
-          type: field.type,
-          value_text: field.type === 'text' ? String(field.value) : null,
-          value_number: field.type === 'number' ? Number(field.value) : null
-        }
-      }),
+      custom_fields: (formData.customFields || []).map((field) => ({
+        custom_field_definition_id: field.customFieldDefinitionId,
+        type: field.type,
+        value_text: field.type === 'text' ? String(field.value) : null,
+        value_number: field.type === 'number' ? Number(field.value) : null
+      })),
       studies: originalPatient.studies,
       treatments: originalPatient.treatments,
       insurance: originalPatient.insurance,
       appointments: originalPatient.appointments
     }
 
-    console.log('Update data:', updateData)
-
     const response = await api.request.request<Patient>({
       method: 'PUT',
       url: `/api/patients/${patientId}/`,
       body: updateData
     })
-    console.log('Update response:', response)
     return response
   } catch (error) {
     console.error('Error in updatePatient:', error)

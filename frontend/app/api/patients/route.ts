@@ -13,7 +13,6 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const page = searchParams.get('page')
-    console.log('API Route - Fetching patients with params:', { page })
 
     const apiClient = await getApiClient(session)
     const response = await apiClient.patients.patientsList(
@@ -37,7 +36,6 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    console.log('Creating patient with data:', body)
 
     const apiClient = await getApiClient(session)
     const response = await apiClient.patients.patientsCreate({

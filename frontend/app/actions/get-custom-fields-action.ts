@@ -19,7 +19,6 @@ export async function getCustomFields(): Promise<CustomFieldDefinition[]> {
   }
 
   try {
-    console.log('Fetching custom fields for user:', session.user?.email)
     const api = await getApiClient(session)
     const response = await api.request.request<
       PaginatedResponse<CustomFieldDefinition>
@@ -27,7 +26,6 @@ export async function getCustomFields(): Promise<CustomFieldDefinition[]> {
       method: 'GET',
       url: '/api/custom-field-definitions/'
     })
-    console.log('Custom fields API response:', response)
     return response.results
   } catch (error) {
     console.error('Error fetching custom fields:', error)
@@ -42,10 +40,6 @@ export async function getUserCustomFields(): Promise<CustomFieldDefinition[]> {
   }
 
   try {
-    console.log(
-      'Fetching assigned custom fields for user:',
-      session.user?.email
-    )
     const api = await getApiClient(session)
     const response = await api.request.request<
       PaginatedResponse<CustomFieldDefinition>
@@ -53,7 +47,6 @@ export async function getUserCustomFields(): Promise<CustomFieldDefinition[]> {
       method: 'GET',
       url: '/api/custom-field-definitions/assigned/'
     })
-    console.log('User custom fields API response:', response)
     return response.results
   } catch (error) {
     console.error('Error fetching user custom fields:', error)
@@ -72,7 +65,6 @@ export async function createCustomField(data: {
   }
 
   try {
-    console.log('Creating custom field:', data)
     const api = await getApiClient(session)
     const response = await api.request.request<CustomFieldDefinition>({
       method: 'POST',
@@ -84,7 +76,6 @@ export async function createCustomField(data: {
         display_order: 0
       }
     })
-    console.log('Create custom field response:', response)
     return response
   } catch (error) {
     console.error('Error creating custom field:', error)
@@ -101,13 +92,11 @@ export async function assignCustomFieldToUser(
   }
 
   try {
-    console.log('Assigning custom field to user:', customFieldId)
     const api = await getApiClient(session)
     await api.request.request({
       method: 'POST',
       url: `/api/custom-field-definitions/${customFieldId}/assign/`
     })
-    console.log('Successfully assigned custom field to user')
   } catch (error) {
     console.error('Error assigning custom field to user:', error)
     throw error

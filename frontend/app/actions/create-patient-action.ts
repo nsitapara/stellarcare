@@ -46,36 +46,23 @@ export async function createPatient(
           }) as Address
       ),
       status: 'Inquiry',
-      custom_fields: (formData.customFields || []).map((field) => {
-        console.log('Processing custom field:', field)
-        console.log(
-          'Field customFieldDefinitionId:',
-          field.customFieldDefinitionId
-        )
-        console.log('Field type:', field.type)
-        console.log('Field value:', field.value)
-
-        return {
-          custom_field_definition_id: field.customFieldDefinitionId,
-          type: field.type,
-          value_text: field.type === 'text' ? String(field.value) : null,
-          value_number: field.type === 'number' ? Number(field.value) : null
-        }
-      }),
+      custom_fields: (formData.customFields || []).map((field) => ({
+        custom_field_definition_id: field.customFieldDefinitionId,
+        type: field.type,
+        value_text: field.type === 'text' ? String(field.value) : null,
+        value_number: field.type === 'number' ? Number(field.value) : null
+      })),
       studies: [],
       treatments: [],
       insurance: [],
       appointments: []
     }
 
-    console.log('Create data:', createData)
-
     const response = await api.request.request<Patient>({
       method: 'POST',
       url: '/api/patients/',
       body: createData
     })
-    console.log('Create response:', response)
     return response
   } catch (error) {
     console.error('Error in createPatient:', error)
