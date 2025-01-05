@@ -159,7 +159,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
 
         {loading && data.data.length === 0 ? (
           <div className="flex justify-center items-center h-32">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
           </div>
         ) : error ? (
           <div className="p-4 text-red-700 bg-red-100 rounded-md">{error}</div>

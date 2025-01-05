@@ -74,7 +74,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent" />
+          </div>
+        }
+      >
         <DashboardClient initialData={dashboardData} />
       </Suspense>
     </div>
