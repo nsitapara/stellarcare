@@ -58,7 +58,12 @@ export function VisitCard({ appointmentId }: { appointmentId: string }) {
   return (
     <Card className="form-card bg-card">
       <CardHeader>
-        <CardTitle className="text-foreground">Appointment Details</CardTitle>
+        <CardTitle className="text-foreground">
+          {format(
+            new Date(`${appointment.date}T${appointment.time}`),
+            'MMMM d, yyyy h:mm a'
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="grid gap-4">
@@ -93,12 +98,12 @@ export function VisitCard({ appointmentId }: { appointmentId: string }) {
               </Badge>
             </dd>
           </div>
-          {appointment.notes && (
-            <div>
-              <dt className="text-sm text-muted-foreground">Notes</dt>
-              <dd className="text-foreground">{appointment.notes}</dd>
-            </div>
-          )}
+          <div>
+            <dt className="text-sm text-muted-foreground">Notes</dt>
+            <dd className="text-foreground">
+              {appointment.notes || 'No notes'}
+            </dd>
+          </div>
           {appointment.zoom_link && (
             <div>
               <dt className="text-sm text-muted-foreground">Zoom Link</dt>
