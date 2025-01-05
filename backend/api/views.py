@@ -177,3 +177,25 @@ class PatientCustomFieldListView(generics.ListAPIView):
         return PatientCustomField.objects.filter(patient_id=patient_id).select_related(
             "field_definition"
         )
+
+
+class CustomFieldDefinitionAssignView(generics.GenericAPIView):
+    """
+    Handles assigning a custom field definition to the current user.
+    """
+
+    queryset = CustomFieldDefinition.objects.all()
+    serializer_class = CustomFieldDefinitionSerializer
+
+    def post(self, request, *args, **kwargs):
+        custom_field = self.get_object()
+        user = request.user
+        logger.info(f"Assigning custom field {custom_field.id} to user {user.email}")
+
+        try:
+            user.available_custom_fields.add(custom_field)
+            logger.info("Successfully assigned custom field to user")
+            return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error assigning custom field to user: {e}")
+            raise

@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .api import UserViewSet
 from .views import (
     CustomFieldDefinitionAssignedView,
+    CustomFieldDefinitionAssignView,
     CustomFieldDefinitionListCreateView,
     CustomFieldDefinitionRetrieveUpdateDeleteView,
     PatientCustomFieldListView,
@@ -51,6 +52,11 @@ urlpatterns = [
         "api/custom-field-definitions/<int:pk>/",
         CustomFieldDefinitionRetrieveUpdateDeleteView.as_view(),
         name="custom-field-definition-detail",
+    ),
+    path(
+        "api/custom-field-definitions/<int:pk>/assign/",
+        CustomFieldDefinitionAssignView.as_view(),
+        name="custom-field-definition-assign",
     ),
     # Patient custom field values endpoints
     path(

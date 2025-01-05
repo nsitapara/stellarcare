@@ -91,3 +91,25 @@ export async function createCustomField(data: {
     throw error
   }
 }
+
+export async function assignCustomFieldToUser(
+  customFieldId: number
+): Promise<void> {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    throw new Error('You must be logged in to assign custom fields')
+  }
+
+  try {
+    console.log('Assigning custom field to user:', customFieldId)
+    const api = await getApiClient(session)
+    await api.request.request({
+      method: 'POST',
+      url: `/api/custom-field-definitions/${customFieldId}/assign/`
+    })
+    console.log('Successfully assigned custom field to user')
+  } catch (error) {
+    console.error('Error assigning custom field to user:', error)
+    throw error
+  }
+}
