@@ -8,6 +8,7 @@ from rest_framework import exceptions, serializers
 from .models import (
     Address,
     CustomFieldDefinition,
+    Insurance,
     Patient,
     PatientCustomField,
     SleepStudy,
@@ -334,4 +335,19 @@ class SleepStudySerializer(serializers.ModelSerializer):
             "rem_latency",
             "notes",
             "file_url",
+        ]
+
+
+class InsuranceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Insurance
+        fields = [
+            "id",
+            "provider",
+            "policy_number",
+            "group_number",
+            "primary_holder",
+            "relationship",
+            "authorization_status",
+            "authorization_expiry",
         ]

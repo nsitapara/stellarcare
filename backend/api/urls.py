@@ -11,6 +11,7 @@ from .views import (
     CustomFieldDefinitionAssignView,
     CustomFieldDefinitionListCreateView,
     CustomFieldDefinitionRetrieveUpdateDeleteView,
+    InsuranceDetailView,
     PatientCustomFieldListView,
     PatientListCreateView,
     PatientQueryView,
@@ -81,5 +82,10 @@ urlpatterns = [
         "api/sleep-studies/<int:pk>/",
         SleepStudyDetailView.as_view(),
         name="sleep-study-detail",
+    ),
+    path(
+        "api/insurance/<int:pk>/",
+        InsuranceDetailView.as_view(),
+        name="insurance-detail",
     ),
 ]

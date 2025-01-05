@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 
 from .models import (
     CustomFieldDefinition,
+    Insurance,
     Patient,
     PatientCustomField,
     SleepStudy,
@@ -16,6 +17,7 @@ from .models import (
 )
 from .serializers import (
     CustomFieldDefinitionSerializer,
+    InsuranceSerializer,
     PatientCustomFieldSerializer,
     PatientSerializer,
     SleepStudySerializer,
@@ -236,3 +238,12 @@ class SleepStudyDetailView(generics.RetrieveAPIView):
 
     queryset = SleepStudy.objects.all()
     serializer_class = SleepStudySerializer
+
+
+class InsuranceDetailView(generics.RetrieveAPIView):
+    """
+    Retrieves a single insurance record by ID.
+    """
+
+    queryset = Insurance.objects.all()
+    serializer_class = InsuranceSerializer
