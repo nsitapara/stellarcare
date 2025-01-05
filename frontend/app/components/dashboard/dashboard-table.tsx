@@ -3,7 +3,6 @@
 import type { DashboardData } from '@/types/dashboard'
 import { cn } from '@components/lib/utils'
 import { Button } from '@components/ui/button'
-import { Input } from '@components/ui/input'
 import {
   Table,
   TableBody,
@@ -30,13 +29,13 @@ interface DashboardTableProps {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'Inquiry':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200 ring-blue-500/30'
+      return 'status-inquiry'
     case 'Onboarding':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-200 ring-yellow-500/30'
+      return 'status-onboarding'
     case 'Active':
-      return 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-200 ring-green-500/30'
+      return 'status-active'
     case 'Churned':
-      return 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200 ring-red-500/30'
+      return 'status-churned'
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-500/20 dark:text-gray-200 ring-gray-500/30'
   }
@@ -60,14 +59,12 @@ export function DashboardTable({
   const handleSearch = (value: string) => {
     setSearchQuery(value)
 
-    // Always allow empty search
     if (value.length === 0) {
       setIsSearchValid(true)
       onSearch('')
       return
     }
 
-    // For numeric input, wait for 6 digits
     if (/^\d+$/.test(value)) {
       if (value.length === 6) {
         setIsSearchValid(true)
@@ -78,7 +75,6 @@ export function DashboardTable({
       return
     }
 
-    // For text search, require 3 characters minimum
     if (value.length < 3) {
       setIsSearchValid(false)
       return
@@ -94,54 +90,50 @@ export function DashboardTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-foreground dark:text-gray-300" />
-          <Input
-            placeholder="Search by name (min 3 chars) or patient ID (6 digits)..."
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            className={cn(
-              'pl-8 bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 placeholder:text-gray-500 dark:placeholder:text-gray-400',
-              !isSearchValid && searchQuery.length > 0 && 'border-red-500',
-              isLoading && 'pr-8'
-            )}
-          />
-          {isLoading && (
-            <div className="absolute right-2 top-2.5">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-foreground border-t-transparent" />
-            </div>
+      <div className="dashboard-search">
+        <Search className="dashboard-search-icon" />
+        <input
+          type="text"
+          placeholder="Search by name (min 3 chars) or patient ID (6 digits)..."
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          className={cn(
+            'dashboard-search-input',
+            !isSearchValid &&
+              searchQuery.length > 0 &&
+              'border-red-500 focus:border-red-500 focus:ring-red-500/30'
           )}
-          {!isSearchValid && searchQuery.length > 0 && (
-            <p className="mt-1 text-sm text-red-500">
-              {/^\d+$/.test(searchQuery)
-                ? 'Please enter all 6 digits of the patient ID'
-                : 'Please enter at least 3 characters to search by name'}
-            </p>
-          )}
-        </div>
+        />
+        {isLoading && (
+          <div className="absolute right-8 top-[1.75rem]">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-accent border-t-transparent" />
+          </div>
+        )}
+        {!isSearchValid && searchQuery.length > 0 && (
+          <p className="mt-2 text-sm text-red-500 font-medium">
+            {/^\d+$/.test(searchQuery)
+              ? 'Please enter all 6 digits of the patient ID'
+              : 'Please enter at least 3 characters to search by name'}
+          </p>
+        )}
       </div>
 
-      <div className="rounded-lg border-2 border-border bg-card text-card-foreground overflow-hidden dark:bg-zinc-900/80 dark:border-zinc-700">
-        <Table className="border-collapse [&_tr:last-child]:border-0">
-          <TableHeader>
-            <TableRow className="bg-gray-100 dark:bg-zinc-800 border-b border-border dark:border-zinc-700">
-              <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
-                ID
-              </TableHead>
-              <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
+      <div className="table-container">
+        <Table>
+          <TableHeader className="table-header">
+            <TableRow>
+              <TableHead className="table-header-cell w-[100px]">ID</TableHead>
+              <TableHead className="table-header-cell w-[200px]">
                 Name
               </TableHead>
-              <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
+              <TableHead className="table-header-cell w-[120px]">
                 Date of Birth
               </TableHead>
-              <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
-                Address
-              </TableHead>
-              <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
+              <TableHead className="table-header-cell">Address</TableHead>
+              <TableHead className="table-header-cell w-[120px]">
                 Status
               </TableHead>
-              <TableHead className="font-semibold text-foreground border-b border-border dark:border-zinc-700">
+              <TableHead className="table-header-cell w-[100px]">
                 Actions
               </TableHead>
             </TableRow>
@@ -151,7 +143,7 @@ export function DashboardTable({
               <TableRow>
                 <TableCell
                   colSpan={6}
-                  className="h-24 text-center text-foreground dark:text-gray-300"
+                  className="h-24 text-center text-muted-foreground"
                 >
                   No results found.
                 </TableCell>
@@ -160,49 +152,47 @@ export function DashboardTable({
               data.map((item) => (
                 <TableRow
                   key={item.id}
-                  className="cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 border-b border-border dark:border-zinc-700"
+                  className="table-row cursor-pointer"
                   onClick={() => handleRowClick(item.id)}
                 >
-                  <TableCell className="font-mono font-medium text-foreground dark:text-gray-200 border-r border-border dark:border-zinc-700">
+                  <TableCell className="table-cell table-cell-id">
                     {item.id}
                   </TableCell>
-                  <TableCell className="font-medium text-foreground dark:text-gray-200 border-r border-border dark:border-zinc-700">
+                  <TableCell className="table-cell font-medium">
                     {item.first} {item.middle} {item.last}
                   </TableCell>
-                  <TableCell className="text-foreground dark:text-gray-200 border-r border-border dark:border-zinc-700">
+                  <TableCell className="table-cell">
                     {item.date_of_birth}
                   </TableCell>
-                  <TableCell className="text-foreground dark:text-gray-200 border-r border-border dark:border-zinc-700">
+                  <TableCell className="table-cell">
                     {item.addresses && item.addresses.length > 0
                       ? item.addresses[0]
                       : 'No address'}
                   </TableCell>
-                  <TableCell className="border-r border-border dark:border-zinc-700">
+                  <TableCell className="table-cell">
                     <span
                       className={cn(
-                        'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset',
+                        'table-status-badge',
                         getStatusColor(item.status)
                       )}
                     >
                       {item.status}
                     </span>
                   </TableCell>
-                  <TableCell className="dark:bg-zinc-900/80">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="hover:opacity-90 dark:text-white"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(
-                            `/patients/${item.id}/edit?redirect=/dashboard`
-                          )
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </div>
+                  <TableCell className="table-cell">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="action-button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        router.push(
+                          `/patients/${item.id}/edit?redirect=/dashboard`
+                        )
+                      }}
+                    >
+                      Edit
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -211,13 +201,13 @@ export function DashboardTable({
         </Table>
       </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="table-pagination">
         <div className="flex items-center space-x-6 text-sm">
-          <span className="text-foreground dark:text-gray-200">
+          <span className="text-foreground/80 dark:text-white/80 font-medium">
             Page {page} of {totalPages}
           </span>
           <select
-            className="border rounded px-2 py-1 text-sm bg-background dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"
+            className="pagination-select"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
           >
@@ -227,20 +217,20 @@ export function DashboardTable({
           </select>
           <div className="space-x-2">
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="hover:opacity-90 dark:text-white"
               onClick={() => onPageChange(page - 1)}
               disabled={page <= 1}
+              className="action-button-outline"
             >
               Previous
             </Button>
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="hover:opacity-90 dark:text-white"
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages}
+              className="action-button-outline"
             >
               Next
             </Button>

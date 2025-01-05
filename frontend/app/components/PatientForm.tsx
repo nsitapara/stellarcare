@@ -327,9 +327,9 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onFormSubmit)} className="patient-form">
-        <div className="patient-form-section">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <form onSubmit={form.handleSubmit(onFormSubmit)} className="form-base">
+        <div className="form-section">
+          <div className="form-grid-3">
             <FormField
               control={form.control}
               name="firstName"
@@ -337,7 +337,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                 <FormItem>
                   <FormLabel>First Name</FormLabel>
                   <FormControl>
-                    <Input {...field} className="patient-form-input" />
+                    <Input {...field} className="form-input" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -350,7 +350,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                 <FormItem>
                   <FormLabel>Middle Name</FormLabel>
                   <FormControl>
-                    <Input {...field} className="patient-form-input" />
+                    <Input {...field} className="form-input" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -363,7 +363,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                 <FormItem>
                   <FormLabel>Last Name</FormLabel>
                   <FormControl>
-                    <Input {...field} className="patient-form-input" />
+                    <Input {...field} className="form-input" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -378,11 +378,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               <FormItem className="max-w-sm">
                 <FormLabel>Date of Birth</FormLabel>
                 <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    className="patient-form-input"
-                  />
+                  <Input type="date" {...field} className="form-input" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -390,9 +386,9 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           />
         </div>
 
-        <div className="patient-form-section">
-          <div className="patient-form-section-header">
-            <h3 className="patient-form-section-title">Addresses</h3>
+        <div className="form-section">
+          <div className="form-section-header">
+            <h3 className="form-section-title">Addresses</h3>
             <Button
               type="button"
               variant="default"
@@ -400,30 +396,30 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               onClick={() =>
                 append({ street: '', city: '', state: '', zipCode: '' })
               }
-              className="flex items-center gap-2"
+              className="form-button"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="form-button-icon" />
               Add Address
             </Button>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-3">
             {fields.map((field, index) => (
-              <div key={field.id} className="bg-card/50 rounded-lg border p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="font-medium">Address {index + 1}</h4>
+              <div key={field.id} className="form-card">
+                <div className="form-card-header">
+                  <h4 className="form-section-title">Address {index + 1}</h4>
                   {fields.length > 1 && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => remove(index)}
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="delete-button"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="form-button-icon" />
                     </Button>
                   )}
                 </div>
-                <div className="patient-form-grid">
+                <div className="form-grid-2">
                   <FormField
                     control={form.control}
                     name={`addresses.${index}.street`}
@@ -431,7 +427,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                       <FormItem>
                         <FormLabel>Street</FormLabel>
                         <FormControl>
-                          <Input {...field} className="patient-form-input" />
+                          <Input {...field} className="form-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -444,7 +440,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                       <FormItem>
                         <FormLabel>City</FormLabel>
                         <FormControl>
-                          <Input {...field} className="patient-form-input" />
+                          <Input {...field} className="form-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -457,7 +453,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                       <FormItem>
                         <FormLabel>State</FormLabel>
                         <FormControl>
-                          <Input {...field} className="patient-form-input" />
+                          <Input {...field} className="form-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -470,7 +466,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                       <FormItem>
                         <FormLabel>ZIP Code</FormLabel>
                         <FormControl>
-                          <Input {...field} className="patient-form-input" />
+                          <Input {...field} className="form-input" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -482,18 +478,18 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
           </div>
         </div>
 
-        <div className="patient-form-section">
-          <div className="patient-form-section-header">
-            <h3 className="patient-form-section-title">Custom Fields</h3>
+        <div className="form-section">
+          <div className="form-section-header">
+            <h3 className="form-section-title">Custom Fields</h3>
             <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
                   variant="default"
                   size="sm"
-                  className="flex items-center gap-2"
+                  className="form-button"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="form-button-icon" />
                   Add Custom Field
                 </Button>
               </PopoverTrigger>
@@ -540,22 +536,24 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
               </PopoverContent>
             </Popover>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-3">
             {customFields.map((field) => (
-              <div key={field.id} className="bg-card/50 rounded-lg border p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="font-medium">Custom Field: {field.name}</h4>
+              <div key={field.id} className="form-card">
+                <div className="form-card-header">
+                  <h4 className="form-section-title">
+                    Custom Field: {field.name}
+                  </h4>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => removeCustomField(field.id)}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="delete-button"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="form-button-icon" />
                   </Button>
                 </div>
-                <div className="patient-form-grid">
+                <div className="form-grid-2">
                   <div>
                     <FormLabel>Name</FormLabel>
                     <Input
@@ -567,7 +565,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                           e.target.value
                         )
                       }
-                      className="patient-form-input"
+                      className="form-input"
                     />
                   </div>
                   <div>
@@ -582,7 +580,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                         )
                       }
                     >
-                      <SelectTrigger className="patient-form-input">
+                      <SelectTrigger className="form-input">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -603,7 +601,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                             e.target.value
                           )
                         }
-                        className="patient-form-input"
+                        className="form-input"
                       />
                     ) : (
                       <Input
@@ -616,7 +614,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                             Number.parseFloat(e.target.value) || 0
                           )
                         }
-                        className="patient-form-input"
+                        className="form-input"
                       />
                     )}
                   </div>
@@ -627,7 +625,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" size="lg" className="px-8">
+          <Button type="submit" size="sm" className="px-6">
             Save Patient
           </Button>
         </div>
