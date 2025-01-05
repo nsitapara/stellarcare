@@ -26,7 +26,9 @@ export async function getPatients(
 
   try {
     const api = await getApiClient(session)
-    return await api.patients.patientsList(page, pageSize)
+    // Ensure page is at least 1
+    const safePage = Math.max(1, page)
+    return await api.patients.patientsList(safePage, pageSize)
   } catch (error) {
     console.error('Error fetching patients:', error)
     throw new Error('Failed to fetch patients')

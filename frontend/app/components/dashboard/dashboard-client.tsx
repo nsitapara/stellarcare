@@ -7,89 +7,18 @@
 
 'use client'
 
-import { getPatients } from '@actions/patient/get-patients-action'
-import { searchPatients } from '@actions/patient/patient-search-action'
 import type { DashboardClientProps } from '@api/dashboard'
-import type { Patient } from '@api/models/Patient'
 import { Button } from '@components/ui/button'
 import debounce from 'lodash/debounce'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { DashboardTable } from './dashboard-table'
+import { usePatientData } from './use-patient-data'
 
-/**
- * Main dashboard client component that handles data fetching, search, and pagination
- *
- * @param props - Component props including initial data
- * @returns Dashboard interface with search and table components
- */
 export function DashboardClient({ initialData }: DashboardClientProps) {
   const router = useRouter()
-  const [data, setData] = useState(initialData)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-
-  /**
-   * Fetches patient data based on the current page, page size, and search query.
-   * - For search queries >= 3 characters: Uses search endpoint
-   * - For empty search: Uses paginated list endpoint
-   * - For 1-2 characters: Skips fetching to avoid unnecessary API calls
-   */
-  const fetchData = useCallback(
-    async (page: number, pageSize: number, query: string = searchQuery) => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        let response: { results: Patient[]; count: number } | Patient[]
-        if (query.length >= 3) {
-          // Search mode
-          response = (await searchPatients(query)) as Patient[]
-        } else if (query.length === 0) {
-          // Normal paginated list mode
-          response = await getPatients(page, pageSize)
-        } else {
-          // Skip fetching for 1-2 character queries
-          setLoading(false)
-          return
-        }
-
-        // Transform the response to match the dashboard data structure
-        const patients = Array.isArray(response) ? response : response.results
-        const totalCount = Array.isArray(response)
-          ? response.length
-          : response.count
-
-        setData({
-          data: patients.map((patient) => ({
-            id: String(patient.id),
-            first: patient.first || '',
-            middle: patient.middle || '',
-            last: patient.last || '',
-            status: patient.status || '',
-            date_of_birth: patient.date_of_birth || '',
-            created_at: patient.created_at || '',
-            addresses:
-              patient.addresses?.map((addr) => addr.formatted_address) || []
-          })),
-          total: totalCount,
-          page: query.length >= 3 ? 1 : page, // Reset to page 1 for search results
-          pageSize
-        })
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error)
-        setError(
-          error instanceof Error
-            ? error.message
-            : 'Failed to load patient data. Please try again later.'
-        )
-      } finally {
-        setLoading(false)
-      }
-    },
-    [searchQuery] // searchQuery is intentionally included to maintain reference in useCallback
-  )
+  const { data, loading, error, searchQuery, setSearchQuery, fetchData } =
+    usePatientData({ initialData })
 
   // Debounce search queries to avoid excessive API calls
   const debouncedFetch = useMemo(
@@ -105,7 +34,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
       setSearchQuery(query)
       debouncedFetch(query)
     },
-    [debouncedFetch]
+    [debouncedFetch, setSearchQuery]
   )
 
   // Cleanup debounce on unmount
@@ -116,15 +45,21 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   }, [debouncedFetch])
 
   // Handle pagination changes
-  const handlePageChange = (page: number) => {
-    if (searchQuery.length >= 3) return // Disable pagination during search
-    fetchData(page, data.pageSize, searchQuery)
-  }
+  const handlePageChange = useCallback(
+    (page: number) => {
+      if (searchQuery.length >= 3) return // Disable pagination during search
+      fetchData(page, data.pageSize, searchQuery)
+    },
+    [fetchData, data.pageSize, searchQuery]
+  )
 
-  const handlePageSizeChange = (pageSize: number) => {
-    if (searchQuery.length >= 3) return // Disable page size change during search
-    fetchData(1, pageSize, searchQuery)
-  }
+  const handlePageSizeChange = useCallback(
+    (pageSize: number) => {
+      if (searchQuery.length >= 3) return // Disable page size change during search
+      fetchData(1, pageSize, searchQuery)
+    },
+    [fetchData, searchQuery]
+  )
 
   return (
     <div className="container-wrapper">

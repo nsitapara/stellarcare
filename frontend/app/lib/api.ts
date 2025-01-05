@@ -1,5 +1,5 @@
-import { ApiClient } from '@types/api'
 import type { Session } from 'next-auth'
+import { ApiClient } from '../../types/api'
 
 export async function getApiClient(session?: Session | null) {
   return new ApiClient({
