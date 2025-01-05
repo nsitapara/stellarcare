@@ -43,9 +43,9 @@ export function InsuranceCard({ insuranceId }: { insuranceId: string }) {
 
   if (error) {
     return (
-      <Card className="bg-gray-900">
+      <Card className="form-card bg-card">
         <CardContent className="pt-6">
-          <div className="text-red-500">{error}</div>
+          <div className="text-destructive">{error}</div>
         </CardContent>
       </Card>
     )
@@ -53,19 +53,21 @@ export function InsuranceCard({ insuranceId }: { insuranceId: string }) {
 
   if (!insurance) {
     return (
-      <Card className="bg-gray-900">
+      <Card className="form-card bg-card">
         <CardContent className="pt-6">
-          <div className="text-gray-400">Loading insurance...</div>
+          <div className="text-muted-foreground">Loading insurance...</div>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="bg-gray-900">
+    <Card className="form-card bg-card">
       <CardHeader>
         <div className="flex justify-between items-start">
-          <CardTitle>{insurance.provider}</CardTitle>
+          <CardTitle className="text-foreground">
+            {insurance.provider}
+          </CardTitle>
           {insurance.authorization_status && (
             <Badge
               variant={
@@ -84,25 +86,27 @@ export function InsuranceCard({ insuranceId }: { insuranceId: string }) {
       <CardContent>
         <dl className="grid gap-4">
           <div>
-            <dt className="text-sm text-gray-400">Policy Number</dt>
-            <dd className="text-white">{insurance.policy_number}</dd>
+            <dt className="text-sm text-muted-foreground">Policy Number</dt>
+            <dd className="text-foreground">{insurance.policy_number}</dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-400">Group Number</dt>
-            <dd className="text-white">{insurance.group_number}</dd>
+            <dt className="text-sm text-muted-foreground">Group Number</dt>
+            <dd className="text-foreground">{insurance.group_number}</dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-400">Primary Holder</dt>
-            <dd className="text-white">{insurance.primary_holder}</dd>
+            <dt className="text-sm text-muted-foreground">Primary Holder</dt>
+            <dd className="text-foreground">{insurance.primary_holder}</dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-400">Relationship</dt>
-            <dd className="text-white">{insurance.relationship}</dd>
+            <dt className="text-sm text-muted-foreground">Relationship</dt>
+            <dd className="text-foreground">{insurance.relationship}</dd>
           </div>
           {insurance.authorization_expiry && (
             <div>
-              <dt className="text-sm text-gray-400">Authorization Expires</dt>
-              <dd className="text-white">
+              <dt className="text-sm text-muted-foreground">
+                Authorization Expiry
+              </dt>
+              <dd className="text-foreground">
                 {format(
                   new Date(insurance.authorization_expiry),
                   'MMMM d, yyyy'

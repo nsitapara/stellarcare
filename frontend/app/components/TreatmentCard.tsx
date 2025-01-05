@@ -43,9 +43,9 @@ export function TreatmentCard({ treatmentId }: { treatmentId: string }) {
 
   if (error) {
     return (
-      <Card className="bg-gray-900">
+      <Card className="form-card bg-card">
         <CardContent className="pt-6">
-          <div className="text-red-500">{error}</div>
+          <div className="text-destructive">{error}</div>
         </CardContent>
       </Card>
     )
@@ -53,50 +53,50 @@ export function TreatmentCard({ treatmentId }: { treatmentId: string }) {
 
   if (!treatment) {
     return (
-      <Card className="bg-gray-900">
+      <Card className="form-card bg-card">
         <CardContent className="pt-6">
-          <div className="text-gray-400">Loading treatment...</div>
+          <div className="text-muted-foreground">Loading treatment...</div>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="bg-gray-900">
+    <Card className="form-card bg-card">
       <CardHeader>
         <div className="flex justify-between items-start">
-          <CardTitle>{treatment.name}</CardTitle>
+          <CardTitle className="text-foreground">{treatment.name}</CardTitle>
           <Badge>{treatment.dosage}</Badge>
         </div>
       </CardHeader>
       <CardContent>
         <dl className="grid gap-4">
           <div>
-            <dt className="text-sm text-gray-400">Type</dt>
-            <dd className="text-white">{treatment.type}</dd>
+            <dt className="text-sm text-muted-foreground">Type</dt>
+            <dd className="text-foreground">{treatment.type}</dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-400">Frequency</dt>
-            <dd className="text-white">{treatment.frequency}</dd>
+            <dt className="text-sm text-muted-foreground">Frequency</dt>
+            <dd className="text-foreground">{treatment.frequency}</dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-400">Start Date</dt>
-            <dd className="text-white">
+            <dt className="text-sm text-muted-foreground">Start Date</dt>
+            <dd className="text-foreground">
               {format(new Date(treatment.start_date), 'MMMM d, yyyy')}
             </dd>
           </div>
           {treatment.end_date && (
             <div>
-              <dt className="text-sm text-gray-400">End Date</dt>
-              <dd className="text-white">
+              <dt className="text-sm text-muted-foreground">End Date</dt>
+              <dd className="text-foreground">
                 {format(new Date(treatment.end_date), 'MMMM d, yyyy')}
               </dd>
             </div>
           )}
           {treatment.notes && (
             <div>
-              <dt className="text-sm text-gray-400">Notes</dt>
-              <dd className="text-white">{treatment.notes}</dd>
+              <dt className="text-sm text-muted-foreground">Notes</dt>
+              <dd className="text-foreground">{treatment.notes}</dd>
             </div>
           )}
         </dl>

@@ -42,9 +42,9 @@ export function AppointmentCard({ appointmentId }: { appointmentId: string }) {
 
   if (error) {
     return (
-      <Card className="bg-gray-900">
+      <Card className="form-card bg-card">
         <CardContent className="pt-6">
-          <div className="text-red-500">{error}</div>
+          <div className="text-destructive">{error}</div>
         </CardContent>
       </Card>
     )
@@ -52,24 +52,24 @@ export function AppointmentCard({ appointmentId }: { appointmentId: string }) {
 
   if (!appointment) {
     return (
-      <Card className="bg-gray-900">
+      <Card className="form-card bg-card">
         <CardContent className="pt-6">
-          <div className="text-gray-400">Loading appointment...</div>
+          <div className="text-muted-foreground">Loading appointment...</div>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card className="bg-gray-900">
+    <Card className="form-card bg-card">
       <CardHeader>
-        <CardTitle>Appointment Details</CardTitle>
+        <CardTitle className="text-foreground">Appointment Details</CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="grid gap-4">
           <div>
-            <dt className="text-sm text-gray-400">Date & Time</dt>
-            <dd className="text-white">
+            <dt className="text-sm text-muted-foreground">Date & Time</dt>
+            <dd className="text-foreground">
               {format(
                 new Date(`${appointment.date}T${appointment.time}`),
                 'MMMM d, yyyy h:mm a'
@@ -77,11 +77,11 @@ export function AppointmentCard({ appointmentId }: { appointmentId: string }) {
             </dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-400">Type</dt>
-            <dd className="text-white">{appointment.type}</dd>
+            <dt className="text-sm text-muted-foreground">Type</dt>
+            <dd className="text-foreground">{appointment.type}</dd>
           </div>
           <div>
-            <dt className="text-sm text-gray-400">Status</dt>
+            <dt className="text-sm text-muted-foreground">Status</dt>
             <dd>
               <Badge
                 variant={
@@ -100,19 +100,19 @@ export function AppointmentCard({ appointmentId }: { appointmentId: string }) {
           </div>
           {appointment.notes && (
             <div>
-              <dt className="text-sm text-gray-400">Notes</dt>
-              <dd className="text-white">{appointment.notes}</dd>
+              <dt className="text-sm text-muted-foreground">Notes</dt>
+              <dd className="text-foreground">{appointment.notes}</dd>
             </div>
           )}
           {appointment.zoom_link && (
             <div>
-              <dt className="text-sm text-gray-400">Zoom Link</dt>
+              <dt className="text-sm text-muted-foreground">Zoom Link</dt>
               <dd>
                 <a
                   href={appointment.zoom_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300"
+                  className="text-primary hover:text-primary/80"
                 >
                   Join Meeting
                 </a>
