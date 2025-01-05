@@ -1,38 +1,20 @@
-import type { Patient } from '@/types/api/models/Patient'
-import { DashboardClient } from '@components/dashboard/dashboard-client'
-import { getApiClient } from '@lib/api'
-import { authOptions } from '@lib/auth'
-import { getServerSession } from 'next-auth'
-import { Suspense } from 'react'
+import { UserSession } from '@/app/components/user-session'
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions)
-  const api = await getApiClient(session)
-
-  const initialData = await api.patients.patientsList(1, 10)
-
+export default function HomePage() {
   return (
-    <div className="container mx-auto py-10">
-      <Suspense fallback={<div>Loading...</div>}>
-        <DashboardClient
-          initialData={{
-            data: initialData.results.map((patient: Patient) => ({
-              id: patient.id,
-              first: patient.first || '',
-              middle: patient.middle || '',
-              last: patient.last || '',
-              status: patient.status || '',
-              date_of_birth: patient.date_of_birth || '',
-              created_at: patient.created_at || '',
-              addresses:
-                patient.addresses?.map((addr) => addr.formatted_address) || []
-            })),
-            total: initialData.count,
-            page: 1,
-            pageSize: 10
-          }}
-        />
-      </Suspense>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)]">
+      <div className="text-center space-y-6 max-w-3xl mx-auto px-4">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+          Welcome to StellarCare
+        </h1>
+        <p className="text-xl text-muted-foreground">
+          A comprehensive healthcare management platform for sleep medicine
+          professionals
+        </p>
+        <div className="flex justify-center gap-4">
+          <UserSession />
+        </div>
+      </div>
     </div>
   )
 }

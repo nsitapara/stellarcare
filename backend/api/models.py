@@ -6,6 +6,9 @@ from django.utils.translation import gettext_lazy as _
 class User(AbstractUser):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     modified_at = models.DateTimeField(_("modified at"), auto_now=True)
+    available_custom_fields = models.ManyToManyField(
+        "CustomFieldDefinition", blank=True, related_name="assigned_users"
+    )
 
     class Meta:
         db_table = "users"
@@ -26,7 +29,11 @@ class Address(models.Model):
         return f"{self.street}, {self.city}, {self.state}, {self.zip_code}"
 
 
-class CustomField(models.Model):
+class CustomFieldDefinition(models.Model):
+    """
+    Catalog of available custom fields that can be assigned to patients
+    """
+
     FIELD_TYPES = [
         ("text", "Text"),
         ("number", "Number"),
@@ -34,11 +41,53 @@ class CustomField(models.Model):
 
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=10, choices=FIELD_TYPES)
-    value_text = models.TextField(blank=True, null=True)
-    value_number = models.FloatField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    options = models.JSONField(
+        blank=True,
+        null=True,
+        help_text="For select type fields, stores the available options",
+    )
+    is_active = models.BooleanField(default=True)
+    is_required = models.BooleanField(default=False)
+    display_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ["display_order", "name"]
+
+
+class PatientCustomField(models.Model):
+    """
+    Stores the values of custom fields for each patient
+    """
+
+    patient = models.ForeignKey(
+        "Patient", on_delete=models.CASCADE, related_name="patient_custom_fields"
+    )
+    field_definition = models.ForeignKey(
+        CustomFieldDefinition, on_delete=models.CASCADE
+    )
+    value_text = models.TextField(blank=True, null=True)
+    value_number = models.FloatField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ["patient", "field_definition"]
+
+    def __str__(self):
+        return f"{self.patient} - {self.field_definition}: {self.get_value()}"
+
+    def get_value(self):
+        if self.field_definition.type == "text":
+            return self.value_text
+        elif self.field_definition.type == "number":
+            return self.value_number
+        return None
 
 
 class SleepStudy(models.Model):
@@ -125,7 +174,9 @@ class Patient(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     addresses = models.ManyToManyField(Address, blank=True)
-    custom_fields = models.ManyToManyField(CustomField, blank=True)
+    custom_fields = models.ManyToManyField(
+        CustomFieldDefinition, through="PatientCustomField", blank=True
+    )
     studies = models.ManyToManyField(SleepStudy, blank=True)
     treatments = models.ManyToManyField(Treatment, blank=True)
     insurance = models.ManyToManyField(Insurance, blank=True)

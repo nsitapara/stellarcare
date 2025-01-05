@@ -30,21 +30,6 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
             <a href="/patients" className="text-foreground hover:text-primary">
               Patients
             </a>
-            <a
-              href="/medications"
-              className="text-foreground hover:text-primary"
-            >
-              Medications
-            </a>
-            <a
-              href="/sleep-assessment"
-              className="text-foreground hover:text-primary"
-            >
-              Sleep Assessment
-            </a>
-            <a href="/insurance" className="text-foreground hover:text-primary">
-              Insurance
-            </a>
           </div>
           <div className="flex items-center space-x-4">
             <ThemeToggle />

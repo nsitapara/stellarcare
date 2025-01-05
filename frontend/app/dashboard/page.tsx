@@ -22,7 +22,7 @@ export default async function DashboardPage() {
         <DashboardClient
           initialData={{
             data: initialData.results.map((patient: Patient) => ({
-              id: patient.id,
+              id: String(patient.id),
               first: patient.first || '',
               middle: patient.middle || '',
               last: patient.last || '',

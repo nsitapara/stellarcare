@@ -5,9 +5,10 @@ from faker import Faker
 
 from api.models import (
     Address,
-    CustomField,
+    CustomFieldDefinition,
     Insurance,
     Patient,
+    PatientCustomField,
     SleepStudy,
     Treatment,
     Visits,
@@ -33,27 +34,56 @@ class Command(BaseCommand):
             )
             addresses.append(address)
 
-        # Generate Custom Fields
-        custom_fields = []
-        field_names = [
-            "Height",
-            "Weight",
-            "Blood Pressure",
-            "Heart Rate",
-            "Temperature",
+        # Generate Custom Field Definitions
+        field_definitions = []
+        field_configs = [
+            {
+                "name": "Height",
+                "type": "number",
+                "description": "Patient's height in centimeters",
+                "is_required": True,
+                "display_order": 1,
+            },
+            {
+                "name": "Weight",
+                "type": "number",
+                "description": "Patient's weight in kilograms",
+                "is_required": True,
+                "display_order": 2,
+            },
+            {
+                "name": "Blood Pressure",
+                "type": "text",
+                "description": "Patient's blood pressure reading",
+                "is_required": False,
+                "display_order": 3,
+            },
+            {
+                "name": "Heart Rate",
+                "type": "number",
+                "description": "Patient's heart rate in BPM",
+                "is_required": False,
+                "display_order": 4,
+            },
+            {
+                "name": "Temperature",
+                "type": "number",
+                "description": "Patient's temperature in Celsius",
+                "is_required": False,
+                "display_order": 5,
+            },
         ]
-        for name in field_names:
-            field = CustomField.objects.create(
-                name=name,
-                type="number" if name in ["Height", "Weight", "Heart Rate"] else "text",
-                value_text=fake.text(max_nb_chars=50)
-                if name not in ["Height", "Weight", "Heart Rate"]
-                else None,
-                value_number=random.uniform(50, 200)
-                if name in ["Height", "Weight", "Heart Rate"]
-                else None,
+
+        for config in field_configs:
+            field = CustomFieldDefinition.objects.create(
+                name=config["name"],
+                type=config["type"],
+                description=config["description"],
+                is_required=config["is_required"],
+                display_order=config["display_order"],
+                is_active=True,
             )
-            custom_fields.append(field)
+            field_definitions.append(field)
 
         # Generate Sleep Studies
         sleep_studies = []
@@ -140,7 +170,7 @@ class Command(BaseCommand):
                 )
             )
 
-        # Generate Patients
+        # Generate Patients with Custom Field Values
         for _ in range(15):
             patient = Patient.objects.create(
                 first=fake.first_name(),
@@ -153,10 +183,23 @@ class Command(BaseCommand):
             # Add random number of addresses
             patient.addresses.add(*random.sample(addresses, random.randint(1, 2)))
 
-            # Add random custom fields
-            patient.custom_fields.add(
-                *random.sample(custom_fields, random.randint(2, 5))
-            )
+            # Add custom field values
+            for field_def in field_definitions:
+                if field_def.is_required or random.choice([True, False]):
+                    if field_def.type == "number":
+                        value = random.uniform(50, 200)
+                        PatientCustomField.objects.create(
+                            patient=patient,
+                            field_definition=field_def,
+                            value_number=value,
+                        )
+                    else:
+                        value = fake.text(max_nb_chars=50)
+                        PatientCustomField.objects.create(
+                            patient=patient,
+                            field_definition=field_def,
+                            value_text=value,
+                        )
 
             # Add random sleep studies
             patient.studies.add(*random.sample(sleep_studies, random.randint(1, 3)))

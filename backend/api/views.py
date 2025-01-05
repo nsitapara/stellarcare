@@ -6,13 +6,22 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Patient
-from .serializers import PatientSerializer
+from .models import CustomFieldDefinition, Patient, PatientCustomField
+from .serializers import (
+    CustomFieldDefinitionSerializer,
+    PatientCustomFieldSerializer,
+    PatientSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class CustomPagination(PageNumberPagination):
+    """
+    Custom pagination class that extends Django REST Framework's PageNumberPagination.
+    Provides pagination with configurable page size and maximum page size limits.
+    """
+
     page_size = 10
     page_size_query_param = "page_size"
     max_page_size = 100
@@ -62,6 +71,13 @@ class PatientRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class PatientQueryView(APIView):
+    """
+    API endpoint for searching patients by name or ID.
+    Supports:
+    - Exact ID match for numeric queries
+    - Case-insensitive partial name match for text queries
+    """
+
     def get(self, request):
         query = request.query_params.get("q", None)
         if not query:
@@ -87,3 +103,77 @@ class PatientQueryView(APIView):
 
         serializer = PatientSerializer(patients, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CustomFieldDefinitionListCreateView(generics.ListCreateAPIView):
+    """
+    Handles listing all custom field definitions and creating new ones.
+    When creating a new custom field:
+    1. Creates the custom field definition
+    2. Associates it with the creating user
+    3. Logs the creation process and any errors
+    """
+
+    queryset = CustomFieldDefinition.objects.all().order_by("display_order", "name")
+    serializer_class = CustomFieldDefinitionSerializer
+
+    def create(self, request, *args, **kwargs):
+        logger.info(f"Creating custom field definition with data: {request.data}")
+        logger.info(f"Request user: {request.user.email}")
+
+        response = super().create(request, *args, **kwargs)
+        logger.info(f"Created custom field definition response: {response.data}")
+
+        # Associate the new custom field with the creating user
+        custom_field = CustomFieldDefinition.objects.get(id=response.data["id"])
+        user = request.user
+        logger.info(
+            f"Associating custom field {custom_field.id} with user {user.email}"
+        )
+
+        try:
+            user.available_custom_fields.add(custom_field)
+            logger.info("Successfully associated custom field with user")
+        except Exception as e:
+            logger.error(f"Error associating custom field with user: {e}")
+            raise
+
+        return response
+
+
+class CustomFieldDefinitionAssignedView(generics.ListAPIView):
+    """
+    Returns custom field definitions assigned to the current user.
+    """
+
+    serializer_class = CustomFieldDefinitionSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        logger.info(f"Fetching assigned custom fields for user: {user.email}")
+        return user.available_custom_fields.all().order_by("display_order", "name")
+
+
+class CustomFieldDefinitionRetrieveUpdateDeleteView(
+    generics.RetrieveUpdateDestroyAPIView
+):
+    """
+    Handles retrieving, updating, and deleting a single custom field definition.
+    """
+
+    queryset = CustomFieldDefinition.objects.all()
+    serializer_class = CustomFieldDefinitionSerializer
+
+
+class PatientCustomFieldListView(generics.ListAPIView):
+    """
+    Handles listing all custom field values for a specific patient.
+    """
+
+    serializer_class = PatientCustomFieldSerializer
+
+    def get_queryset(self):
+        patient_id = self.kwargs.get("patient_id")
+        return PatientCustomField.objects.filter(patient_id=patient_id).select_related(
+            "field_definition"
+        )

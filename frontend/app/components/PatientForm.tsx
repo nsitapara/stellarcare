@@ -1,14 +1,35 @@
 'use client'
 
-import type { CustomField, Patient } from '@/types/patient'
+import {
+  createCustomField,
+  getCustomFields,
+  getUserCustomFields
+} from '@/app/actions/get-custom-fields-action'
+import { Button } from '@/app/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/app/components/ui/form'
+import { Input } from '@/app/components/ui/input'
+import type { CustomFieldDefinition } from '@/types/api/models/CustomFieldDefinition'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Trash } from 'lucide-react'
-import { useState } from 'react'
+import { Plus, Trash2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { Button } from './ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel } from './ui/form'
-import { Input } from './ui/input'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from './ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import {
   Select,
   SelectContent,
@@ -17,41 +38,250 @@ import {
   SelectValue
 } from './ui/select'
 
-const addressSchema = z.object({
-  street: z.string().min(1, 'Street is required'),
-  city: z.string().min(1, 'City is required'),
-  state: z.string().min(1, 'State is required'),
-  zipCode: z.string().min(5, 'ZIP code must be at least 5 characters')
-})
-
-const formSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  middleName: z.string().optional(),
-  lastName: z.string().min(1, 'Last name is required'),
-  dateOfBirth: z.string(),
-  addresses: z.array(addressSchema)
-})
-
-type FormData = z.infer<typeof formSchema>
-
-interface PatientFormProps {
-  onSubmit: (patient: Patient) => void
-  initialData?: Patient
+interface FormCustomField {
+  id: string
+  name: string
+  type: 'text' | 'number'
+  value: string | number
+  customFieldDefinitionId: number
 }
 
-interface CustomFieldWithId extends CustomField {
-  id: string
+interface FormData {
+  firstName: string
+  middleName?: string
+  lastName: string
+  dateOfBirth: string
+  addresses: {
+    street: string
+    city: string
+    state: string
+    zipCode: string
+  }[]
+  customFields: FormCustomField[]
+}
+
+interface PatientFormProps {
+  onSubmit: (data: FormData) => void
+  initialData?: FormData
 }
 
 export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
-  const [customFields, setCustomFields] = useState<CustomFieldWithId[]>(
-    initialData?.customFields.map((field) => ({
-      ...field,
-      id: crypto.randomUUID()
-    })) || []
-  )
+  const [customFields, setCustomFields] = useState<FormCustomField[]>([])
+  const [availableCustomFields, setAvailableCustomFields] = useState<
+    CustomFieldDefinition[]
+  >([])
+  const [userAssignedFields, setUserAssignedFields] = useState<
+    CustomFieldDefinition[]
+  >([])
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const form = useForm<FormData>({
+  useEffect(() => {
+    const fetchCustomFields = async () => {
+      try {
+        console.log('Fetching custom fields...')
+        console.log('Initial data:', initialData)
+
+        // Get all available fields for search
+        const allFields = await getCustomFields()
+        console.log('All available fields:', allFields)
+        setAvailableCustomFields(allFields)
+
+        // Get user's assigned fields
+        const assignedFields = await getUserCustomFields()
+        console.log('User assigned fields:', assignedFields)
+        console.log(
+          'Assigned fields IDs:',
+          assignedFields.map((f) => f.id)
+        )
+        setUserAssignedFields(assignedFields)
+
+        if (initialData?.customFields) {
+          // If we have initial data, use those custom fields
+          console.log(
+            'Loading initial custom fields:',
+            initialData.customFields
+          )
+          const initialCustomFields: FormCustomField[] = []
+
+          for (const field of initialData.customFields) {
+            const fieldDef = allFields.find(
+              (def) => def.id === field.customFieldDefinitionId
+            )
+            if (!fieldDef) {
+              console.warn(
+                `Could not find field definition for ID: ${field.customFieldDefinitionId}`
+              )
+              continue
+            }
+            const initialField: FormCustomField = {
+              id: crypto.randomUUID(),
+              name: fieldDef.name,
+              type: fieldDef.type,
+              value: field.value,
+              customFieldDefinitionId: field.customFieldDefinitionId
+            }
+            console.log('Created initial field:', initialField)
+            initialCustomFields.push(initialField)
+          }
+
+          console.log('Formatted initial custom fields:', initialCustomFields)
+          setCustomFields(initialCustomFields)
+        } else {
+          // If no initial data, populate with user's assigned fields
+          console.log('No initial data, using assigned fields')
+          const defaultFields = assignedFields.map((field) => {
+            console.log('Creating field from:', field)
+            console.log('Field ID:', field.id)
+            return {
+              id: crypto.randomUUID(),
+              name: field.name,
+              type: field.type,
+              value: field.type === 'text' ? '' : 0,
+              customFieldDefinitionId: field.id
+            }
+          })
+          console.log('Created default fields:', defaultFields)
+          setCustomFields(defaultFields)
+        }
+      } catch (error) {
+        console.error('Error fetching custom fields:', error)
+        setAvailableCustomFields([])
+        setUserAssignedFields([])
+      }
+    }
+    fetchCustomFields()
+  }, [initialData])
+
+  const addCustomField = async (selectedField?: CustomFieldDefinition) => {
+    console.log('Adding custom field:', selectedField)
+    if (selectedField) {
+      // Check if field is already added
+      if (
+        customFields.some((f) => f.customFieldDefinitionId === selectedField.id)
+      ) {
+        console.log('Field already exists in form')
+        return
+      }
+
+      console.log(
+        'Selected field ID:',
+        selectedField.id,
+        'Type:',
+        typeof selectedField.id
+      )
+      const newField = {
+        id: crypto.randomUUID(),
+        name: selectedField.name,
+        type: selectedField.type,
+        value: selectedField.type === 'text' ? '' : 0,
+        customFieldDefinitionId: selectedField.id
+      }
+      console.log('Adding existing field:', newField)
+      setCustomFields([newField, ...customFields])
+    } else if (searchQuery) {
+      try {
+        console.log('Creating new custom field with name:', searchQuery)
+        const newField = await createCustomField({
+          name: searchQuery,
+          type: 'text',
+          description: 'Custom field created from patient form'
+        })
+        if (newField) {
+          console.log('Successfully created new field:', newField)
+          console.log('New field ID:', newField.id, 'Type:', typeof newField.id)
+
+          // Update available fields
+          setAvailableCustomFields((prev) => {
+            const updated = [newField, ...prev]
+            console.log('Updated available custom fields:', updated)
+            return updated
+          })
+
+          // Update user assigned fields
+          setUserAssignedFields((prev) => {
+            const updated = [newField, ...prev]
+            console.log('Updated user assigned fields:', updated)
+            return updated
+          })
+
+          const formField = {
+            id: crypto.randomUUID(),
+            name: newField.name,
+            type: newField.type,
+            value: newField.type === 'text' ? '' : 0,
+            customFieldDefinitionId: newField.id
+          }
+          console.log('Adding new field to form:', formField)
+          setCustomFields([formField, ...customFields])
+          setSearchQuery('')
+          setIsSearchOpen(false)
+        }
+      } catch (error) {
+        console.error('Error creating custom field:', error)
+      }
+    }
+  }
+
+  const removeCustomField = (id: string) => {
+    setCustomFields(customFields.filter((field) => field.id !== id))
+  }
+
+  const handleCustomFieldChange = (
+    id: string,
+    field: keyof Omit<FormCustomField, 'id'>,
+    value: string | number
+  ) => {
+    console.log('Handling custom field change:')
+    console.log('Field ID:', id)
+    console.log('Field key:', field)
+    console.log('New value:', value)
+
+    const updatedFields = [...customFields]
+    const index = updatedFields.findIndex((f) => f.id === id)
+    if (index === -1) return
+
+    console.log('Current field:', updatedFields[index])
+    console.log(
+      'Current customFieldDefinitionId:',
+      updatedFields[index].customFieldDefinitionId
+    )
+
+    if (field === 'type') {
+      updatedFields[index] = {
+        ...updatedFields[index],
+        type: value as 'text' | 'number',
+        value: value === 'text' ? '' : 0,
+        customFieldDefinitionId: updatedFields[index].customFieldDefinitionId
+      }
+    } else {
+      updatedFields[index] = {
+        ...updatedFields[index],
+        [field]: value,
+        customFieldDefinitionId: updatedFields[index].customFieldDefinitionId
+      }
+    }
+
+    console.log('Updated field:', updatedFields[index])
+    setCustomFields(updatedFields)
+  }
+
+  const formSchema = z.object({
+    firstName: z.string().min(1, 'First name is required'),
+    middleName: z.string().optional(),
+    lastName: z.string().min(1, 'Last name is required'),
+    dateOfBirth: z.string().min(1, 'Date of birth is required'),
+    addresses: z.array(
+      z.object({
+        street: z.string().min(1, 'Street is required'),
+        city: z.string().min(1, 'City is required'),
+        state: z.string().min(1, 'State is required'),
+        zipCode: z.string().min(1, 'ZIP code is required')
+      })
+    )
+  })
+
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: initialData?.firstName || '',
@@ -65,280 +295,317 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   })
 
   const { fields, append, remove } = useFieldArray({
-    name: 'addresses',
-    control: form.control
+    control: form.control,
+    name: 'addresses'
   })
 
-  const handleAddCustomField = () => {
-    setCustomFields([
-      ...customFields,
-      {
-        id: crypto.randomUUID(),
-        name: '',
-        type: 'text' as const,
-        value: ''
-      }
-    ])
-  }
+  const onFormSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log('Raw custom fields before formatting:', customFields)
 
-  const handleSubmit = (data: FormData) => {
-    const newPatient: Patient = {
-      id: initialData?.id || crypto.randomUUID(),
+    const formData: FormData = {
       firstName: data.firstName,
-      lastName: data.lastName,
       middleName: data.middleName,
+      lastName: data.lastName,
       dateOfBirth: data.dateOfBirth,
       addresses: data.addresses,
-      customFields: customFields.map(({ id, ...field }) => field),
-      status: initialData?.status || 'Inquiry',
-      sleepStudies: initialData?.sleepStudies || [],
-      medications: initialData?.medications || [],
-      cpapUsage: initialData?.cpapUsage || [],
-      insurance: initialData?.insurance || [],
-      appointments: initialData?.appointments || []
+      customFields: customFields
     }
-    onSubmit(newPatient)
+
+    console.log('Final form data:', formData)
+    onSubmit(formData)
   }
+
+  const filteredCustomFields = (availableCustomFields || []).filter(
+    (field) =>
+      field.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !customFields.some((f) => f.customFieldDefinitionId === field.id)
+  )
+  console.log('Filtered custom fields:', filteredCustomFields)
+  console.log('Current custom fields:', customFields)
+  console.log('Available custom fields:', availableCustomFields)
+  console.log('User assigned fields:', userAssignedFields)
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="firstName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium">
-                First Name
-              </FormLabel>
-              <FormControl>
-                <Input {...field} className="bg-background border-input" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="middleName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium">
-                Middle Name
-              </FormLabel>
-              <FormControl>
-                <Input {...field} className="bg-background border-input" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="lastName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium">
-                Last Name
-              </FormLabel>
-              <FormControl>
-                <Input {...field} className="bg-background border-input" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>First Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="middleName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Middle Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
           name="dateOfBirth"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-foreground font-medium">
-                Date of Birth
-              </FormLabel>
+            <FormItem className="max-w-sm">
+              <FormLabel>Date of Birth</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  type="date"
-                  className="bg-background border-input"
-                />
+                <Input type="date" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
 
-        {fields.map((field, index) => (
-          <div
-            key={field.id}
-            className="space-y-4 p-4 rounded-md border bg-accent/10"
-          >
-            <h3 className="text-lg font-semibold text-foreground">
-              Address {index + 1}
-            </h3>
-            <FormField
-              control={form.control}
-              name={`addresses.${index}.street`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground font-medium">
-                    Street
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="bg-background border-input" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`addresses.${index}.city`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground font-medium">
-                    City
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="bg-background border-input" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`addresses.${index}.state`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground font-medium">
-                    State
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="bg-background border-input" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`addresses.${index}.zipCode`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-foreground font-medium">
-                    ZIP Code
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} className="bg-background border-input" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Addresses</h3>
             <Button
               type="button"
               variant="outline"
-              onClick={() => remove(index)}
-              className="bg-background hover:bg-destructive hover:text-destructive-foreground"
+              size="sm"
+              onClick={() =>
+                append({ street: '', city: '', state: '', zipCode: '' })
+              }
             >
-              Remove Address
+              Add Address
             </Button>
           </div>
-        ))}
-        <Button
-          type="button"
-          onClick={() =>
-            append({ street: '', city: '', state: '', zipCode: '' })
-          }
-          variant="outline"
-          className="bg-background hover:bg-primary hover:text-primary-foreground"
-        >
-          Add Address
-        </Button>
-
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">
-            Custom Fields
-          </h3>
-          {customFields.map((field) => (
-            <div
-              key={field.id}
-              className="flex space-x-2 p-4 rounded-md border bg-accent/10"
-            >
-              <Input
-                placeholder="Field Name"
-                value={field.name}
-                onChange={(e) => {
-                  const newFields = customFields.map((f) =>
-                    f.id === field.id ? { ...f, name: e.target.value } : f
-                  )
-                  setCustomFields(newFields)
-                }}
-                className="bg-background border-input"
-              />
-              <Select
-                value={field.type}
-                onValueChange={(value: 'text' | 'number') => {
-                  const newFields = customFields.map((f) =>
-                    f.id === field.id
-                      ? {
-                          ...f,
-                          type: value,
-                          value: value === 'number' ? 0 : ''
-                        }
-                      : f
-                  )
-                  setCustomFields(newFields)
-                }}
-              >
-                <SelectTrigger className="bg-background border-input">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="text">Text</SelectItem>
-                  <SelectItem value="number">Number</SelectItem>
-                </SelectContent>
-              </Select>
-              <Input
-                type={field.type}
-                value={field.value}
-                onChange={(e) => {
-                  const newFields = customFields.map((f) =>
-                    f.id === field.id
-                      ? {
-                          ...f,
-                          value:
-                            field.type === 'number'
-                              ? Number(e.target.value)
-                              : e.target.value
-                        }
-                      : f
-                  )
-                  setCustomFields(newFields)
-                }}
-                className="bg-background border-input"
-              />
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                onClick={() => {
-                  setCustomFields(customFields.filter((f) => f.id !== field.id))
-                }}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
+          {fields.map((field, index) => (
+            <div key={field.id} className="space-y-4 p-4 border rounded-lg">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">Address {index + 1}</h4>
+                {fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => remove(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name={`addresses.${index}.street`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Street</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`addresses.${index}.city`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`addresses.${index}.state`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`addresses.${index}.zipCode`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ZIP Code</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           ))}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleAddCustomField}
-            className="bg-background hover:bg-primary hover:text-primary-foreground"
-          >
-            Add Custom Field
-          </Button>
         </div>
 
-        <Button
-          type="submit"
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          Save Patient
-        </Button>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Custom Fields</h3>
+            <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Custom Field
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0" side="right" align="start">
+                <Command>
+                  <CommandInput
+                    placeholder="Search custom fields..."
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      <div className="flex flex-col items-center py-4">
+                        <p className="text-sm text-muted-foreground mb-2">
+                          No custom fields found
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addCustomField()}
+                        >
+                          Create &quot;{searchQuery}&quot;
+                        </Button>
+                      </div>
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {filteredCustomFields.map((field) => (
+                        <CommandItem
+                          key={field.id}
+                          onSelect={() => addCustomField(field)}
+                        >
+                          <div className="flex items-center">
+                            <span>{field.name}</span>
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              ({field.type})
+                            </span>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+          {customFields.map((field) => (
+            <div key={field.id} className="space-y-4 p-4 border rounded-lg">
+              <div className="flex justify-between items-center">
+                <h4 className="font-medium">Custom Field {field.name}</h4>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeCustomField(field.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <FormLabel>Name</FormLabel>
+                  <Input
+                    value={field.name}
+                    onChange={(e) =>
+                      handleCustomFieldChange(field.id, 'name', e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <FormLabel>Type</FormLabel>
+                  <Select
+                    value={field.type}
+                    onValueChange={(value) =>
+                      handleCustomFieldChange(
+                        field.id,
+                        'type',
+                        value as 'text' | 'number'
+                      )
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text">Text</SelectItem>
+                      <SelectItem value="number">Number</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <FormLabel>Value</FormLabel>
+                  {field.type === 'text' ? (
+                    <Input
+                      value={field.value}
+                      onChange={(e) =>
+                        handleCustomFieldChange(
+                          field.id,
+                          'value',
+                          e.target.value
+                        )
+                      }
+                    />
+                  ) : (
+                    <Input
+                      type="number"
+                      value={field.value}
+                      onChange={(e) =>
+                        handleCustomFieldChange(
+                          field.id,
+                          'value',
+                          Number.parseFloat(e.target.value) || 0
+                        )
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <Button type="submit">Save Patient</Button>
       </form>
     </Form>
   )

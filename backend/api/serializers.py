@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions, serializers
 
-from .models import Address, Patient
+from .models import Address, CustomFieldDefinition, Patient, PatientCustomField
 
 User = get_user_model()
 
@@ -136,10 +136,159 @@ class AddressSerializer(serializers.ModelSerializer):
         return str(obj)
 
 
+class CustomFieldDefinitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomFieldDefinition
+        fields = [
+            "id",
+            "name",
+            "type",
+            "description",
+            "options",
+            "is_active",
+            "is_required",
+            "display_order",
+        ]
+
+
+class PatientCustomFieldSerializer(serializers.ModelSerializer):
+    field_definition = CustomFieldDefinitionSerializer(read_only=True)
+    value = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PatientCustomField
+        fields = ["id", "field_definition", "value"]
+
+    def get_value(self, obj):
+        return obj.get_value()
+
+
 class PatientSerializer(serializers.ModelSerializer):
-    addresses = AddressSerializer(many=True, read_only=True)
+    addresses = AddressSerializer(many=True)
+    custom_fields = serializers.ListField(
+        child=serializers.DictField(), write_only=True, required=False
+    )
+    patient_custom_fields = PatientCustomFieldSerializer(many=True, read_only=True)
 
     class Meta:
         model = Patient
         fields = "__all__"
         read_only_fields = ("id",)
+
+    def create(self, validated_data):
+        addresses_data = validated_data.pop("addresses", [])
+        studies = validated_data.pop("studies", [])
+        treatments = validated_data.pop("treatments", [])
+        insurance = validated_data.pop("insurance", [])
+        appointments = validated_data.pop("appointments", [])
+        custom_fields_data = validated_data.pop("custom_fields", [])
+
+        # Create the patient first
+        patient = Patient.objects.create(**validated_data)
+
+        # Handle addresses
+        for address_data in addresses_data:
+            address = Address.objects.create(**address_data)
+            patient.addresses.add(address)
+
+        # Handle custom fields
+        for field_data in custom_fields_data:
+            print(f"Processing custom field data: {field_data}")
+            print(
+                f"Custom field definition ID: {field_data.get('custom_field_definition_id')}, Type: {type(field_data.get('custom_field_definition_id'))}"
+            )
+            try:
+                field_definition = CustomFieldDefinition.objects.get(
+                    id=field_data["custom_field_definition_id"]
+                )
+                print(
+                    f"Found custom field definition: {field_definition.id}, Name: {field_definition.name}"
+                )
+
+                value_field = f"value_{field_definition.type}"
+                value = field_data.get(
+                    f"value_{field_definition.type}"
+                ) or field_data.get("value_text")
+                print(f"Value field: {value_field}, Value: {value}")
+
+                if value is not None:
+                    custom_field = PatientCustomField.objects.create(
+                        patient=patient,
+                        field_definition=field_definition,
+                        **{value_field: value},
+                    )
+                    print(f"Created patient custom field: {custom_field.id}")
+            except CustomFieldDefinition.DoesNotExist:
+                print(
+                    f"Custom field definition not found for ID: {field_data.get('custom_field_definition_id')}"
+                )
+                continue
+            except Exception as e:
+                print(f"Error creating custom field: {str(e)}")
+                continue
+
+        # Handle many-to-many relationships
+        if studies:
+            patient.studies.set(studies)
+        if treatments:
+            patient.treatments.set(treatments)
+        if insurance:
+            patient.insurance.set(insurance)
+        if appointments:
+            patient.appointments.set(appointments)
+
+        return patient
+
+    def update(self, instance, validated_data):
+        addresses_data = validated_data.pop("addresses", [])
+        studies = validated_data.pop("studies", None)
+        treatments = validated_data.pop("treatments", None)
+        insurance = validated_data.pop("insurance", None)
+        appointments = validated_data.pop("appointments", None)
+        custom_fields_data = validated_data.pop("custom_fields", [])
+
+        # Update regular fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Handle addresses
+        instance.addresses.clear()
+        for address_data in addresses_data:
+            address = Address.objects.create(**address_data)
+            instance.addresses.add(address)
+
+        # Handle custom fields
+        if custom_fields_data:
+            instance.patient_custom_fields.all().delete()
+            for field_data in custom_fields_data:
+                try:
+                    field_definition = CustomFieldDefinition.objects.get(
+                        id=field_data["custom_field_definition_id"]
+                    )
+
+                    value_field = f"value_{field_definition.type}"
+                    value = field_data.get(
+                        f"value_{field_definition.type}"
+                    ) or field_data.get("value_text")
+
+                    if value is not None:
+                        PatientCustomField.objects.create(
+                            patient=instance,
+                            field_definition=field_definition,
+                            **{value_field: value},
+                        )
+                except CustomFieldDefinition.DoesNotExist:
+                    continue
+
+        # Handle many-to-many relationships
+        if studies is not None:
+            instance.studies.set(studies)
+        if treatments is not None:
+            instance.treatments.set(treatments)
+        if insurance is not None:
+            instance.insurance.set(insurance)
+        if appointments is not None:
+            instance.appointments.set(appointments)
+
+        return instance

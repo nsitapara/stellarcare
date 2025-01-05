@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { PaginatedPatientCustomFieldList } from '../models/PaginatedPatientCustomFieldList';
 import type { PaginatedPatientList } from '../models/PaginatedPatientList';
 import type { PatchedPatient } from '../models/PatchedPatient';
 import type { Patient } from '../models/Patient';
@@ -43,6 +44,28 @@ export class PatientsService {
             url: '/api/patients/',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+    /**
+     * Handles listing all custom field values for a specific patient.
+     * @param patientId
+     * @param page A page number within the paginated result set.
+     * @returns PaginatedPatientCustomFieldList
+     * @throws ApiError
+     */
+    public patientsCustomFieldsList(
+        patientId: number,
+        page?: number,
+    ): CancelablePromise<PaginatedPatientCustomFieldList> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/patients/{patient_id}/custom-fields/',
+            path: {
+                'patient_id': patientId,
+            },
+            query: {
+                'page': page,
+            },
         });
     }
     /**

@@ -1,150 +1,156 @@
 'use client'
 
+import { getPatient } from '@/app/actions/get-patient-action'
+import { getPatientCustomFields } from '@/app/actions/get-patient-custom-fields-action'
+import { updatePatient } from '@/app/actions/update-patient-action'
 import { PatientForm } from '@/app/components/PatientForm'
+import { Button } from '@/app/components/ui/button'
 import type { Patient } from '@/types/api/models/Patient'
-import type { PatientFormData } from '@/types/patient'
+import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 
-interface EditPatientPageProps {
-  params: {
-    id: string
-  }
+interface FormCustomField {
+  id: string
+  name: string
+  type: 'text' | 'number'
+  value: string | number
+  customFieldDefinitionId: number
 }
 
-export default function EditPatientPage({ params }: EditPatientPageProps) {
+interface FormData {
+  firstName: string
+  middleName?: string
+  lastName: string
+  dateOfBirth: string
+  addresses: {
+    street: string
+    city: string
+    state: string
+    zipCode: string
+  }[]
+  customFields: FormCustomField[]
+}
+
+interface PatientWithCustomFields extends Patient {
+  customFields: FormCustomField[]
+}
+
+export default function EditPatientPage({
+  params
+}: {
+  params: Promise<{ id: string }>
+}) {
   const router = useRouter()
-  const [patient, setPatient] = useState<Patient | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [patient, setPatient] = useState<PatientWithCustomFields | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { id } = use(params)
 
   useEffect(() => {
-    async function loadPatient() {
+    const fetchPatientData = async () => {
       try {
-        const response = await fetch(`/api/patients/${params.id}`)
-        if (!response.ok) {
-          throw new Error('Failed to load patient')
+        setLoading(true)
+        const patientData = await getPatient(id)
+        console.log('Patient data:', patientData)
+
+        // Fetch patient's custom field values
+        const customFields = await getPatientCustomFields(Number(id))
+        console.log('Patient custom fields:', customFields)
+
+        // Transform custom fields to match form data structure
+        const formattedCustomFields = customFields.map((field) => ({
+          id: crypto.randomUUID(),
+          name: field.field_definition.name,
+          type: field.field_definition.type as 'text' | 'number',
+          value: field.value,
+          customFieldDefinitionId: field.field_definition.id
+        }))
+
+        // Merge patient data with custom fields
+        const patientWithCustomFields: PatientWithCustomFields = {
+          ...patientData,
+          customFields: formattedCustomFields
         }
-        const patientData = await response.json()
-        setPatient(patientData)
-      } catch (error) {
-        console.error('Failed to load patient:', error)
-        setError('Failed to load patient data. Please try again.')
+
+        setPatient(patientWithCustomFields)
+        setError(null)
+      } catch (err) {
+        console.error('Error fetching patient:', err)
+        setError('Failed to load patient data')
       } finally {
         setLoading(false)
       }
     }
-    loadPatient()
-  }, [params.id])
 
-  async function handleSubmit(formData: PatientFormData) {
+    fetchPatientData()
+  }, [id])
+
+  const handleSubmit = async (formData: FormData) => {
     try {
       if (!patient) return
 
-      const response = await fetch('/api/patients', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
+      await updatePatient(
+        id,
+        {
+          ...formData,
+          customFields: formData.customFields
         },
-        body: JSON.stringify({
-          id: params.id,
-          first: formData.firstName,
-          middle: formData.middleName || null,
-          last: formData.lastName,
-          date_of_birth: formData.dateOfBirth,
-          status: patient.status,
-          created_at: patient.created_at,
-          modified_at: patient.modified_at,
-          addresses: formData.addresses.map((addr) => ({
-            id: 0,
-            street: addr.street,
-            city: addr.city,
-            state: addr.state,
-            zip_code: addr.zipCode,
-            formatted_address: `${addr.street}, ${addr.city}, ${addr.state} ${addr.zipCode}`
-          })),
-          custom_fields: patient.custom_fields,
-          studies: patient.studies,
-          treatments: patient.treatments,
-          insurance: patient.insurance,
-          appointments: patient.appointments
-        })
-      })
+        patient
+      )
 
-      if (!response.ok) {
-        throw new Error('Failed to update patient')
-      }
-
-      router.push('/dashboard')
+      // Get the redirect path from the URL query parameters
+      const searchParams = new URLSearchParams(window.location.search)
+      const redirectPath = searchParams.get('redirect') || '/patients'
+      router.push(redirectPath)
     } catch (error) {
-      console.error('Failed to update patient:', error)
-      if (error instanceof Error) {
-        setError(error.message)
-      } else {
-        setError('Failed to update patient. Please try again.')
-      }
+      console.error('Error updating patient:', error)
     }
   }
 
   if (loading) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="flex justify-center items-center min-h-[200px]">
-          Loading...
-        </div>
-      </div>
-    )
+    return <div>Loading...</div>
   }
 
   if (error) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="p-4 text-red-700 bg-red-100 rounded-md">{error}</div>
-      </div>
-    )
+    return <div>Error: {error}</div>
   }
 
   if (!patient) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="p-4 text-red-700 bg-red-100 rounded-md">
-          Patient not found
-        </div>
-      </div>
-    )
+    return <div>Patient not found</div>
+  }
+
+  const initialData: FormData = {
+    firstName: patient.first,
+    middleName: patient.middle || undefined,
+    lastName: patient.last,
+    dateOfBirth: patient.date_of_birth,
+    addresses: patient.addresses.map((addr) => ({
+      street: addr.street,
+      city: addr.city,
+      state: addr.state,
+      zipCode: addr.zip_code
+    })),
+    customFields: patient.customFields
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Edit Patient</h1>
-        <p className="text-muted-foreground">Update patient information</p>
+    <div className="container mx-auto py-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Edit Patient</h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            const searchParams = new URLSearchParams(window.location.search)
+            const redirectPath = searchParams.get('redirect') || '/dashboard'
+            router.push(redirectPath)
+          }}
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
-      <PatientForm
-        onSubmit={handleSubmit}
-        initialData={{
-          id: patient.id,
-          firstName: patient.first,
-          middleName: patient.middle || '',
-          lastName: patient.last,
-          dateOfBirth: patient.date_of_birth,
-          status: patient.status,
-          addresses: patient.addresses.map((addr) => ({
-            street: addr.street,
-            city: addr.city,
-            state: addr.state,
-            zipCode: addr.zip_code
-          })),
-          customFields: [],
-          sleepStudies: [],
-          medications: [],
-          cpapUsage: [],
-          insurance: [],
-          appointments: [],
-          createdAt: patient.created_at,
-          modifiedAt: patient.modified_at
-        }}
-      />
+      <PatientForm onSubmit={handleSubmit} initialData={initialData} />
     </div>
   )
 }
