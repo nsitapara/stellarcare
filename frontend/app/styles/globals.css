@@ -48,24 +48,24 @@
     --popover: 217 28% 15%;
     --popover-foreground: 210 40% 98%;
 
-    --card: 217 28% 15%;
+    --card: 217 28% 17%;
     --card-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 25%;
+    --border: 217.2 32.6% 20%;
+    --input: 217.2 32.6% 22%;
 
     --primary: 14 64% 62%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217 28% 25%;
+    --secondary: 217 28% 20%;
     --secondary-foreground: 210 40% 98%;
 
     --accent: 14 64% 62%;
     --accent-foreground: 210 40% 98%;
 
-    --main-background: 217 28% 20%;
+    --main-background: 217 28% 12%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 85.7% 97.3%;
 
     --ring: 217.2 32.6% 17.5%;
@@ -78,5 +78,55 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .container-wrapper {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .form-card {
+    @apply bg-card rounded-lg border shadow-sm p-6;
+  }
+
+  .form-section {
+    @apply space-y-6 border-b border-border pb-6 last:border-0 last:pb-0;
+  }
+
+  .patient-form {
+    @apply bg-background/50 p-8 rounded-lg;
+  }
+
+  .patient-form-header {
+    @apply flex justify-between items-center mb-8;
+  }
+
+  .patient-form-title {
+    @apply text-2xl font-bold tracking-tight;
+  }
+
+  .patient-form-subtitle {
+    @apply text-sm text-muted-foreground mt-1;
+  }
+
+  .patient-form-section {
+    @apply space-y-4 mb-8;
+  }
+
+  .patient-form-section-header {
+    @apply flex justify-between items-center mb-4;
+  }
+
+  .patient-form-section-title {
+    @apply text-lg font-medium;
+  }
+
+  .patient-form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  .patient-form-input {
+    @apply bg-background/50 border-border/50;
   }
 }
