@@ -4,6 +4,18 @@ import { Button } from '@components/ui/button'
 import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+/**
+ * A component that provides a toggle button for switching between light and dark themes.
+ * The theme state is managed through the 'dark' class on the HTML element and persists across page reloads.
+ *
+ * Features:
+ * - Displays a sun icon in dark mode and moon icon in light mode
+ * - Maintains theme state using React useState
+ * - Initializes theme state on component mount
+ * - Provides screen reader accessibility with sr-only text
+ *
+ * @returns A button component that toggles between light and dark themes
+ */
 export function ThemeToggle() {
   const [isDark, setIsDark] = useState(true)
 

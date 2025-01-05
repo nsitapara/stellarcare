@@ -4,6 +4,18 @@ import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 
+/**
+ * Server-side rendered dashboard page component.
+ * Handles authentication, initial data fetching, and patient data processing.
+ *
+ * Features:
+ * - Authentication check with automatic redirect to login if unauthenticated
+ * - Fetches initial patient data (10 patients per page)
+ * - Processes patient data to include formatted addresses and default values
+ * - Error handling with fallback to empty dashboard state
+ *
+ * @returns The DashboardClient component with processed patient data or empty state
+ */
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   if (!session) {

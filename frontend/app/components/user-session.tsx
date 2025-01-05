@@ -3,6 +3,18 @@
 import { Button } from '@components/ui/button'
 import { signIn, signOut, useSession } from 'next-auth/react'
 
+/**
+ * A component that handles user session display and authentication actions.
+ * Renders different UI states based on the authentication status:
+ * - Loading: Shows a loading message
+ * - Unauthenticated: Displays a sign-in button
+ * - Authenticated: Shows username and sign-out button
+ *
+ * Uses NextAuth's useSession hook to manage authentication state.
+ * Username is displayed without the email domain (splits at '@').
+ *
+ * @returns A component that conditionally renders based on authentication state
+ */
 export function UserSession() {
   const { data: session, status } = useSession()
 
