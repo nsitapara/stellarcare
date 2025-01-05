@@ -1,7 +1,15 @@
+/**
+ * Dashboard Client Component
+ *
+ * A client-side component that provides a dynamic interface for managing patient data.
+ * Features include pagination, search functionality, and real-time updates.
+ */
+
 'use client'
 
 import { getPatients } from '@actions/patient/get-patients-action'
 import { searchPatients } from '@actions/patient/patient-search-action'
+import type { DashboardClientProps } from '@api/dashboard'
 import type { Patient } from '@api/models/Patient'
 import { Button } from '@components/ui/button'
 import debounce from 'lodash/debounce'
@@ -10,33 +18,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DashboardTable } from './dashboard-table'
 
 /**
- * Type for the transformed patient data used in the dashboard UI
+ * Main dashboard client component that handles data fetching, search, and pagination
+ *
+ * @param props - Component props including initial data
+ * @returns Dashboard interface with search and table components
  */
-interface TransformedPatient {
-  id: string
-  first: string
-  middle: string
-  last: string
-  status: string
-  date_of_birth: string
-  created_at: string
-  addresses: string[]
-}
-
-/**
- * Type for the dashboard's data structure including pagination info
- */
-interface DashboardData {
-  data: TransformedPatient[]
-  total: number
-  page: number
-  pageSize: number
-}
-
-interface DashboardClientProps {
-  initialData: DashboardData
-}
-
 export function DashboardClient({ initialData }: DashboardClientProps) {
   const router = useRouter()
   const [data, setData] = useState(initialData)
@@ -76,7 +62,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
           : response.count
 
         setData({
-          data: patients.map((patient: Patient) => ({
+          data: patients.map((patient) => ({
             id: String(patient.id),
             first: patient.first || '',
             middle: patient.middle || '',

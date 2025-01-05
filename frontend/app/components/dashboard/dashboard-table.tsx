@@ -1,5 +1,13 @@
+/**
+ * Dashboard Table Component
+ *
+ * A responsive table component for displaying and managing patient data.
+ * Features include sorting, filtering, and pagination controls.
+ */
+
 'use client'
 
+import type { DashboardTableProps } from '@api/dashboard'
 import { cn } from '@components/lib/utils'
 import { Button } from '@components/ui/button'
 import {
@@ -10,22 +18,16 @@ import {
   TableHeader,
   TableRow
 } from '@components/ui/table'
-import type { DashboardData } from '@types/dashboard'
 import { Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-interface DashboardTableProps {
-  data: DashboardData[]
-  total: number
-  page: number
-  pageSize: number
-  onPageChange: (page: number) => void
-  onPageSizeChange: (pageSize: number) => void
-  onSearch: (query: string) => void
-  isLoading: boolean
-}
-
+/**
+ * Maps patient status to corresponding CSS classes for visual styling
+ *
+ * @param status - Patient status string
+ * @returns CSS class string for the status badge
+ */
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'Inquiry':
@@ -41,6 +43,12 @@ const getStatusColor = (status: string) => {
   }
 }
 
+/**
+ * Gets the color class for address badges based on index
+ *
+ * @param index - Index of the address in the list
+ * @returns CSS class string for the address badge
+ */
 const getAddressColor = (index: number) => {
   const colors = [
     'bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-200 ring-purple-500/30',
@@ -51,6 +59,12 @@ const getAddressColor = (index: number) => {
   return colors[index % colors.length]
 }
 
+/**
+ * Main dashboard table component that displays patient data in a tabular format
+ *
+ * @param props - Component props including data and event handlers
+ * @returns Table interface with search, pagination, and data display
+ */
 export function DashboardTable({
   data,
   total,

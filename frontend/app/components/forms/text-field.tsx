@@ -1,26 +1,29 @@
+/**
+ * Text Field Component
+ *
+ * A reusable form input component that supports various input types
+ * and displays validation errors from react-hook-form.
+ */
+
 'use client'
 
+import type { TextFieldProps } from '@api/forms'
 import { cn } from '@components/lib/utils'
 import type React from 'react'
-import type {
-  FieldValues,
-  FormState,
-  UseFormRegisterReturn
-} from 'react-hook-form'
 
+/**
+ * Renders a form input field with label and error handling
+ *
+ * @param props - Component props including input configuration and form state
+ * @returns Form input field with label and optional error message
+ */
 export function TextField({
   type,
   label,
   placeholder,
   register,
   formState
-}: {
-  type: 'text' | 'password' | 'number'
-  label: string
-  placeholder?: string
-  register: UseFormRegisterReturn
-  formState: FormState<FieldValues>
-}): React.ReactElement {
+}: TextFieldProps): React.ReactElement {
   const hasError = formState.errors[register.name]
 
   return (

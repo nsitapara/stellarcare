@@ -1,17 +1,21 @@
+/**
+ * Form Footer Component
+ *
+ * A reusable footer component for forms that displays a call-to-action link.
+ */
+
 'use client'
 
+import type { FormFooterProps } from '@api/forms'
 import Link from 'next/link'
-import type React from 'react'
 
-export function FormFooter({
-  cta,
-  link,
-  title
-}: {
-  cta: string
-  link: string
-  title: string
-}) {
+/**
+ * Renders a form footer with a call-to-action link
+ *
+ * @param props - Component props including CTA text and link details
+ * @returns Form footer with styled link
+ */
+export function FormFooter({ cta, link, title }: FormFooterProps) {
   const actionLink = (
     <Link
       href={link}
