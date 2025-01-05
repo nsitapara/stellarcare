@@ -1,29 +1,41 @@
+/**
+ * Patient Details Page
+ *
+ * This page displays detailed information about a single patient.
+ * It handles:
+ * - Authentication checks
+ * - Patient data fetching
+ * - Redirection for unauthorized access or missing patients
+ */
+
 import { getPatient } from '@/app/actions/get-patient-action'
+import { authOptions } from '@/app/lib/auth'
+import { getServerSession } from 'next-auth'
+import { redirect } from 'next/navigation'
 import { PatientTabs } from './patient-tabs'
 
-export default async function PatientPage({
-  params
-}: { params: { id: string } }) {
-  const patient = await getPatient(params.id)
+interface PatientPageProps {
+  params: {
+    id: string // Patient ID from the URL
+  }
+}
 
+export default async function PatientPage({ params }: PatientPageProps) {
+  // Check authentication first
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    redirect('/login')
+  }
+
+  // Fetch patient data
+  const patient = await getPatient(params.id)
   if (!patient) {
-    return (
-      <div className="container-wrapper py-8">
-        <div className="form-card">
-          <h1 className="dashboard-title">Patient not found</h1>
-          <p className="dashboard-subtitle">
-            The requested patient could not be found in the system.
-          </p>
-        </div>
-      </div>
-    )
+    redirect('/dashboard')
   }
 
   return (
-    <div className="container-wrapper py-8">
-      <div className="space-y-6">
-        <PatientTabs patient={patient} />
-      </div>
+    <div className="container mx-auto py-6">
+      <PatientTabs patient={patient} />
     </div>
   )
 }

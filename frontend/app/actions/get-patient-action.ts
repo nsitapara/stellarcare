@@ -1,3 +1,10 @@
+/**
+ * Patient Data Server Actions
+ *
+ * This module provides server-side actions for fetching patient data.
+ * It handles authentication checks and error handling for patient-related operations.
+ */
+
 'use server'
 
 import type { Patient } from '@/types/api/models/Patient'
@@ -5,12 +12,23 @@ import { getApiClient } from '@lib/api'
 import { authOptions } from '@lib/auth'
 import { getServerSession } from 'next-auth'
 
-export async function getPatient(patientId: string): Promise<Patient> {
+/**
+ * Fetches a single patient's details by ID
+ *
+ * @param id - The patient's ID
+ * @returns The patient object if found and user is authenticated, null otherwise
+ */
+export async function getPatient(id: string): Promise<Patient | null> {
   const session = await getServerSession(authOptions)
   if (!session) {
-    throw new Error('You must be logged in to view patient details')
+    return null
   }
 
-  const api = await getApiClient(session)
-  return api.patients.patientsRetrieve(patientId)
+  try {
+    const api = await getApiClient(session)
+    return await api.patients.patientsRetrieve(id)
+  } catch (error) {
+    console.error('Failed to fetch patient:', error)
+    return null
+  }
 }

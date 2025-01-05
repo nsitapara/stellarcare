@@ -1,8 +1,24 @@
-import { ApiError } from '@/types/api'
+/**
+ * NextAuth Configuration and JWT Token Management
+ *
+ * This module configures NextAuth to work with our Django backend's JWT authentication.
+ * It handles:
+ * - JWT token decoding and validation
+ * - Session management
+ * - Token refresh logic
+ * - Credentials provider setup
+ */
+
+import { refreshTokenAction } from '@/app/actions/auth-action'
 import type { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { getApiClient } from './api'
 
+/**
+ * Decodes a JWT token and returns its payload
+ *
+ * @param token - JWT token string to decode
+ * @returns Decoded token payload containing user information and expiry
+ */
 function decodeToken(token: string): {
   token_type: string
   exp: number
@@ -13,6 +29,15 @@ function decodeToken(token: string): {
   return JSON.parse(atob(token.split('.')[1]))
 }
 
+/**
+ * NextAuth configuration options
+ *
+ * This configuration:
+ * - Uses JWT strategy for session handling
+ * - Customizes the sign-in page route
+ * - Implements session and JWT callbacks for token management
+ * - Sets up the credentials provider for username/password authentication
+ */
 const authOptions: AuthOptions = {
   session: {
     strategy: 'jwt'
@@ -21,6 +46,12 @@ const authOptions: AuthOptions = {
     signIn: '/login'
   },
   callbacks: {
+    /**
+     * Session Callback
+     *
+     * Runs when a session is checked. Validates token expiry and
+     * adds user information and tokens to the session.
+     */
     session: async ({ session, token }) => {
       const access = decodeToken(token.access)
       const refresh = decodeToken(token.refresh)
@@ -41,62 +72,65 @@ const authOptions: AuthOptions = {
 
       return session
     },
+    /**
+     * JWT Callback
+     *
+     * Runs when a JWT is created/updated. Handles token refresh
+     * when the access token expires.
+     */
     jwt: async ({ token, user }) => {
       if (user?.username) {
         return { ...token, ...user }
       }
 
-      // Refresh token
+      // Refresh token if access token is expired
       if (Date.now() / 1000 > decodeToken(token.access).exp) {
-        const apiClient = await getApiClient()
-        const res = await apiClient.token.tokenRefreshCreate({
-          access: token.access,
-          refresh: token.refresh
-        })
-
-        token.access = res.access
+        try {
+          const result = await refreshTokenAction(token.refresh)
+          if (result.access) {
+            token.access = result.access
+          }
+        } catch (error) {
+          console.error('Token refresh error:', error)
+          return token
+        }
       }
 
-      return { ...token, ...user }
+      return token
     }
   },
   providers: [
     CredentialsProvider({
       name: 'credentials',
-      credentials: {
-        username: {
-          label: 'Email',
-          type: 'text'
-        },
-        password: { label: 'Password', type: 'password' }
-      },
-      async authorize(credentials) {
-        if (credentials === undefined) {
+      credentials: {},
+      /**
+       * Authorize Callback
+       *
+       * Validates the credentials provided during sign-in.
+       * For our implementation, it validates pre-obtained tokens
+       * rather than handling the actual authentication.
+       */
+      async authorize(credentials: Record<string, string> | undefined) {
+        if (
+          !credentials?.access ||
+          !credentials?.refresh ||
+          !credentials?.username
+        ) {
           return null
         }
 
         try {
-          const apiClient = await getApiClient()
-          const res = await apiClient.token.tokenCreate({
-            username: credentials.username,
-            password: credentials.password,
-            access: '',
-            refresh: ''
-          })
-
+          const decoded = decodeToken(credentials.access)
           return {
-            id: decodeToken(res.access).user_id,
+            id: decoded.user_id,
             username: credentials.username,
-            access: res.access,
-            refresh: res.refresh
+            access: credentials.access,
+            refresh: credentials.refresh
           }
         } catch (error) {
-          if (error instanceof ApiError) {
-            return null
-          }
+          console.error('Auth error:', error)
+          return null
         }
-
-        return null
       }
     })
   ]
