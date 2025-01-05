@@ -2,15 +2,98 @@
 
 import { ThemeToggle } from '@components/theme-toggle'
 import { UserSession } from '@components/user-session'
-import { Moon } from 'lucide-react'
 import { SessionProvider, useSession } from 'next-auth/react'
 import '@/app/styles/globals.css'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+
+function MoonIcon({ animate }: { animate: boolean }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`moon-icon ${animate ? 'animate-fill' : ''}`}
+      role="img"
+      aria-label="StellarCare Logo"
+    >
+      <title>StellarCare Logo</title>
+      <defs>
+        <linearGradient
+          id="moonGradient"
+          x1="100%"
+          y1="100%"
+          x2="0%"
+          y2="0%"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" className="gradient-stop-1" />
+          <stop offset="50%" className="gradient-stop-2" />
+          <stop offset="100%" className="gradient-stop-3" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+        className="moon-path"
+      />
+    </svg>
+  )
+}
 
 function NavigationBar() {
   const { data: session } = useSession()
   const router = useRouter()
+  const pathname = usePathname()
+  const [shouldAnimate, setShouldAnimate] = useState(false)
+  const [isDark, setIsDark] = useState(true)
+  const [lastPathname, setLastPathname] = useState(pathname)
+
+  const triggerAnimation = useCallback(() => {
+    setShouldAnimate(true)
+    const timer = setTimeout(() => {
+      setShouldAnimate(false)
+    }, 700)
+    return timer
+  }, [])
+
+  // Watch for route changes
+  useEffect(() => {
+    if (pathname !== lastPathname) {
+      setLastPathname(pathname)
+      triggerAnimation()
+    }
+  }, [pathname, lastPathname, triggerAnimation])
+
+  // Watch for theme changes
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.target instanceof HTMLElement &&
+          mutation.attributeName === 'class'
+        ) {
+          const isDarkMode = mutation.target.classList.contains('dark')
+          if (isDark !== isDarkMode) {
+            setIsDark(isDarkMode)
+            triggerAnimation()
+          }
+        }
+      }
+    })
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => observer.disconnect()
+  }, [isDark, triggerAnimation])
 
   const handleLogoClick = () => {
     if (session) {
@@ -18,6 +101,10 @@ function NavigationBar() {
     } else {
       router.push('/')
     }
+  }
+
+  const handleNavigation = (path: string) => {
+    router.push(path)
   }
 
   return (
@@ -29,14 +116,15 @@ function NavigationBar() {
           className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           aria-label="Go to home page"
         >
-          <Moon className="h-6 w-6 text-foreground" />
+          <MoonIcon animate={shouldAnimate} />
           <span className="text-xl font-semibold text-foreground">
             StellarCare
           </span>
         </button>
         <div className="hidden md:flex items-center space-x-8">
-          <Link
-            href="/dashboard"
+          <button
+            type="button"
+            onClick={() => handleNavigation('/dashboard')}
             className="text-foreground hover:text-primary flex items-center gap-2"
           >
             <svg
@@ -59,9 +147,10 @@ function NavigationBar() {
               <rect width="7" height="5" x="3" y="16" rx="1" />
             </svg>
             Dashboard
-          </Link>
-          <Link
-            href="/appointments"
+          </button>
+          <button
+            type="button"
+            onClick={() => handleNavigation('/appointments')}
             className="text-foreground hover:text-primary flex items-center gap-2"
           >
             <svg
@@ -84,7 +173,7 @@ function NavigationBar() {
               <line x1="3" x2="21" y1="10" y2="10" />
             </svg>
             Appointments
-          </Link>
+          </button>
         </div>
         <div className="flex items-center space-x-4">
           <ThemeToggle />

@@ -266,4 +266,87 @@
   .delete-button {
     @apply bg-destructive/10 text-destructive hover:bg-[#ef4444] hover:text-white;
   }
+
+  /* Add this new section for the moon icon */
+  .moon-icon {
+    @apply h-6 w-6 text-foreground;
+  }
+
+  .moon-path {
+    @apply transition-all duration-700;
+    stroke: currentColor;
+    fill: url(#moonGradient);
+  }
+
+  /* Base states for gradient stops */
+  .gradient-stop-1,
+  .gradient-stop-2,
+  .gradient-stop-3 {
+    stop-color: rgb(249, 115, 22);
+    stop-opacity: 0;
+  }
+
+  /* Animation trigger class */
+  .animate-fill .gradient-stop-1 {
+    animation: fillStart 0.7s ease forwards;
+  }
+
+  .animate-fill .gradient-stop-2 {
+    animation: fillMiddle 0.7s ease forwards;
+  }
+
+  .animate-fill .gradient-stop-3 {
+    animation: fillEnd 0.7s ease forwards 0.1s;
+  }
+
+  /* Reset animation when not animating */
+  .moon-icon:not(.animate-fill) .gradient-stop-1,
+  .moon-icon:not(.animate-fill) .gradient-stop-2,
+  .moon-icon:not(.animate-fill) .gradient-stop-3 {
+    animation: emptyAll 0.7s ease forwards;
+  }
+
+  /* Fill animations */
+  @keyframes fillStart {
+    from {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+    to {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 1;
+    }
+  }
+
+  @keyframes fillMiddle {
+    from {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+    to {
+      stop-color: rgb(255, 255, 255);
+      stop-opacity: 1;
+    }
+  }
+
+  @keyframes fillEnd {
+    from {
+      stop-color: rgb(249, 115, 22);
+      stop-opacity: 0;
+    }
+    to {
+      stop-color: rgb(255, 255, 255);
+      stop-opacity: 1;
+    }
+  }
+
+  /* Empty animation */
+  @keyframes emptyAll {
+    from {
+      stop-opacity: 1;
+    }
+    to {
+      stop-opacity: 0;
+    }
+  }
 }
