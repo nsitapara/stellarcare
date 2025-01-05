@@ -41,6 +41,16 @@ const getStatusColor = (status: string) => {
   }
 }
 
+const getAddressColor = (index: number) => {
+  const colors = [
+    'bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-200 ring-purple-500/30',
+    'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-200 ring-green-500/30',
+    'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200 ring-amber-500/30',
+    'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200 ring-rose-500/30'
+  ]
+  return colors[index % colors.length]
+}
+
 export function DashboardTable({
   data,
   total,
@@ -169,9 +179,25 @@ export function DashboardTable({
                     {item.date_of_birth}
                   </TableCell>
                   <TableCell className="text-gray-700 dark:text-gray-200">
-                    {item.addresses && item.addresses.length > 0
-                      ? item.addresses[0]
-                      : 'No address'}
+                    {item.addresses && item.addresses.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {item.addresses.map((address, index) => (
+                          <span
+                            key={`${item.id}-${address}`}
+                            className={cn(
+                              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                              getAddressColor(index)
+                            )}
+                          >
+                            {address}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-gray-500 dark:text-gray-400">
+                        No address
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="text-gray-700 dark:text-gray-200">
                     <span
