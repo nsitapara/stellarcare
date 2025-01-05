@@ -1,23 +1,27 @@
 'use client'
 
 import { getInsurance } from '@actions/patient/get-insurance-action'
+import type { Insurance } from '@api/models/Insurance'
 import { Badge } from '@components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card'
 import { format } from 'date-fns'
 import { useEffect, useState } from 'react'
 
-interface Insurance {
-  id: number
-  provider: string
-  policy_number: string
-  group_number: string
-  primary_holder: string
-  relationship: string
-  authorization_status?: string
-  authorization_expiry?: string
+interface InsuranceCardProps {
+  /** The unique identifier of the insurance record to display */
+  insuranceId: string
 }
 
-export function InsuranceCard({ insuranceId }: { insuranceId: string }) {
+/**
+ * InsuranceCard Component
+ *
+ * Displays detailed insurance information in a card format, including provider details,
+ * policy information, and authorization status.
+ *
+ * @param {InsuranceCardProps} props - The component props
+ * @returns {JSX.Element} A card displaying insurance information
+ */
+export function InsuranceCard({ insuranceId }: InsuranceCardProps) {
   const [insurance, setInsurance] = useState<Insurance | null>(null)
   const [error, setError] = useState<string | null>(null)
 
