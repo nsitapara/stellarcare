@@ -497,7 +497,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
 
         <div className="form-section">
           <div className="form-section-header">
-            <h3 className="form-section-title">Custom Fields</h3>
+            <h3 className="form-section-title">Additional Information</h3>
             <Popover open={isSearchOpen} onOpenChange={setIsSearchOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -507,13 +507,13 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   className="form-button"
                 >
                   <Plus className="form-button-icon" />
-                  Add Custom Field
+                  Add Additional Information
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="p-0" side="right" align="start">
                 <Command>
                   <CommandInput
-                    placeholder="Search custom fields..."
+                    placeholder="Search Additional Fields"
                     value={searchQuery}
                     onValueChange={setSearchQuery}
                   />
@@ -521,7 +521,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                     <CommandEmpty>
                       <div className="flex flex-col items-center py-4">
                         <p className="text-sm text-muted-foreground mb-2">
-                          No custom fields found
+                          No additional information found
                         </p>
                         <Button
                           type="button"
@@ -557,9 +557,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
             {customFields.map((field) => (
               <div key={field.id} className="form-card">
                 <div className="form-card-header">
-                  <h4 className="form-section-title">
-                    Custom Field: {field.name}
-                  </h4>
+                  <h4 className="form-section-title">{field.name}</h4>
                   <Button
                     type="button"
                     variant="ghost"
@@ -571,7 +569,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   </Button>
                 </div>
                 <div className="form-grid-2">
-                  <div>
+                  {/* <div>
                     <FormLabel>Name</FormLabel>
                     <Input
                       value={field.name}
@@ -584,28 +582,8 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                       }
                       className="form-input"
                     />
-                  </div>
-                  <div>
-                    <FormLabel>Type</FormLabel>
-                    <Select
-                      value={field.type}
-                      onValueChange={(value) =>
-                        handleCustomFieldChange(
-                          field.id,
-                          'type',
-                          value as 'text' | 'number'
-                        )
-                      }
-                    >
-                      <SelectTrigger className="form-input">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="text">Text</SelectItem>
-                        <SelectItem value="number">Number</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  </div> */}
+
                   <div>
                     <FormLabel>Value</FormLabel>
                     {field.type === 'text' ? (
@@ -634,6 +612,27 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                         className="form-input"
                       />
                     )}
+                  </div>
+                  <div>
+                    <FormLabel>Type</FormLabel>
+                    <Select
+                      value={field.type}
+                      onValueChange={(value) =>
+                        handleCustomFieldChange(
+                          field.id,
+                          'type',
+                          value as 'text' | 'number'
+                        )
+                      }
+                    >
+                      <SelectTrigger className="form-input">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text</SelectItem>
+                        <SelectItem value="number">Number</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
