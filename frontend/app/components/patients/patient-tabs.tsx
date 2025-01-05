@@ -1,13 +1,13 @@
 'use client'
 
 import type { Patient } from '@api/models/Patient'
-import { AppointmentCard } from '@components/appointments/AppointmentCard'
 import { BasicInformation } from '@components/patients/BasicInformation'
 import { InsuranceCard } from '@components/patients/InsuranceCard'
 import { SleepStudyCard } from '@components/patients/SleepStudyCard'
 import { TreatmentCard } from '@components/patients/TreatmentCard'
 import { Button } from '@components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
+import { VisitCard } from '@components/visits/VisitCard'
 import { format, parseISO } from 'date-fns'
 import { Pencil } from 'lucide-react'
 import Link from 'next/link'
@@ -95,7 +95,7 @@ export function PatientTabs({ patient }: PatientTabsProps) {
           <div className="space-y-4">
             {patient.appointments?.length ? (
               patient.appointments.map((appointmentId) => (
-                <AppointmentCard
+                <VisitCard
                   key={appointmentId}
                   appointmentId={appointmentId.toString()}
                 />

@@ -1,5 +1,20 @@
+/**
+ * VisitCalendar Component
+ *
+ * A comprehensive calendar interface for managing patient visits.
+ * Features include:
+ * - Calendar view with visit indicators
+ * - List of upcoming visits
+ * - Ability to schedule new visits
+ * - Edit and cancel existing visits
+ * - Support for both in-person and telehealth visits
+ */
+
 'use client'
 
+import type { Visit } from '@api/models/Visit'
+import { VisitStatusEnum } from '@api/models/VisitStatusEnum'
+import { VisitTypeEnum } from '@api/models/VisitTypeEnum'
 import { Button } from '@components/ui/button'
 import { Calendar } from '@components/ui/calendar'
 import {
@@ -29,117 +44,128 @@ import {
 import { Textarea } from '@components/ui/textarea'
 import { useEffect, useState } from 'react'
 
-type AppointmentType = 'In-Person' | 'Telehealth'
-
-interface AppointmentWithPatient {
-  id: string
-  date: string
-  time: string
-  type: AppointmentType
-  status: string
+interface VisitWithPatient extends Visit {
   patientName: string
-  notes?: string
-  duration: string
-  zoomLink?: string
 }
 
-// Mock data for upcoming appointments
-const mockUpcomingAppointments: AppointmentWithPatient[] = [
+// Mock data for upcoming visits - TODO: Replace with API call
+const mockUpcomingVisits: VisitWithPatient[] = [
   {
-    id: '1',
+    id: 1,
     date: '2024-01-04',
     time: '09:00',
-    type: 'In-Person',
-    status: 'Scheduled',
+    type: VisitTypeEnum.IN_PERSON,
+    status: VisitStatusEnum.SCHEDULED,
     patientName: 'John Doe',
-    notes: 'Regular check-up appointment',
-    duration: '30 minutes'
+    notes: 'Regular check-up visit',
+    zoom_link: null
   },
   {
-    id: '2',
+    id: 2,
     date: '2024-01-05',
     time: '14:30',
-    type: 'Telehealth',
-    status: 'Confirmed',
+    type: VisitTypeEnum.TELEHEALTH,
+    status: VisitStatusEnum.SCHEDULED,
     patientName: 'Jane Smith',
     notes: 'Follow-up consultation',
-    duration: '45 minutes',
-    zoomLink: 'https://zoom.us/j/example'
+    zoom_link: 'https://zoom.us/j/example'
   },
   {
-    id: '3',
+    id: 3,
     date: '2024-01-08',
     time: '11:00',
-    type: 'In-Person',
-    status: 'Scheduled',
+    type: VisitTypeEnum.IN_PERSON,
+    status: VisitStatusEnum.SCHEDULED,
     patientName: 'Mike Johnson',
     notes: 'Annual physical examination',
-    duration: '60 minutes'
+    zoom_link: null
   },
   {
-    id: '4',
+    id: 4,
     date: '2024-01-10',
     time: '13:15',
-    type: 'Telehealth',
-    status: 'Confirmed',
+    type: VisitTypeEnum.TELEHEALTH,
+    status: VisitStatusEnum.SCHEDULED,
     patientName: 'Sarah Williams',
     notes: 'Medication review and consultation',
-    duration: '30 minutes',
-    zoomLink: 'https://zoom.us/j/example'
+    zoom_link: 'https://zoom.us/j/example'
   },
   {
-    id: '5',
+    id: 5,
     date: '2024-01-12',
     time: '10:30',
-    type: 'In-Person',
-    status: 'Scheduled',
+    type: VisitTypeEnum.IN_PERSON,
+    status: VisitStatusEnum.SCHEDULED,
     patientName: 'Robert Brown',
     notes: 'Initial consultation',
-    duration: '45 minutes'
+    zoom_link: null
   }
 ]
 
-export function AppointmentCalendar() {
+interface VisitCalendarProps {
+  initialDate?: Date
+  onVisitCreate?: (visit: VisitWithPatient) => void
+  onVisitCancel?: (visitId: number) => void
+  onVisitEdit?: (visit: VisitWithPatient) => void
+}
+
+export function VisitCalendar({
+  initialDate,
+  onVisitCreate,
+  onVisitCancel,
+  onVisitEdit
+}: VisitCalendarProps) {
   const [mounted, setMounted] = useState(false)
-  const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([])
+  const [visits, setVisits] = useState<VisitWithPatient[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
-  const [isAddingAppointment, setIsAddingAppointment] = useState(false)
+  const [isAddingVisit, setIsAddingVisit] = useState(false)
 
   // Initialize state after mount to prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
-    setAppointments(mockUpcomingAppointments)
-    setSelectedDate(new Date())
-  }, [])
+    setVisits(mockUpcomingVisits)
+    setSelectedDate(initialDate || new Date())
+  }, [initialDate])
 
+  /**
+   * Handles the submission of a new visit
+   */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    const appointment: AppointmentWithPatient = {
-      id: Date.now().toString(),
+    const visit: VisitWithPatient = {
+      id: Date.now(),
       date: formData.get('date') as string,
       time: formData.get('time') as string,
-      type: formData.get('type') as AppointmentType,
-      status: 'Scheduled',
-      patientName: 'New Patient', // This would come from patient selection
+      type: formData.get('type') as VisitTypeEnum,
+      status: VisitStatusEnum.SCHEDULED,
+      patientName: 'New Patient', // TODO: Replace with actual patient selection
       notes: formData.get('notes') as string,
-      duration: '30 minutes',
-      zoomLink:
-        formData.get('type') === 'Telehealth'
+      zoom_link:
+        formData.get('type') === VisitTypeEnum.TELEHEALTH
           ? 'https://zoom.us/j/example'
-          : undefined
+          : null
     }
-    setAppointments([...appointments, appointment])
-    setIsAddingAppointment(false)
+
+    setVisits([...visits, visit])
+    setIsAddingVisit(false)
+    onVisitCreate?.(visit)
   }
 
-  const handleCancelAppointment = (id: string) => {
-    setAppointments(appointments.filter((apt) => apt.id !== id))
+  /**
+   * Handles the cancellation of an existing visit
+   */
+  const handleCancelVisit = (id: number) => {
+    setVisits(visits.filter((visit) => visit.id !== id))
+    onVisitCancel?.(id)
   }
 
-  const dateHasAppointment = (date: Date) => {
-    return appointments.some(
-      (apt) => apt.date === date.toISOString().split('T')[0]
+  /**
+   * Checks if a given date has any visits
+   */
+  const dateHasVisit = (date: Date) => {
+    return visits.some(
+      (visit) => visit.date === date.toISOString().split('T')[0]
     )
   }
 
@@ -151,18 +177,15 @@ export function AppointmentCalendar() {
   return (
     <div className="container-wrapper">
       <div className="flex justify-end mb-6">
-        <Dialog
-          open={isAddingAppointment}
-          onOpenChange={setIsAddingAppointment}
-        >
+        <Dialog open={isAddingVisit} onOpenChange={setIsAddingVisit}>
           <DialogTrigger asChild>
-            <Button className="action-button">Schedule Appointment</Button>
+            <Button className="action-button">Schedule Visit</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Schedule New Appointment</DialogTitle>
+              <DialogTitle>Schedule New Visit</DialogTitle>
               <DialogDescription>
-                Enter the appointment details below
+                Enter the visit details below
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -182,14 +205,18 @@ export function AppointmentCalendar() {
                   <Input type="time" id="time" name="time" required />
                 </div>
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="type">Appointment Type</Label>
+                  <Label htmlFor="type">Visit Type</Label>
                   <Select name="type">
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="In-Person">In-Person</SelectItem>
-                      <SelectItem value="Telehealth">Telehealth</SelectItem>
+                      <SelectItem value={VisitTypeEnum.IN_PERSON}>
+                        In-Person
+                      </SelectItem>
+                      <SelectItem value={VisitTypeEnum.TELEHEALTH}>
+                        Telehealth
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -215,7 +242,7 @@ export function AppointmentCalendar() {
               onSelect={setSelectedDate}
               className="rounded-md border"
               modifiers={{
-                booked: (date) => dateHasAppointment(date)
+                booked: (date) => dateHasVisit(date)
               }}
               modifiersStyles={{
                 booked: { backgroundColor: 'var(--primary)', color: 'white' }
@@ -224,31 +251,28 @@ export function AppointmentCalendar() {
           </CardContent>
         </Card>
 
-        {/* Upcoming Appointments */}
+        {/* Upcoming Visits */}
         <div className="space-y-4">
-          <h4 className="font-medium text-lg">Upcoming Appointments</h4>
+          <h4 className="font-medium text-lg">Upcoming Visits</h4>
           <div className="space-y-3 max-h-[800px] overflow-y-auto pr-2">
-            {appointments?.map((appointment) => (
+            {visits?.map((visit) => (
               <Card
-                key={appointment.id}
+                key={visit.id}
                 className="group bg-card hover:bg-accent/5 transition-colors"
               >
                 <CardHeader className="p-4">
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-base">
-                        {new Date(appointment.date).toLocaleDateString(
-                          'en-US',
-                          {
-                            weekday: 'long',
-                            month: 'long',
-                            day: 'numeric'
-                          }
-                        )}{' '}
-                        at {appointment.time}
+                        {new Date(visit.date).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'long',
+                          day: 'numeric'
+                        })}{' '}
+                        at {visit.time}
                       </CardTitle>
                       <CardDescription className="mt-1">
-                        {appointment.patientName} - {appointment.type}
+                        {visit.patientName} - {visit.type}
                       </CardDescription>
                     </div>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -259,7 +283,7 @@ export function AppointmentCalendar() {
                         variant="outline"
                         size="sm"
                         className="h-8 text-destructive hover:text-destructive-foreground hover:bg-destructive"
-                        onClick={() => handleCancelAppointment(appointment.id)}
+                        onClick={() => handleCancelVisit(visit.id)}
                       >
                         Cancel
                       </Button>
@@ -270,28 +294,22 @@ export function AppointmentCalendar() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
-                        <span>Duration:</span>
-                        <span className="text-foreground">
-                          {appointment.duration}
-                        </span>
-                      </span>
-                      <span className="inline-flex items-center gap-1">
                         <span>Status:</span>
                         <span
                           className={`text-foreground ${
-                            appointment.status === 'Confirmed'
+                            visit.status === VisitStatusEnum.COMPLETED
                               ? 'text-green-500'
                               : ''
                           }`}
                         >
-                          {appointment.status}
+                          {visit.status}
                         </span>
                       </span>
                     </div>
-                    {appointment.zoomLink && (
+                    {visit.zoom_link && (
                       <div>
                         <a
-                          href={appointment.zoomLink}
+                          href={visit.zoom_link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary hover:underline text-sm inline-flex items-center gap-1"
@@ -300,9 +318,9 @@ export function AppointmentCalendar() {
                         </a>
                       </div>
                     )}
-                    {appointment.notes && (
+                    {visit.notes && (
                       <div className="text-sm text-muted-foreground">
-                        {appointment.notes}
+                        {visit.notes}
                       </div>
                     )}
                   </div>

@@ -19,7 +19,7 @@
 
 'use client'
 
-import { AppointmentCalendar } from '@components/appointments/AppointmentCalendar'
+import { VisitCalendar } from '@components/visits/VisitCalendar'
 
 /**
  * Main appointments page component.
@@ -38,7 +38,7 @@ export default function AppointmentsPage() {
       </div>
 
       <div className="bg-background rounded-lg">
-        <AppointmentCalendar />
+        <VisitCalendar />
       </div>
     </div>
   )

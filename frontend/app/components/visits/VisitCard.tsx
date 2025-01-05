@@ -16,7 +16,7 @@ interface Appointment {
   zoom_link?: string
 }
 
-export function AppointmentCard({ appointmentId }: { appointmentId: string }) {
+export function VisitCard({ appointmentId }: { appointmentId: string }) {
   const [appointment, setAppointment] = useState<Appointment | null>(null)
   const [error, setError] = useState<string | null>(null)
 
