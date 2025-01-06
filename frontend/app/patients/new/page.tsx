@@ -1,13 +1,27 @@
 'use client'
 
 import { createPatient } from '@actions/patient/create-patient-action'
+import type { PatientFormData } from '@api/patient/form'
 import { PatientForm } from '@components/forms/PatientForm'
 import { Button } from '@components/ui/button'
-import type { PatientFormData } from '@types/patient'
 import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+/**
+ * New Patient Page Component
+ * Provides a form interface for creating new patient records.
+ *
+ * Features:
+ * - Clean form for entering new patient information
+ * - Handles form submission and patient creation
+ * - Validates required fields
+ * - Supports redirect after successful creation
+ * - Includes error handling and display
+ * - Responsive layout with close button
+ *
+ * @returns A form interface for creating new patients
+ */
 export default function NewPatientPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)

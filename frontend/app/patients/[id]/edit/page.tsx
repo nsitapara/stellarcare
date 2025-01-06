@@ -4,45 +4,42 @@ import { getPatient } from '@actions/patient/get-patient-action'
 import { getPatientCustomFields } from '@actions/patient/get-patient-custom-fields-action'
 import { updatePatient } from '@actions/patient/update-patient-action'
 import type { Patient } from '@api/models/Patient'
+import type { FormCustomField, PatientFormData } from '@api/patient/form'
 import { PatientForm } from '@components/forms/PatientForm'
 import { Button } from '@components/ui/button'
 import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { use, useEffect, useState } from 'react'
 
-interface FormCustomField {
-  id: string
-  name: string
-  type: 'text' | 'number'
-  value: string | number
-  customFieldDefinitionId: number
-}
-
-interface FormData {
-  firstName: string
-  middleName?: string
-  lastName: string
-  dateOfBirth: string
-  addresses: {
-    street: string
-    city: string
-    state: string
-    zipCode: string
-  }[]
+/**
+ * Extends the Patient type with form-specific custom fields
+ */
+type PatientWithFormFields = Patient & {
   customFields: FormCustomField[]
 }
 
-interface PatientWithCustomFields extends Patient {
-  customFields: FormCustomField[]
-}
-
+/**
+ * Edit Patient Page Component
+ * Provides a form interface for updating existing patient information.
+ *
+ * Features:
+ * - Loads existing patient data and custom fields
+ * - Provides form for editing patient information
+ * - Handles form submission and updates
+ * - Supports redirect after successful update
+ * - Includes loading and error states
+ * - Responsive layout with close button
+ *
+ * @param params - Object containing the patient ID from the URL
+ * @returns A form interface for editing patient information
+ */
 export default function EditPatientPage({
   params
 }: {
   params: Promise<{ id: string }>
 }) {
   const router = useRouter()
-  const [patient, setPatient] = useState<PatientWithCustomFields | null>(null)
+  const [patient, setPatient] = useState<PatientWithFormFields | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { id } = use(params)
@@ -52,6 +49,7 @@ export default function EditPatientPage({
       try {
         setLoading(true)
         const patientData = await getPatient(id)
+        if (!patientData) throw new Error('Patient data not found')
 
         // Fetch patient's custom field values
         const customFields = await getPatientCustomFields(Number(id))
@@ -66,7 +64,7 @@ export default function EditPatientPage({
         }))
 
         // Merge patient data with custom fields
-        const patientWithCustomFields: PatientWithCustomFields = {
+        const patientWithCustomFields: PatientWithFormFields = {
           ...patientData,
           customFields: formattedCustomFields
         }
@@ -84,18 +82,11 @@ export default function EditPatientPage({
     fetchPatientData()
   }, [id])
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (formData: PatientFormData) => {
     try {
       if (!patient) return
 
-      await updatePatient(
-        id,
-        {
-          ...formData,
-          customFields: formData.customFields
-        },
-        patient
-      )
+      await updatePatient(id, formData, patient)
 
       // Get the redirect path from the URL query parameters
       const searchParams = new URLSearchParams(window.location.search)
@@ -136,7 +127,7 @@ export default function EditPatientPage({
     )
   }
 
-  const initialData: FormData = {
+  const initialData: PatientFormData = {
     firstName: patient.first,
     middleName: patient.middle || undefined,
     lastName: patient.last,
