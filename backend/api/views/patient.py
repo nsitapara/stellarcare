@@ -37,13 +37,20 @@ class PatientListCreateView(generics.ListCreateAPIView):
     - Error handling
     """
 
-    queryset = Patient.objects.all().order_by("-created_at")
     serializer_class = PatientSerializer
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        """Returns filtered queryset with logging."""
-        queryset = super().get_queryset()
+        """Returns optimized queryset with prefetched related fields."""
+        queryset = (
+            Patient.objects.all()
+            .order_by("-created_at")
+            .prefetch_related(
+                "addresses",
+                "patient_custom_fields",
+                "patient_custom_fields__field_definition",
+            )
+        )
         logger.info(f"Fetching patients. Query params: {self.request.query_params}")
         return queryset
 
@@ -73,8 +80,15 @@ class PatientRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     - Cascading deletion handling
     """
 
-    queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+
+    def get_queryset(self):
+        """Returns optimized queryset with prefetched related fields."""
+        return Patient.objects.all().prefetch_related(
+            "addresses",
+            "patient_custom_fields",
+            "patient_custom_fields__field_definition",
+        )
 
 
 class PatientQueryView(APIView):
@@ -113,12 +127,18 @@ class PatientQueryView(APIView):
 
         logger.info(f"Searching patients with query: {query}")
 
+        base_queryset = Patient.objects.prefetch_related(
+            "addresses",
+            "patient_custom_fields",
+            "patient_custom_fields__field_definition",
+        )
+
         # If query is numeric, do exact ID match only
         if query.isdigit():
-            patients = Patient.objects.filter(id=query)
+            patients = base_queryset.filter(id=query)
         else:
             # Otherwise do case-insensitive search on names
-            patients = Patient.objects.filter(
+            patients = base_queryset.filter(
                 Q(first__icontains=query)
                 | Q(last__icontains=query)
                 | Q(middle__icontains=query)

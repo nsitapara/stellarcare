@@ -14,6 +14,10 @@ export interface DashboardData {
   date_of_birth: string
   created_at: string
   addresses: string[]
+  customFields: Array<{
+    name: string
+    value: string | number
+  }>
 }
 
 /**
