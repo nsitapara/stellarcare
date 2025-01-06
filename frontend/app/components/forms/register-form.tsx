@@ -1,18 +1,27 @@
+/**
+ * RegisterForm Component
+ *
+ * A form component for user registration that handles:
+ * - Username and password input with confirmation
+ * - Form validation
+ * - Error handling
+ * - Successful registration redirection
+ * - Integration with backend registration API
+ */
+
 'use client'
 
-import type {
-  RegisterFormSchema,
-  registerAction
-} from '@actions/register-action'
+import type { registerAction } from '@actions/user/register-action'
+import type { RegisterFormError, RegisterFormSchema } from '@api/forms/auth'
+import { FormFooter } from '@components/forms/form-footer'
+import { FormHeader } from '@components/forms/form-header'
+import { SubmitField } from '@components/forms/submit-field'
+import { TextField } from '@components/forms/text-field'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { fieldApiError } from '@lib/forms'
 import { registerFormSchema } from '@lib/validation'
 import { signIn } from 'next-auth/react'
 import { useForm } from 'react-hook-form'
-import { TextField } from '..//forms/text-field'
-import { FormFooter } from '../forms/form-footer'
-import { FormHeader } from '../forms/form-header'
-import { SubmitField } from '../forms/submit-field'
 
 export function RegisterForm({
   onSubmitHandler
@@ -37,9 +46,10 @@ export function RegisterForm({
           if (res === true) {
             signIn()
           } else if (typeof res !== 'boolean') {
-            fieldApiError('username', 'username', res, setError)
-            fieldApiError('password', 'password', res, setError)
-            fieldApiError('password_retype', 'passwordRetype', res, setError)
+            const errors = res as RegisterFormError
+            fieldApiError('username', 'username', errors, setError)
+            fieldApiError('password', 'password', errors, setError)
+            fieldApiError('password_retype', 'passwordRetype', errors, setError)
           }
         })}
       >

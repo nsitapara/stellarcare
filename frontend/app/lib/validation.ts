@@ -1,10 +1,21 @@
 import { z } from 'zod'
 
+/**
+ * Validation schema for user login form.
+ * @requires username - Minimum 6 characters
+ * @requires password - Minimum 8 characters
+ */
 const loginFormSchema = z.object({
   username: z.string().min(6),
   password: z.string().min(8)
 })
 
+/**
+ * Validation schema for user registration form.
+ * @requires username - Minimum 6 characters
+ * @requires password - Minimum 6 characters
+ * @requires passwordRetype - Must match password field
+ */
 const registerFormSchema = z
   .object({
     username: z.string().min(6),
@@ -16,11 +27,21 @@ const registerFormSchema = z
     path: ['passwordRetype']
   })
 
+/**
+ * Validation schema for user profile form.
+ * @property {string} firstName - Optional user's first name
+ * @property {string} lastName - Optional user's last name
+ */
 const profileFormSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional()
 })
 
+/**
+ * Validation schema for account deletion form.
+ * @requires username - Minimum 6 characters
+ * @requires usernameCurrent - Must match username field for confirmation
+ */
 const deleteAccountFormSchema = z
   .object({
     username: z.string().min(6),
@@ -32,6 +53,12 @@ const deleteAccountFormSchema = z
     path: ['username']
   })
 
+/**
+ * Validation schema for password change form.
+ * @requires password - Current password, minimum 8 characters
+ * @requires passwordNew - New password, minimum 8 characters, must be different from current
+ * @requires passwordRetype - Must match new password
+ */
 const changePasswordFormSchema = z
   .object({
     password: z.string().min(8),

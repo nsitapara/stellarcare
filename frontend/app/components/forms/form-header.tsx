@@ -1,14 +1,20 @@
+/**
+ * Form Header Component
+ *
+ * A reusable header component for forms that displays a title and optional description.
+ */
+
 'use client'
 
-import type React from 'react'
+import type { FormHeaderProps } from '@api/forms'
 
-export function FormHeader({
-  title,
-  description
-}: {
-  title: string
-  description?: string
-}) {
+/**
+ * Renders a form header with title and optional description
+ *
+ * @param props - Component props including title and optional description
+ * @returns Form header with styling
+ */
+export function FormHeader({ title, description }: FormHeaderProps) {
   return (
     <>
       <h1 className="text-2xl font-bold text-white mb-2">{title}</h1>

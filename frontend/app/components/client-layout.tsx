@@ -1,12 +1,33 @@
 'use client'
 
+/**
+ * Client Layout Component
+ *
+ * This component serves as the main layout wrapper for client-side rendered pages.
+ * It provides:
+ * - Navigation bar with responsive design
+ * - Theme toggle functionality with animation
+ * - User session management
+ * - Dynamic routing based on authentication state
+ * - Logo with animated moon icon
+ */
+
 import { ThemeToggle } from '@components/theme-toggle'
 import { UserSession } from '@components/user-session'
 import { SessionProvider, useSession } from 'next-auth/react'
-import '@/app/styles/globals.css'
+import '@styles/globals.css'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
+/**
+ * MoonIcon Component
+ *
+ * A custom SVG moon icon that serves as the application logo.
+ * Features gradient fills and animation capabilities.
+ *
+ * @param {Object} props - Component properties
+ * @param {boolean} props.animate - Controls animation state of the icon
+ */
 function MoonIcon({ animate }: { animate: boolean }) {
   return (
     <svg
@@ -46,6 +67,22 @@ function MoonIcon({ animate }: { animate: boolean }) {
   )
 }
 
+/**
+ * NavigationBar Component
+ *
+ * Main navigation component that provides:
+ * - Responsive navigation links
+ * - Theme toggle with animation
+ * - User session management
+ * - Dynamic routing based on authentication
+ * - Animated logo transitions
+ *
+ * Features:
+ * - Animates logo on route changes
+ * - Animates logo on theme changes
+ * - Responsive design with mobile considerations
+ * - Accessible navigation elements
+ */
 function NavigationBar() {
   const { data: session } = useSession()
   const router = useRouter()
@@ -184,6 +221,21 @@ function NavigationBar() {
   )
 }
 
+/**
+ * ClientLayout Component
+ *
+ * The root layout component that wraps the application content.
+ * Provides session management and consistent layout structure.
+ *
+ * @param {Object} props - Component properties
+ * @param {React.ReactNode} props.children - Child components to render within the layout
+ *
+ * Features:
+ * - Session provider for authentication
+ * - Consistent navigation across pages
+ * - Responsive container sizing
+ * - Theme-aware styling
+ */
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>

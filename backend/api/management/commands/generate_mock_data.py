@@ -1,3 +1,40 @@
+"""
+This module provides a Django management command to generate mock data for testing and development purposes.
+It creates realistic sample data for all major models in the application including:
+- Addresses
+- Custom Field Definitions
+- Sleep Studies
+- Treatments
+- Insurance Records
+- Patient Visits
+- Patients (with relationships to all above models)
+
+The generated data follows realistic patterns and relationships between models, making it
+suitable for development, testing, and demonstration purposes.
+
+Usage:
+    python manage.py generate_mock_data
+
+The command will create:
+- 20 Addresses
+- 5 Custom Field Definitions (Height, Weight, Blood Pressure, Heart Rate, Temperature)
+- 30 Sleep Studies
+- 15 Treatments
+- 10 Insurance Records
+- 40 Visits
+- 15 Patients with related data
+
+Each patient will have:
+- 1-2 addresses
+- Required and optional custom field values
+- 1-3 sleep studies
+- 1-3 treatments
+- 1-2 insurance records
+- 2-5 visits
+
+All generated data uses the Faker library to create realistic-looking values.
+"""
+
 import random
 
 from django.core.management.base import BaseCommand
@@ -18,9 +55,30 @@ fake = Faker()
 
 
 class Command(BaseCommand):
+    """
+    Django management command to generate mock data for the StellarCare application.
+
+    This command populates the database with realistic sample data for all major models,
+    creating a full network of related records that can be used for testing and development.
+    The data generation follows business rules and creates realistic relationships between
+    different models.
+    """
+
     help = "Generates mock data for the application"
 
     def handle(self, *args, **kwargs):
+        """
+        Execute the command to generate mock data.
+
+        This method orchestrates the creation of all mock data in the following order:
+        1. Create base records (addresses, field definitions)
+        2. Create independent records (studies, treatments, insurance, visits)
+        3. Create patients and link them to all related records
+
+        The method ensures referential integrity and creates realistic relationships
+        between different types of records.
+        """
+
         self.stdout.write("Generating mock data...")
 
         # Generate Addresses

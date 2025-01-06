@@ -15,8 +15,34 @@ services:
       interval: 2s
       timeout: 2s
       retries: 10
+  setup:
+    build:
+      context: backend
+    command: >
+      bash -c "
+        uv sync &&
+        uv run -- python manage.py migrate &&
+        uv run -- python manage.py createsuperuser --noinput &&
+        for i in {1..5}; do
+          uv run -- python manage.py generate_mock_data;
+        done
+      "
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env.backend
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["setup"]
+    healthcheck:
+      test: ["CMD-SHELL", "exit 0"]
+      interval: 1s
+      timeout: 5s
+      retries: 1
+      start_period: 1s
   api:
-    command: bash -c "uv sync && uv run -- python manage.py migrate && uv run -- python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "uv sync && uv run -- python manage.py runserver 0.0.0.0:8000"
     build:
       context: backend
     expose:
@@ -30,8 +56,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      setup:
+        condition: service_completed_successfully
+        required: false
   web:
-    command: bash -c "pnpm install -r && pnpm dev"
+    command: bash -c "pnpm install -r && if [ \"$$BUILD_ENV\" = \"production\" ]; then pnpm build && pnpm start; else pnpm dev; fi"
     build:
       context: frontend
     volumes:
@@ -42,5 +71,7 @@ services:
       - "3000:3000"
     env_file:
       - .env.frontend
+    environment:
+      - BUILD_ENV=${BUILD_ENV:-development}
     depends_on:
       - api

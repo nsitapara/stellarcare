@@ -3,6 +3,10 @@
 import { signIn, signOut } from 'next-auth/react'
 import Link from 'next/link'
 
+/**
+ * Component that provides a sign-in button that triggers the authentication flow
+ * @returns A button component that initiates the sign-in process when clicked
+ */
 export function SignInLink() {
   return (
     <button
@@ -15,6 +19,10 @@ export function SignInLink() {
   )
 }
 
+/**
+ * Component that provides a sign-out button that triggers the logout flow
+ * @returns A button component that initiates the sign-out process when clicked
+ */
 export function SignOutLink() {
   return (
     <button
@@ -27,6 +35,13 @@ export function SignOutLink() {
   )
 }
 
+/**
+ * Main component that displays an overview of available pages in the application
+ * Organizes pages into two categories:
+ * 1. Authenticated pages - requires user login (Profile, Change password, Delete account)
+ * 2. Anonymous pages - accessible without authentication (Login, Register, Logout)
+ * @returns A structured list of navigation links organized by authentication requirement
+ */
 export function PagesOverview() {
   return (
     <ul className="flex flex-col gap-6">

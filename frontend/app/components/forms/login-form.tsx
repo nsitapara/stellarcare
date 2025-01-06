@@ -1,10 +1,23 @@
 'use client'
 
+/**
+ * LoginForm Component
+ *
+ * A form component for user authentication that handles:
+ * - Username/email and password input
+ * - Form validation
+ * - Error handling
+ * - Loading states
+ * - Successful login redirection
+ */
+
+import { loginAction } from '@actions/user/auth-action'
+import type { LoginFormSchema } from '@api/forms/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { signIn } from 'next-auth/react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import type { z } from 'zod'
 import { loginFormSchema } from '../../lib/validation'
 import { FormFooter } from '../forms/form-footer'
 import { FormHeader } from '../forms/form-header'
@@ -12,21 +25,49 @@ import { TextField } from '../forms/text-field'
 import { ErrorMessage } from '../messages/error-message'
 import { Button } from '../ui/button'
 
-type LoginFormSchema = z.infer<typeof loginFormSchema>
-
 export function LoginForm() {
   const search = useSearchParams()
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const { register, handleSubmit, formState } = useForm<LoginFormSchema>({
     resolver: zodResolver(loginFormSchema)
   })
 
-  const onSubmitHandler = handleSubmit((data) => {
-    signIn('credentials', {
-      username: data.username,
-      password: data.password,
-      callbackUrl: '/dashboard'
-    })
+  const onSubmitHandler = handleSubmit(async (data) => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const result = await loginAction(data)
+
+      if (result.error) {
+        setError(result.error)
+        return
+      }
+
+      if (result.tokens) {
+        // Use signIn to set the session, but with our obtained tokens
+        const signInResult = await signIn('credentials', {
+          username: data.username,
+          access: result.tokens.access,
+          refresh: result.tokens.refresh,
+          redirect: false
+        })
+
+        if (signInResult?.ok) {
+          router.push('/dashboard')
+          router.refresh()
+        } else {
+          setError('Failed to sign in')
+        }
+      }
+    } catch {
+      setError('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
   })
 
   return (
@@ -36,16 +77,13 @@ export function LoginForm() {
         description="Sign in to access your dashboard"
       />
 
-      {search.has('error') && search.get('error') === 'CredentialsSignin' && (
-        <ErrorMessage>Invalid username or password.</ErrorMessage>
+      {(error ||
+        (search.has('error') &&
+          search.get('error') === 'CredentialsSignin')) && (
+        <ErrorMessage>{error || 'Invalid username or password.'}</ErrorMessage>
       )}
 
-      <form
-        method="post"
-        action="/api/auth/callback/credentials"
-        onSubmit={onSubmitHandler}
-        className="space-y-6"
-      >
+      <form onSubmit={onSubmitHandler} className="space-y-6">
         <TextField
           type="text"
           register={register('username')}
@@ -65,8 +103,16 @@ export function LoginForm() {
         <Button
           type="submit"
           className="w-full bg-primary hover:bg-primary/90 text-white"
+          disabled={isLoading}
         >
-          Sign in
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2" />
+              Signing in...
+            </div>
+          ) : (
+            'Sign in'
+          )}
         </Button>
       </form>
 

@@ -19,11 +19,12 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./*"],
 			"@lib/*": ["./app/lib/*"],
 			"@types/*": ["./types/*"],
+			"@api/*": ["./types/api/*"],
 			"@components/*": ["./app/components/*"],
-			"@actions/*": ["./app/actions/*"]
+			"@actions/*": ["./app/actions/*"],
+			"@styles/*": ["./app/styles/*"]
 		}
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next-auth.d.ts"],

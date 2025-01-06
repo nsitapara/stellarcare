@@ -1,3 +1,23 @@
+"""
+This module defines the URL routing configuration for the StellarCare application.
+
+URL patterns are organized into logical groups:
+1. API Documentation (Swagger/OpenAPI)
+2. Authentication endpoints
+3. User management
+4. Patient management
+5. Custom field configuration
+6. Medical records
+7. Administrative records
+
+Features:
+- RESTful API endpoints
+- Token-based authentication
+- Interactive API documentation
+- Nested resource paths
+- Named URL patterns for reverse lookup
+"""
+
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -20,20 +40,34 @@ from .views import (
     TreatmentDetailView,
 )
 
+# Router configuration for viewsets
 router = routers.DefaultRouter()
 router.register("users", UserViewSet, basename="api-users")
 
-urlpatterns = [
+# API Documentation endpoints
+documentation_patterns = [
     path(
         "api/schema/swagger-ui/",
         SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
     ),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/", include(router.urls)),
+]
+
+# Authentication endpoints
+auth_patterns = [
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+]
+
+# Core application endpoints (users, router)
+core_patterns = [
+    path("api/", include(router.urls)),
     path("admin/", admin.site.urls),
-    # Patient endpoints
+]
+
+# Patient management endpoints
+patient_patterns = [
     path("api/patients/", PatientListCreateView.as_view(), name="patient-list-create"),
     path("api/patients/search/", PatientQueryView.as_view(), name="patient-search"),
     path(
@@ -41,7 +75,15 @@ urlpatterns = [
         PatientRetrieveUpdateDeleteView.as_view(),
         name="patient-detail",
     ),
-    # Custom field definition endpoints
+    path(
+        "api/patients/<int:patient_id>/custom-fields/",
+        PatientCustomFieldListView.as_view(),
+        name="patient-custom-fields",
+    ),
+]
+
+# Custom field configuration endpoints
+custom_field_patterns = [
     path(
         "api/custom-field-definitions/",
         CustomFieldDefinitionListCreateView.as_view(),
@@ -62,12 +104,10 @@ urlpatterns = [
         CustomFieldDefinitionAssignView.as_view(),
         name="custom-field-definition-assign",
     ),
-    # Patient custom field values endpoints
-    path(
-        "api/patients/<int:patient_id>/custom-fields/",
-        PatientCustomFieldListView.as_view(),
-        name="patient-custom-fields",
-    ),
+]
+
+# Medical and administrative record endpoints
+record_patterns = [
     path(
         "api/appointments/<int:pk>/",
         AppointmentDetailView.as_view(),
@@ -89,3 +129,13 @@ urlpatterns = [
         name="insurance-detail",
     ),
 ]
+
+# Combine all URL patterns
+urlpatterns = (
+    documentation_patterns
+    + auth_patterns
+    + core_patterns
+    + patient_patterns
+    + custom_field_patterns
+    + record_patterns
+)

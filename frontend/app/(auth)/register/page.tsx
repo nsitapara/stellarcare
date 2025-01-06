@@ -1,4 +1,4 @@
-import { registerAction } from '@actions/register-action'
+import { registerAction } from '@actions/user/register-action'
 import { RegisterForm } from '@components/forms/register-form'
 import type { Metadata } from 'next'
 

@@ -1,5 +1,24 @@
-import { UserSession } from '@/app/components/user-session'
+import { UserSession } from '@components/user-session'
 
+/**
+ * Home Page Component
+ * Landing page for the StellarCare application.
+ *
+ * Features:
+ * - Displays welcome message and application description
+ * - Centers content vertically and horizontally
+ * - Provides authentication interface through UserSession component
+ * - Responsive text sizing for different screen sizes
+ * - Maintains consistent spacing and layout
+ *
+ * Layout:
+ * - Full viewport height minus header (120px)
+ * - Centered content with maximum width
+ * - Stacked layout with consistent spacing
+ * - Muted secondary text for description
+ *
+ * @returns The landing page interface with authentication options
+ */
 export default function HomePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)]">
