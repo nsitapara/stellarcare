@@ -5,4 +5,4 @@ docker compose down
 
 docker volume rm stellarcare_postgres_data
 # docker system prune
-docker compose up --build -d
+docker-compose --profile setup up --build -d
