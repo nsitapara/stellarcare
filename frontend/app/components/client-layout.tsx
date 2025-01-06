@@ -12,6 +12,7 @@
  * - Logo with animated moon icon
  */
 
+import { Footer } from '@components/layout/footer'
 import { ThemeToggle } from '@components/theme-toggle'
 import { UserSession } from '@components/user-session'
 import { SessionProvider, useSession } from 'next-auth/react'
@@ -240,10 +241,11 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <NavigationBar />
-      <div className="min-h-screen bg-background">
-        <main className="container mx-auto py-6 text-foreground">
+      <div className="flex flex-col min-h-[calc(100vh-4rem)]">
+        <main className="container mx-auto py-4 text-foreground flex-grow">
           {children}
         </main>
+        <Footer />
       </div>
     </SessionProvider>
   )
