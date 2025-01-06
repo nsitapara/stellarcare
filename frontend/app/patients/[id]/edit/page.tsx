@@ -90,7 +90,7 @@ export default function EditPatientPage({
 
       // Get the redirect path from the URL query parameters
       const searchParams = new URLSearchParams(window.location.search)
-      const redirectPath = searchParams.get('redirect') || '/patients'
+      const redirectPath = searchParams.get('redirect') || '/dashboard'
       router.push(redirectPath)
     } catch (error) {
       console.error('Error updating patient:', error)

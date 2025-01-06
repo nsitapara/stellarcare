@@ -21,6 +21,14 @@ import type { CustomFieldDefinition } from '@api/models/CustomFieldDefinition'
 import type { FormCustomField, PatientFormData } from '@api/patient/form'
 import { Button } from '@components/ui/button'
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@components/ui/command'
+import {
   Form,
   FormControl,
   FormField,
@@ -29,27 +37,19 @@ import {
   FormMessage
 } from '@components/ui/form'
 import { Input } from '@components/ui/input'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useFieldArray, useForm } from 'react-hook-form'
-import * as z from 'zod'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList
-} from '../ui/command'
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '../ui/select'
+} from '@components/ui/select'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Plus, Trash2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useFieldArray, useForm } from 'react-hook-form'
+import * as z from 'zod'
 
 interface PatientFormProps {
   onSubmit: (data: PatientFormData) => void
