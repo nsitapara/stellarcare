@@ -134,17 +134,14 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         return
       }
 
-      // Check if field is not in user's assigned fields
+      // Add field to user's assigned fields if not already assigned
       if (!userAssignedFields.some((f) => f.id === selectedField.id)) {
         try {
           await assignCustomFieldToUser(selectedField.id)
-          // Update user assigned fields
-          setUserAssignedFields((prev) => {
-            const updated = [selectedField, ...prev]
-            return updated
-          })
+          setUserAssignedFields((prev) => [...prev, selectedField])
         } catch (error) {
           console.error('Error assigning field to user:', error)
+          return
         }
       }
 
@@ -153,43 +150,22 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
         name: selectedField.name,
         type: selectedField.type,
         value: selectedField.type === 'text' ? '' : 0,
-        customFieldDefinitionId: selectedField.id
+        customFieldDefinitionId: selectedField.id,
+        isNew: false
       }
       setCustomFields([newField, ...customFields])
     } else if (searchQuery) {
-      try {
-        const newField = await createCustomField({
-          name: searchQuery,
-          type: 'text',
-          description: 'Custom field created from patient form'
-        })
-        if (newField) {
-          // Update available fields
-          setAvailableCustomFields((prev) => {
-            const updated = [newField, ...prev]
-            return updated
-          })
-
-          // Update user assigned fields
-          setUserAssignedFields((prev) => {
-            const updated = [newField, ...prev]
-            return updated
-          })
-
-          const formField = {
-            id: crypto.randomUUID(),
-            name: newField.name,
-            type: newField.type,
-            value: newField.type === 'text' ? '' : 0,
-            customFieldDefinitionId: newField.id
-          }
-          setCustomFields([formField, ...customFields])
-          setSearchQuery('')
-          setIsSearchOpen(false)
-        }
-      } catch (error) {
-        console.error('Error creating custom field:', error)
+      const newField = {
+        id: crypto.randomUUID(),
+        name: searchQuery,
+        type: 'text' as const,
+        value: '',
+        customFieldDefinitionId: 0,
+        isNew: true
       }
+      setCustomFields([newField, ...customFields])
+      setSearchQuery('')
+      setIsSearchOpen(false)
     }
   }
 
@@ -200,7 +176,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   const handleCustomFieldChange = (
     id: string,
     field: keyof Omit<FormCustomField, 'id'>,
-    value: string | number
+    value: string | number | null
   ) => {
     const updatedFields = [...customFields]
     const index = updatedFields.findIndex((f) => f.id === id)
@@ -257,23 +233,45 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
     name: 'addresses'
   })
 
-  const onFormSubmit = (data: z.infer<typeof formSchema>) => {
-    const formData: PatientFormData = {
-      firstName: data.firstName,
-      middleName: data.middleName,
-      lastName: data.lastName,
-      dateOfBirth: data.dateOfBirth,
-      addresses: data.addresses,
-      customFields: customFields.map((field) => ({
-        id: field.id,
-        name: field.name,
-        type: field.type,
-        value: field.value,
-        customFieldDefinitionId: field.customFieldDefinitionId
-      }))
-    }
+  const onFormSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      // Create new custom fields and prepare all fields for submission
+      const customFieldsToSubmit = await Promise.all(
+        customFields.map(async (field) => {
+          if (!field.customFieldDefinitionId) {
+            // Create the new custom field
+            const createdField = await createCustomField({
+              name: field.name,
+              type: field.type,
+              description: 'Custom field created from patient form'
+            })
+            // Return the field with the new ID
+            return {
+              id: field.id,
+              name: field.name,
+              type: field.type,
+              value: field.value,
+              customFieldDefinitionId: createdField.id
+            }
+          }
+          // For existing fields, just return the field as is
+          return field
+        })
+      )
 
-    onSubmit(formData)
+      const formData: PatientFormData = {
+        firstName: data.firstName,
+        middleName: data.middleName,
+        lastName: data.lastName,
+        dateOfBirth: data.dateOfBirth,
+        addresses: data.addresses,
+        customFields: customFieldsToSubmit
+      }
+
+      onSubmit(formData)
+    } catch (error) {
+      console.error('Error creating custom fields:', error)
+    }
   }
 
   const filteredCustomFields = (availableCustomFields || []).filter(
@@ -511,26 +509,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   </Button>
                 </div>
                 <div className="form-grid-2">
-                  {/* <div>
-                    <FormLabel>Name</FormLabel>
-                    <Input
-                      value={field.name}
-                      onChange={(e) =>
-                        handleCustomFieldChange(
-                          field.id,
-                          'name',
-                          e.target.value
-                        )
-                      }
-                      className="form-input"
-                    />
-                  </div> */}
-
                   <div>
                     <FormLabel>Value</FormLabel>
                     {field.type === 'text' ? (
                       <Input
-                        value={field.value}
+                        value={field.value ?? ''}
                         onChange={(e) =>
                           handleCustomFieldChange(
                             field.id,
@@ -543,12 +526,14 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                     ) : (
                       <Input
                         type="number"
-                        value={field.value}
+                        value={field.value ?? ''}
                         onChange={(e) =>
                           handleCustomFieldChange(
                             field.id,
                             'value',
-                            Number.parseFloat(e.target.value) || 0
+                            e.target.value === ''
+                              ? null
+                              : Number(e.target.value)
                           )
                         }
                         className="form-input"
@@ -557,24 +542,35 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   </div>
                   <div>
                     <FormLabel>Type</FormLabel>
-                    <Select
-                      value={field.type}
-                      onValueChange={(value) =>
-                        handleCustomFieldChange(
-                          field.id,
-                          'type',
-                          value as 'text' | 'number'
-                        )
-                      }
-                    >
-                      <SelectTrigger className="form-input">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="text">Text</SelectItem>
-                        <SelectItem value="number">Number</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {!field.customFieldDefinitionId ? (
+                      <Select
+                        value={field.type}
+                        onValueChange={(value) =>
+                          handleCustomFieldChange(
+                            field.id,
+                            'type',
+                            value as 'text' | 'number'
+                          )
+                        }
+                      >
+                        <SelectTrigger className="form-input">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">Text</SelectItem>
+                          <SelectItem value="number">Number</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        value={
+                          field.type.charAt(0).toUpperCase() +
+                          field.type.slice(1)
+                        }
+                        className="form-input"
+                        disabled
+                      />
+                    )}
                   </div>
                 </div>
               </div>

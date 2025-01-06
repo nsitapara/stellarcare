@@ -11,7 +11,31 @@ const inter = Inter({ subsets: ['latin'] })
  */
 export const metadata = {
   title: 'StellarCare - Patient Management',
-  description: 'A comprehensive healthcare management platform'
+  description: 'A comprehensive healthcare management platform',
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml'
+      }
+    ]
+  },
+  manifest: '/manifest.json',
+  themeColor: '#6366f1',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5
+  },
+  applicationName: 'StellarCare',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'StellarCare'
+  },
+  formatDetection: {
+    telephone: true
+  }
 }
 
 /**
