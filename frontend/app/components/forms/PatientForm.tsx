@@ -237,47 +237,34 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
 
   const onFormSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      // Filter out empty fields and create new custom fields
+      // Create new custom fields and prepare all fields for submission
       const customFieldsToSubmit = await Promise.all(
-        customFields
-          .filter((field) => {
-            // Filter out empty string values or null/undefined
-            if (
-              field.value === '' ||
-              field.value === null ||
-              field.value === undefined
-            ) {
-              return false
+        customFields.map(async (field) => {
+          if (field.isNew) {
+            // Create the new custom field
+            const createdField = await createCustomField({
+              name: field.name,
+              type: field.type,
+              description: 'Custom field created from patient form'
+            })
+            // Return the field with the new ID
+            return {
+              id: field.id,
+              name: field.name,
+              type: field.type,
+              value: field.value,
+              customFieldDefinitionId: createdField.id
             }
-            // For number type, also filter out 0 if it's the default value (not user entered)
-            if (
-              field.type === 'number' &&
-              field.value === 0 &&
-              !field.userEntered
-            ) {
-              return false
-            }
-            return true
-          })
-          .map(async (field) => {
-            if (field.isNew) {
-              // Create the new custom field
-              const createdField = await createCustomField({
-                name: field.name,
-                type: field.type,
-                description: 'Custom field created from patient form'
-              })
-              // Return the field with the new ID
-              return {
-                id: field.id,
-                name: field.name,
-                type: field.type,
-                value: field.value,
-                customFieldDefinitionId: createdField.id
-              }
-            }
-            return field
-          })
+          }
+          // For existing fields, just return the field as is
+          return {
+            id: field.id,
+            name: field.name,
+            type: field.type,
+            value: field.value,
+            customFieldDefinitionId: field.customFieldDefinitionId
+          }
+        })
       )
 
       const formData: PatientFormData = {
