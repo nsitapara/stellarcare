@@ -176,7 +176,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
   const handleCustomFieldChange = (
     id: string,
     field: keyof Omit<FormCustomField, 'id'>,
-    value: string | number
+    value: string | number | null
   ) => {
     const updatedFields = [...customFields]
     const index = updatedFields.findIndex((f) => f.id === id)
@@ -186,15 +186,13 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       updatedFields[index] = {
         ...updatedFields[index],
         type: value as 'text' | 'number',
-        value: '',
-        userEntered: false,
+        value: value === 'text' ? '' : 0,
         customFieldDefinitionId: updatedFields[index].customFieldDefinitionId
       }
     } else {
       updatedFields[index] = {
         ...updatedFields[index],
         [field]: value,
-        userEntered: true,
         customFieldDefinitionId: updatedFields[index].customFieldDefinitionId
       }
     }
@@ -240,7 +238,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       // Create new custom fields and prepare all fields for submission
       const customFieldsToSubmit = await Promise.all(
         customFields.map(async (field) => {
-          if (field.isNew) {
+          if (!field.customFieldDefinitionId) {
             // Create the new custom field
             const createdField = await createCustomField({
               name: field.name,
@@ -257,13 +255,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
             }
           }
           // For existing fields, just return the field as is
-          return {
-            id: field.id,
-            name: field.name,
-            type: field.type,
-            value: field.value,
-            customFieldDefinitionId: field.customFieldDefinitionId
-          }
+          return field
         })
       )
 
@@ -517,26 +509,11 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   </Button>
                 </div>
                 <div className="form-grid-2">
-                  {/* <div>
-                    <FormLabel>Name</FormLabel>
-                    <Input
-                      value={field.name}
-                      onChange={(e) =>
-                        handleCustomFieldChange(
-                          field.id,
-                          'name',
-                          e.target.value
-                        )
-                      }
-                      className="form-input"
-                    />
-                  </div> */}
-
                   <div>
                     <FormLabel>Value</FormLabel>
                     {field.type === 'text' ? (
                       <Input
-                        value={field.value}
+                        value={field.value ?? ''}
                         onChange={(e) =>
                           handleCustomFieldChange(
                             field.id,
@@ -549,12 +526,14 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                     ) : (
                       <Input
                         type="number"
-                        value={field.value}
+                        value={field.value ?? ''}
                         onChange={(e) =>
                           handleCustomFieldChange(
                             field.id,
                             'value',
-                            Number.parseFloat(e.target.value) || 0
+                            e.target.value === ''
+                              ? null
+                              : Number(e.target.value)
                           )
                         }
                         className="form-input"
@@ -563,7 +542,7 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
                   </div>
                   <div>
                     <FormLabel>Type</FormLabel>
-                    {field.isNew ? (
+                    {!field.customFieldDefinitionId ? (
                       <Select
                         value={field.type}
                         onValueChange={(value) =>
