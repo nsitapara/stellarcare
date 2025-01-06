@@ -34,7 +34,12 @@ export default async function DashboardPage() {
         date_of_birth: patient.date_of_birth || '',
         created_at: patient.created_at || '',
         addresses:
-          patient.addresses?.map((addr) => addr.formatted_address) || []
+          patient.addresses?.map((addr) => addr.formatted_address) || [],
+        customFields:
+          patient.patient_custom_fields?.map((field) => ({
+            name: field.field_definition.name,
+            value: field.value
+          })) || []
       })),
       total: initialData.count,
       page: 1,

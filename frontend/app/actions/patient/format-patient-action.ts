@@ -22,6 +22,12 @@ export async function formatPatientData(
     status: patient.status || '',
     date_of_birth: patient.date_of_birth || '',
     created_at: patient.created_at || '',
-    addresses: patient.addresses?.map(formatAddress) || []
+    addresses: patient.addresses?.map(formatAddress) || [],
+    customFields: (patient.patient_custom_fields || [])
+      .filter((field) => field?.field_definition)
+      .map((field) => ({
+        name: field.field_definition?.name || '',
+        value: field.value || ''
+      }))
   }
 }

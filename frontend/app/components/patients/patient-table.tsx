@@ -23,26 +23,6 @@ import {
 } from '@components/ui/table'
 
 /**
- * Maps patient status to corresponding CSS classes for visual styling
- * @param status - Patient status string
- * @returns CSS class string for the status badge
- */
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'Inquiry':
-      return 'status-inquiry'
-    case 'Onboarding':
-      return 'status-onboarding'
-    case 'Active':
-      return 'status-active'
-    case 'Churned':
-      return 'status-churned'
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-500/20 dark:text-gray-200 ring-gray-500/30'
-  }
-}
-
-/**
  * Gets the color class for address badges based on index
  * @param index - Index of the address in the list
  * @returns CSS class string for the address badge
@@ -53,6 +33,21 @@ const getAddressColor = (index: number) => {
     'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-200 ring-green-500/30',
     'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200 ring-amber-500/30',
     'bg-rose-100 text-rose-800 dark:bg-rose-500/20 dark:text-rose-200 ring-rose-500/30'
+  ]
+  return colors[index % colors.length]
+}
+
+/**
+ * Gets the color class for custom field badges based on index
+ * @param index - Index of the custom field in the list
+ * @returns CSS class string for the custom field badge
+ */
+const getCustomFieldColor = (index: number) => {
+  const colors = [
+    'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200 ring-blue-500/30',
+    'bg-teal-100 text-teal-800 dark:bg-teal-500/20 dark:text-teal-200 ring-teal-500/30',
+    'bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-200 ring-indigo-500/30',
+    'bg-pink-100 text-pink-800 dark:bg-pink-500/20 dark:text-pink-200 ring-pink-500/30'
   ]
   return colors[index % colors.length]
 }
@@ -78,8 +73,8 @@ export function PatientTable({ data, onEdit, onView }: PatientTableProps) {
             <TableHead className="text-gray-700 dark:text-gray-200 font-semibold">
               Address
             </TableHead>
-            <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[120px]">
-              Status
+            <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[200px]">
+              Custom Fields
             </TableHead>
             <TableHead className="text-gray-700 dark:text-gray-200 font-semibold w-[100px]">
               Actions
@@ -134,14 +129,25 @@ export function PatientTable({ data, onEdit, onView }: PatientTableProps) {
                   )}
                 </TableCell>
                 <TableCell className="text-gray-700 dark:text-gray-200">
-                  <span
-                    className={cn(
-                      'table-status-badge',
-                      getStatusColor(item.status)
-                    )}
-                  >
-                    {item.status}
-                  </span>
+                  {item.customFields && item.customFields.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {item.customFields.map((field, index) => (
+                        <span
+                          key={`${item.id}-${field.name}`}
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                            getCustomFieldColor(index)
+                          )}
+                        >
+                          {field.name}: {field.value}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-gray-500 dark:text-gray-400">
+                      No custom fields
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <button
