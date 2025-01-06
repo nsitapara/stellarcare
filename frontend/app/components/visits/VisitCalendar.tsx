@@ -112,8 +112,7 @@ interface VisitCalendarProps {
 export function VisitCalendar({
   initialDate,
   onVisitCreate,
-  onVisitCancel,
-  onVisitEdit
+  onVisitCancel
 }: VisitCalendarProps) {
   const [mounted, setMounted] = useState(false)
   const [visits, setVisits] = useState<VisitWithPatient[]>([])
