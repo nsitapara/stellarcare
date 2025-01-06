@@ -247,14 +247,14 @@ class Command(BaseCommand):
             for field_def in field_definitions:
                 if field_def.is_required or random.choice([True, False]):
                     if field_def.type == "number":
-                        value = random.uniform(50, 200)
+                        value = round(random.uniform(50, 200), 2)
                         PatientCustomField.objects.create(
                             patient=patient,
                             field_definition=field_def,
                             value_number=value,
                         )
                     else:
-                        value = fake.text(max_nb_chars=50)
+                        value = fake.text(max_nb_chars=25)
                         PatientCustomField.objects.create(
                             patient=patient,
                             field_definition=field_def,

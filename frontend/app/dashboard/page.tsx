@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation'
  *
  * Features:
  * - Authentication check with automatic redirect to login if unauthenticated
- * - Fetches initial patient data (10 patients per page)
+ * - Fetches initial patient data (5 patients per page)
  * - Processes patient data to include formatted addresses and default values
  * - Error handling with fallback to empty dashboard state
  *
@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   }
 
   try {
-    const initialData = await getPatients(1, 10)
+    const initialData = await getPatients(1, 5)
     const dashboardData = {
       data: initialData.results.map((patient) => ({
         id: String(patient.id),
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
       })),
       total: initialData.count,
       page: 1,
-      pageSize: 10
+      pageSize: 5
     }
 
     return <DashboardClient initialData={dashboardData} />
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
     console.error('Error fetching initial data:', error)
     return (
       <DashboardClient
-        initialData={{ data: [], total: 0, page: 1, pageSize: 10 }}
+        initialData={{ data: [], total: 0, page: 1, pageSize: 5 }}
       />
     )
   }
