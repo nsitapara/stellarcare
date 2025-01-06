@@ -38,6 +38,26 @@ const getAddressColor = (index: number) => {
 }
 
 /**
+ * Gets the status color class based on patient status
+ * @param status - Patient's status
+ * @returns CSS class string for the status indicator
+ */
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'active':
+      return 'bg-emerald-500'
+    case 'inquiry':
+      return 'bg-blue-500'
+    case 'onboarding':
+      return 'bg-amber-500'
+    case 'churned':
+      return 'bg-rose-500'
+    default:
+      return 'bg-gray-500'
+  }
+}
+
+/**
  * Gets the color class for custom field badges based on index
  * @param index - Index of the custom field in the list
  * @returns CSS class string for the custom field badge
@@ -98,7 +118,13 @@ export function PatientTable({ data, onEdit, onView }: PatientTableProps) {
                 className="border-b border-border hover:bg-gray-50 dark:hover:bg-zinc-800/50 cursor-pointer"
                 onClick={() => onView(item.id)}
               >
-                <TableCell className="font-mono text-gray-700 dark:text-gray-200 bg-gray-50/50 dark:bg-zinc-800/30 w-[80px]">
+                <TableCell className="font-mono text-gray-700 dark:text-gray-200 bg-gray-50/50 dark:bg-zinc-800/30 w-[80px] relative pl-3">
+                  <div
+                    className={cn(
+                      'absolute left-0 top-0 bottom-0 w-1',
+                      getStatusColor(item.status)
+                    )}
+                  />
                   {item.id}
                 </TableCell>
                 <TableCell className="text-gray-700 dark:text-gray-200 font-medium w-[220px]">
