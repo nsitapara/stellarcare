@@ -144,7 +144,7 @@ export function PatientTable({ data, onEdit, onView }: PatientTableProps) {
             data.map((item) => (
               <TableRow
                 key={item.id}
-                className="border-b border-border hover:bg-gray-50 dark:hover:bg-zinc-800/50 cursor-pointer"
+                className="table-row cursor-pointer"
                 onClick={() => onView(item.id)}
               >
                 <TableCell className="font-mono text-gray-700 dark:text-gray-200 bg-gray-50/50 dark:bg-zinc-800/30 w-[80px] relative pl-3">

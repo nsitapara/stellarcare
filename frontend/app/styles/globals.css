@@ -162,7 +162,7 @@
   }
 
   .table-header {
-    @apply bg-accent/20 dark:bg-accent/15 border-b-2 border-border/80 dark:border-border/60;
+    @apply bg-gray-100 dark:bg-zinc-800 border-b-2 border-border/80 dark:border-border/60;
   }
 
   .table-header-cell {
@@ -170,9 +170,25 @@
   }
 
   .table-row {
-    @apply border-b border-border/60 last:border-0 transition-colors
-    hover:bg-accent/5 dark:hover:bg-accent/10
-    active:bg-accent/10 dark:active:bg-accent/15;
+    @apply border-b border-border/60 last:border-0 transition-colors;
+  }
+
+  /* Add alternating row colors with stronger contrast and hover effects */
+  .table-row:nth-child(even) {
+    @apply bg-muted/50 dark:bg-zinc-800/70;
+  }
+
+  .table-row:nth-child(odd) {
+    @apply bg-white dark:bg-zinc-900;
+  }
+
+  /* Hover effects for both themes */
+  .table-row:hover {
+    @apply bg-accent/5 dark:bg-accent/20;
+  }
+
+  .table-row:active {
+    @apply bg-accent/10 dark:bg-accent/30;
   }
 
   .table-cell {
