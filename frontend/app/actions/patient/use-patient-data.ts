@@ -50,19 +50,20 @@ export function usePatientData({
             page: 1,
             pageSize
           })
-        } else if (query.length === 0) {
-          // Use getPatients for pagination
+        } else {
+          // Regular pagination fetch
           const response = await getPatients(page, pageSize)
           const formattedData = await Promise.all(
             response.results.map(formatPatientData)
           )
 
-          setData({
+          const newData = {
             data: formattedData,
             total: response.count,
             page,
             pageSize
-          })
+          }
+          setData(newData)
         }
       } catch (err) {
         setError('Failed to fetch patient data')
