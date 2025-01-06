@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * LoginForm Component
  *
@@ -8,8 +10,6 @@
  * - Loading states
  * - Successful login redirection
  */
-
-'use client'
 
 import { loginAction } from '@actions/user/auth-action'
 import type { LoginFormSchema } from '@api/forms/auth'

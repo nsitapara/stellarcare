@@ -31,7 +31,7 @@ services:
       db:
         condition: service_healthy
   web:
-    command: bash -c "pnpm install -r && pnpm dev"
+    command: bash -c "pnpm install -r && if [ \"$$BUILD_ENV\" = \"production\" ]; then pnpm build && pnpm start; else pnpm dev; fi"
     build:
       context: frontend
     volumes:
@@ -42,5 +42,7 @@ services:
       - "3000:3000"
     env_file:
       - .env.frontend
+    environment:
+      - NODE_ENV=${BUILD_ENV}
     depends_on:
       - api
