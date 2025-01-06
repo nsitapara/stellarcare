@@ -73,11 +73,40 @@ const getCustomFieldColor = (index: number) => {
 }
 
 /**
+ * Status legend component to display available statuses
+ */
+function StatusLegend() {
+  const statuses = [
+    { status: 'Active', color: 'bg-emerald-500' },
+    { status: 'Inquiry', color: 'bg-blue-500' },
+    { status: 'Onboarding', color: 'bg-amber-500' },
+    { status: 'Churned', color: 'bg-rose-500' }
+  ]
+
+  return (
+    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-zinc-800/50 border-b border-border text-xs">
+      <span className="font-medium text-gray-700 dark:text-gray-200">
+        Status:
+      </span>
+      <div className="flex gap-4">
+        {statuses.map(({ status, color }) => (
+          <div key={status} className="flex items-center gap-1.5">
+            <div className={cn('w-1.5 h-3 rounded-sm', color)} />
+            <span className="text-gray-600 dark:text-gray-300">{status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/**
  * PatientTable component displays patient data in a tabular format with interactive elements
  */
 export function PatientTable({ data, onEdit, onView }: PatientTableProps) {
   return (
-    <div className="table-container bg-white dark:bg-zinc-900 border-border">
+    <div className="table-container bg-white dark:bg-zinc-900 border-border rounded-md overflow-hidden">
+      <StatusLegend />
       <Table>
         <TableHeader className="bg-gray-50 dark:bg-zinc-800/50">
           <TableRow className="border-b-2 border-border hover:bg-transparent">
