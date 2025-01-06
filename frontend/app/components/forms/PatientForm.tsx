@@ -264,7 +264,13 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
       lastName: data.lastName,
       dateOfBirth: data.dateOfBirth,
       addresses: data.addresses,
-      customFields: customFields
+      customFields: customFields.map((field) => ({
+        id: field.id,
+        name: field.name,
+        type: field.type,
+        value: field.value,
+        customFieldDefinitionId: field.customFieldDefinitionId
+      }))
     }
 
     onSubmit(formData)
