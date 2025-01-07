@@ -19,10 +19,11 @@ services:
     command: >
       bash -c "
         uv sync &&
+        uv run -- python manage.py makemigrations &&
         uv run -- python manage.py migrate &&
-        uv run -- python manage.py createsuperuser --noinput &&
+        uv run -- python manage.py createsuperuser --noinput || true &&
         for i in {1..5}; do
-          uv run -- python manage.py generate_mock_data;
+          uv run -- python manage.py generate_mock_data || true;
         done
       "
     env_file:
@@ -40,7 +41,6 @@ services:
     command: >
       bash -c "
         uv sync &&
-        uv run -- python manage.py migrate &&
         uv run -- python manage.py runserver 0.0.0.0:${API_PORT:-8000}
       "
     build:
