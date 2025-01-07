@@ -89,7 +89,6 @@ function NavigationBar() {
   const router = useRouter()
   const pathname = usePathname()
   const [shouldAnimate, setShouldAnimate] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const [isDark, setIsDark] = useState(true) // Default to dark to match server
   const [lastPathname, setLastPathname] = useState(pathname)
 
@@ -111,7 +110,6 @@ function NavigationBar() {
 
   // Watch for theme changes and persist them
   useEffect(() => {
-    setMounted(true)
     const savedTheme = localStorage.getItem('theme')
     if (savedTheme) {
       const isSystemDark = savedTheme === 'dark'
