@@ -146,12 +146,12 @@ function NavigationBar() {
   }
 
   return (
-    <nav className="bg-card border-b border-border">
+    <nav className="bg-card border-b border-border relative z-50">
       <div className="container mx-auto flex items-center justify-between p-4">
         <button
           type="button"
           onClick={handleLogoClick}
-          className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+          className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer"
           aria-label="Go to home page"
         >
           <MoonIcon animate={shouldAnimate} />
@@ -163,7 +163,7 @@ function NavigationBar() {
           <button
             type="button"
             onClick={() => handleNavigation('/dashboard')}
-            className="text-foreground hover:text-primary flex items-center gap-2"
+            className="text-foreground hover:text-primary flex items-center gap-2 cursor-pointer relative"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -189,7 +189,7 @@ function NavigationBar() {
           <button
             type="button"
             onClick={() => handleNavigation('/appointments')}
-            className="text-foreground hover:text-primary flex items-center gap-2"
+            className="text-foreground hover:text-primary flex items-center gap-2 cursor-pointer relative"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
