@@ -2,11 +2,11 @@ name: Deploy to DigitalOcean
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, deployment_debug ]
   workflow_dispatch:
 
 env:
-  REGISTRY: "registry.digitalocean.com"
+  REGISTRY: "registry.digitalocean.com/stellarcare"
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
