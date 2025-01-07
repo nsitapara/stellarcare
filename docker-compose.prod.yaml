@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: "db"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  api:
+    image: registry.digitalocean.com/stellarcare/stellarcare:api-latest
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: registry.digitalocean.com/stellarcare/stellarcare:web-latest
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    env_file:
+      - backend/.env
+    environment:
+      - BUILD_ENV=production
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+    driver: local
