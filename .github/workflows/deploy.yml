@@ -8,6 +8,7 @@ on:
 env:
   REGISTRY: "registry.digitalocean.com/stellarcare"
   IMAGE_NAME: "stellarcare"
+  NODE_ENV: "production"
 
 jobs:
   build_and_push:
@@ -31,8 +32,10 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:api-latest
 
       - name: Build and push Web image
+        env:
+          BUILD_ENV: "production"
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:web-${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:web-latest ./frontend
+          docker build --build-arg BUILD_ENV=production -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:web-${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:web-latest ./frontend
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:web-${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:web-latest
 
