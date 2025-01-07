@@ -15,6 +15,8 @@ SECRET_KEY = environ.get("SECRET_KEY", get_random_secret_key())
 DEBUG = environ.get("DEBUG", "") == "1"
 
 ALLOWED_HOSTS = ["localhost", "api"]
+if SERVER_HOST := environ.get("SERVER_HOST", ""):
+    ALLOWED_HOSTS.extend(SERVER_HOST.split(","))
 
 WSGI_APPLICATION = "api.wsgi.application"
 
