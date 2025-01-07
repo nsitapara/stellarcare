@@ -38,13 +38,13 @@ services:
       retries: 1
       start_period: 1s
   api:
-    command: bash -c "uv sync && uv run -- python manage.py runserver 0.0.0.0:8080"
+    command: bash -c "uv sync && uv run -- python manage.py runserver 0.0.0.0:${API_PORT:-8000}"
     build:
       context: backend
     expose:
-      - "8080"
+      - "${API_PORT:-8000}"
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8000}:${API_PORT:-8000}"
     env_file:
       - .env.backend
     depends_on:
@@ -65,6 +65,6 @@ services:
       - .env.frontend
     environment:
       - BUILD_ENV=${BUILD_ENV:-development}
-      - NEXT_PUBLIC_API_URL=http://${SERVER_IP:-localhost}:8080
+      - NEXT_PUBLIC_API_URL=http://${SERVER_IP:-localhost}:${API_PORT:-8000}
     depends_on:
       - api
