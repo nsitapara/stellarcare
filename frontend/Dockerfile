@@ -30,5 +30,5 @@ EXPOSE 3000
 CMD if [ "$BUILD_ENV" = "production" ]; then \
       pnpm start; \
     else \
-      pnpm install -r && pnpm dev; \
+      pnpm dev; \
     fi

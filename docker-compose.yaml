@@ -5,8 +5,6 @@ services:
       - "5432"
     ports:
       - "${DB_PORT:-5432}:5432"
-    volumes:
-      - ./data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: "change-password"
       POSTGRES_DB: "db"
@@ -27,8 +25,6 @@ services:
           uv run -- python manage.py generate_mock_data;
         done
       "
-    volumes:
-      - ./backend:/app
     env_file:
       - .env.backend
     depends_on:
@@ -47,8 +43,6 @@ services:
       context: backend
     expose:
       - "8080"
-    volumes:
-      - ./backend:/app
     env_file:
       - .env.backend
     depends_on:
@@ -58,11 +52,9 @@ services:
         condition: service_completed_successfully
         required: false
   web:
-    command: bash -c "pnpm install -r && if [ \"$$BUILD_ENV\" = \"production\" ]; then pnpm build && pnpm start; else pnpm dev; fi"
+    command: bash -c "pnpm install && if [ \"$$BUILD_ENV\" = \"production\" ]; then pnpm build && pnpm start; else pnpm dev; fi"
     build:
       context: frontend
-    volumes:
-      - ./frontend:/app
     expose:
       - "3000"
     env_file:

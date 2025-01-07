@@ -11,4 +11,9 @@ RUN pip install uv && \
     uv venv && \
     uv sync
 
-EXPOSE 8000
+# Copy the rest of the application
+COPY . .
+
+EXPOSE 8080
+
+CMD ["uv", "run", "--", "python", "manage.py", "runserver", "0.0.0.0:8080"]
