@@ -41,22 +41,42 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.DROPLET_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create directory structure on droplet
+      - name: Create directory structure and config
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }} '
-            mkdir -p /opt/stellarcare/backend
+            mkdir -p /opt/stellarcare/backend /opt/stellarcare/frontend
+
+            # Backend environment configuration
+            cat > /opt/stellarcare/backend/.env << EOL
+            DEBUG=0
+            SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+            DJANGO_SUPERUSER_USERNAME=${{ secrets.DJANGO_SUPERUSER_USERNAME }}
+            DJANGO_SUPERUSER_PASSWORD=${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+            DJANGO_SUPERUSER_EMAIL=${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+            DB_NAME=db
+            DB_USER=postgres
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=db
+            DB_PORT=5432
+            EOL
+
+            # Frontend environment configuration
+            cat > /opt/stellarcare/frontend/.env << EOL
+            API_URL=http://api:8000
+            NEXTAUTH_URL=https://${{ secrets.DOMAIN }}/api/auth
+            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            BUILD_ENV=production
+            EOL
           '
 
-      - name: Copy files to droplet
+      - name: Copy docker-compose file
         run: |
           scp -i ~/.ssh/deploy_key docker-compose.prod.yaml ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }}:/opt/stellarcare/docker-compose.yaml
-          scp -i ~/.ssh/deploy_key backend/.env.example ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }}:/opt/stellarcare/backend/.env
 
       - name: Deploy to DigitalOcean
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }} '
             cd /opt/stellarcare
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> backend/.env
             docker compose pull
             docker compose down
             docker compose up -d
