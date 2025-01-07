@@ -42,13 +42,11 @@ services:
       retries: 1
       start_period: 1s
   api:
-    command: bash -c "uv sync && uv run -- python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "uv sync && uv run -- python manage.py runserver 0.0.0.0:8080"
     build:
       context: backend
     expose:
-      - "8000"
-    ports:
-      - "${API_PORT:-8000}:8000"
+      - "8080"
     volumes:
       - ./backend:/app
     env_file:
@@ -67,8 +65,6 @@ services:
       - ./frontend:/app
     expose:
       - "3000"
-    ports:
-      - "${WEB_PORT:-3000}:3000"
     env_file:
       - .env.frontend
     environment:
