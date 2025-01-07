@@ -81,15 +81,8 @@ jobs:
           sed -i "s|build:\\s*context:\\s*backend|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:api-${{ github.sha }}|g" deploy/docker-compose.yaml
           sed -i "s|build:\\s*context:\\s*frontend|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:web-${{ github.sha }}|g" deploy/docker-compose.yaml
 
-      - name: Test SSH Connection
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DROPLET_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -vvv ${{ secrets.DROPLET_USERNAME }}@${{ secrets.DROPLET_HOST }} "echo 'SSH Connection Test Successful'"
-
       - name: Copy files to droplet
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
@@ -103,7 +96,7 @@ jobs:
           use_insecure_cipher: true
 
       - name: Deploy to DigitalOcean
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v0.1.4
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
