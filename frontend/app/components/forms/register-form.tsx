@@ -32,11 +32,15 @@ export function RegisterForm({
     })
 
   return (
-    <>
-      <FormHeader
-        title="Create new account in Turbo"
-        description="Get an access to internal application"
-      />
+    <div className="space-y-8">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent animate-gradient">
+          Welcome to StellarCare
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
+          Sign up to access your dashboard
+        </p>
+      </div>
 
       <form
         method="post"
@@ -85,6 +89,6 @@ export function RegisterForm({
         link="/login"
         title="Sign in"
       />
-    </>
+    </div>
   )
 }
