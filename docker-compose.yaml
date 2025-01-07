@@ -30,7 +30,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    profiles: ["setup"]
+    profiles: ["${SETUP:+setup}"]
     healthcheck:
       test: ["CMD-SHELL", "exit 0"]
       interval: 1s
@@ -55,11 +55,12 @@ services:
     environment:
       - SERVER_HOST=${SERVER_IP:-localhost}
       - API_PORT=${API_PORT:-8000}
-      - DEBUG=1
-      - PYTHONUNBUFFERED=1
     depends_on:
       db:
         condition: service_healthy
+      setup:
+        condition: service_completed_successfully
+        required: false
   web:
     command: bash -c "pnpm install && if [ \"$$BUILD_ENV\" = \"production\" ]; then pnpm build && pnpm start; else pnpm dev; fi"
     build:
