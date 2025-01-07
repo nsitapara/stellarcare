@@ -14,7 +14,6 @@
 import type { registerAction } from '@actions/user/register-action'
 import type { RegisterFormError, RegisterFormSchema } from '@api/forms/auth'
 import { FormFooter } from '@components/forms/form-footer'
-import { FormHeader } from '@components/forms/form-header'
 import { SubmitField } from '@components/forms/submit-field'
 import { TextField } from '@components/forms/text-field'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,53 +32,63 @@ export function RegisterForm({
 
   return (
     <>
-      <FormHeader
-        title="Create new account in Turbo"
-        description="Get an access to internal application"
-      />
+      <div className="text-center">
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent animate-gradient">
+          Join StellarCare
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground pb-4">
+          Create your account.
+        </p>
+      </div>
 
-      <form
-        method="post"
-        onSubmit={handleSubmit(async (data) => {
-          const res = await onSubmitHandler(data)
+      <div className="p-6 rounded-lg border-2 border-border/60 dark:border-border/40 bg-card animate-fade-up">
+        <form
+          method="post"
+          onSubmit={handleSubmit(async (data) => {
+            const res = await onSubmitHandler(data)
 
-          if (res === true) {
-            signIn()
-          } else if (typeof res !== 'boolean') {
-            const errors = res as RegisterFormError
-            fieldApiError('username', 'username', errors, setError)
-            fieldApiError('password', 'password', errors, setError)
-            fieldApiError('password_retype', 'passwordRetype', errors, setError)
-          }
-        })}
-      >
-        <TextField
-          type="text"
-          register={register('username')}
-          formState={formState}
-          label="Username"
-          placeholder="Unique username or email"
-        />
+            if (res === true) {
+              signIn()
+            } else if (typeof res !== 'boolean') {
+              const errors = res as RegisterFormError
+              fieldApiError('username', 'username', errors, setError)
+              fieldApiError('password', 'password', errors, setError)
+              fieldApiError(
+                'password_retype',
+                'passwordRetype',
+                errors,
+                setError
+              )
+            }
+          })}
+        >
+          <TextField
+            type="text"
+            register={register('username')}
+            formState={formState}
+            label="Username"
+            placeholder="Unique username or email"
+          />
 
-        <TextField
-          type="password"
-          register={register('password')}
-          formState={formState}
-          label="Password"
-          placeholder="Your new password"
-        />
+          <TextField
+            type="password"
+            register={register('password')}
+            formState={formState}
+            label="Password"
+            placeholder="Your new password"
+          />
 
-        <TextField
-          type="password"
-          register={register('passwordRetype')}
-          formState={formState}
-          label="Retype password"
-          placeholder="Verify password"
-        />
+          <TextField
+            type="password"
+            register={register('passwordRetype')}
+            formState={formState}
+            label="Retype password"
+            placeholder="Verify password"
+          />
 
-        <SubmitField>Sign up</SubmitField>
-      </form>
-
+          <SubmitField>Sign up</SubmitField>
+        </form>
+      </div>
       <FormFooter
         cta="Already have an account?"
         link="/login"

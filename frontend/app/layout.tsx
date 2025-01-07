@@ -1,40 +1,29 @@
 import { ClientLayout } from '@components/client-layout'
 import { Inter } from 'next/font/google'
 import './styles/globals.css'
+import type { Metadata, Viewport } from 'next'
 
 // Initialize the Inter font with Latin subset
 const inter = Inter({ subsets: ['latin'] })
 
-/**
- * Application metadata configuration
- * Defines the title and description for SEO and browser display
- */
-export const metadata = {
-  title: 'StellarCare - Patient Management',
-  description: 'A comprehensive healthcare management platform',
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' }
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1
+}
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | StellarCare',
+    default: 'StellarCare'
+  },
+  description: 'Modern healthcare management platform',
   icons: {
-    icon: [
-      {
-        url: '/favicon.svg',
-        type: 'image/svg+xml'
-      }
-    ]
-  },
-  manifest: '/manifest.json',
-  themeColor: '#6366f1',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5
-  },
-  applicationName: 'StellarCare',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'StellarCare'
-  },
-  formatDetection: {
-    telephone: true
+    icon: '/favicon.ico'
   }
 }
 
