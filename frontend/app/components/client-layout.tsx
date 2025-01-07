@@ -89,7 +89,8 @@ function NavigationBar() {
   const router = useRouter()
   const pathname = usePathname()
   const [shouldAnimate, setShouldAnimate] = useState(false)
-  const [isDark, setIsDark] = useState(true)
+  const [mounted, setMounted] = useState(false)
+  const [isDark, setIsDark] = useState(true) // Default to dark to match server
   const [lastPathname, setLastPathname] = useState(pathname)
 
   const triggerAnimation = useCallback(() => {
@@ -108,8 +109,16 @@ function NavigationBar() {
     }
   }, [pathname, lastPathname, triggerAnimation])
 
-  // Watch for theme changes
+  // Watch for theme changes and persist them
   useEffect(() => {
+    setMounted(true)
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme) {
+      const isSystemDark = savedTheme === 'dark'
+      setIsDark(isSystemDark)
+      document.documentElement.classList.toggle('dark', isSystemDark)
+    }
+
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (
@@ -119,6 +128,7 @@ function NavigationBar() {
           const isDarkMode = mutation.target.classList.contains('dark')
           if (isDark !== isDarkMode) {
             setIsDark(isDarkMode)
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light')
             triggerAnimation()
           }
         }

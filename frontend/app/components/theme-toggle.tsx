@@ -17,13 +17,15 @@ import { useEffect, useState } from 'react'
  * @returns A button component that toggles between light and dark themes
  */
 export function ThemeToggle() {
-  const [isDark, setIsDark] = useState(true)
+  const [mounted, setMounted] = useState(false)
+  const [isDark, setIsDark] = useState(true) // Default to dark to match server
 
   // Toggle dark mode by adding/removing the 'dark' class on the html element
   const toggleTheme = () => {
     const html = document.documentElement
     const newIsDark = !isDark
     setIsDark(newIsDark)
+    localStorage.setItem('theme', newIsDark ? 'dark' : 'light')
 
     if (newIsDark) {
       html.classList.add('dark')
@@ -34,9 +36,27 @@ export function ThemeToggle() {
 
   // Initialize theme on mount
   useEffect(() => {
-    const html = document.documentElement
-    setIsDark(html.classList.contains('dark'))
+    setMounted(true)
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme) {
+      const isSystemDark = savedTheme === 'dark'
+      setIsDark(isSystemDark)
+      document.documentElement.classList.toggle('dark', isSystemDark)
+    }
   }, [])
+
+  // Avoid hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <Button
+        variant="outline"
+        size="icon"
+        className="border-gray-700 hover:bg-secondary w-9 h-9"
+      >
+        <span className="sr-only">Loading theme</span>
+      </Button>
+    )
+  }
 
   return (
     <Button
