@@ -14,13 +14,25 @@ SECRET_KEY = environ.get("SECRET_KEY", get_random_secret_key())
 
 DEBUG = environ.get("DEBUG", "") == "1"
 
+# Print environment variables for debugging
+print(f"SERVER_HOST: {environ.get('SERVER_HOST')}")
+print(f"API_PORT: {environ.get('API_PORT')}")
+
 ALLOWED_HOSTS = ["localhost", "api", "127.0.0.1"]
 if SERVER_HOST := environ.get("SERVER_HOST", ""):
     # Add the base IP
     ALLOWED_HOSTS.append(SERVER_HOST)
     # Add potential port combinations
     if API_PORT := environ.get("API_PORT", ""):
-        ALLOWED_HOSTS.append(f"{SERVER_HOST}:{API_PORT}")
+        ALLOWED_HOSTS.extend(
+            [
+                f"{SERVER_HOST}:{API_PORT}",  # IP:PORT
+                SERVER_HOST,  # IP only
+                "*",  # Temporarily allow all hosts for debugging
+            ]
+        )
+
+print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
 WSGI_APPLICATION = "api.wsgi.application"
 
