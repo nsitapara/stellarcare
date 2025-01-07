@@ -25,6 +25,18 @@ jobs:
       - name: Log in to DO Container Registry
         run: doctl registry login --expiry-seconds 600
 
+      - name: Clean up old images
+        run: |
+          # Delete all but the latest image for each tag
+          for tag in api web; do
+            # Get list of digests for the tag, excluding latest
+            digests=$(doctl registry repository digests ${{ env.IMAGE_NAME }} --format ID | grep -v latest)
+            if [ ! -z "$digests" ]; then
+              echo "Deleting old images for $tag"
+              echo "$digests" | xargs -I {} doctl registry repository delete-manifest ${{ env.IMAGE_NAME }} {} --force
+            fi
+          done
+
       - name: Build and push API image
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:api-${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:api-latest ./backend
