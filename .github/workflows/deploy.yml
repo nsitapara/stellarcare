@@ -27,13 +27,19 @@ jobs:
 
       - name: Clean up old images
         run: |
-          # Delete all but the latest image for each tag
+          # List and delete old manifests for each tag
           for tag in api web; do
-            # Get list of digests for the tag, excluding latest
-            digests=$(doctl registry repository digests ${{ env.IMAGE_NAME }} --format ID | grep -v latest)
-            if [ ! -z "$digests" ]; then
-              echo "Deleting old images for $tag"
-              echo "$digests" | xargs -I {} doctl registry repository delete-manifest ${{ env.IMAGE_NAME }} {} --force
+            echo "Cleaning up old images for $tag"
+            # List manifests
+            manifests=$(doctl registry repository list-manifests ${{ env.IMAGE_NAME }} --output json | jq -r '.[].digest')
+            if [ ! -z "$manifests" ]; then
+              echo "Found manifests to clean up"
+              echo "$manifests" | while read digest; do
+                if [ ! -z "$digest" ]; then
+                  echo "Deleting manifest: $digest"
+                  doctl registry repository delete-manifest ${{ env.IMAGE_NAME }} "$digest" --force || true
+                fi
+              done
             fi
           done
 
