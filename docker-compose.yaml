@@ -30,7 +30,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    profiles: ["${SETUP:+setup}"]
     healthcheck:
       test: ["CMD-SHELL", "exit 0"]
       interval: 1s
@@ -60,7 +59,6 @@ services:
         condition: service_healthy
       setup:
         condition: service_completed_successfully
-        required: false
   web:
     command: bash -c "pnpm install && if [ \"$$BUILD_ENV\" = \"production\" ]; then pnpm build && pnpm start; else pnpm dev; fi"
     build:
