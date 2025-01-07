@@ -1,280 +1,247 @@
-# Turbo - Django & Next.js boilerplate <!-- omit from toc -->
+# StellarCare - Healthcare Management System
 
-Turbo is a simple bootstrap template for Django and Next.js, combining both frameworks under one monorepository, including best practices.
+StellarCare is a modern, full-stack healthcare management system built with Django and Next.js. It provides a comprehensive solution for managing patient data, appointments, and healthcare workflows.
 
-## Features <!-- omit from toc -->
+## 📸 Screenshots
 
-- **Microsites**: supports several front ends connected to API backend
-- **API typesafety**: exported types from backend stored in shared front end package
-- **Server actions**: handling form submissions in server part of Next project
-- **Tailwind CSS**: built-in support for all front end packages and sites
-- **Docker Compose**: start both front end and backend by running `docker compose up`
-- **Auth system**: incorporated user authentication based on JWT tokens
-- **Profile management**: update profile information from the front end
-- **Registrations**: creation of new user accounts (activation not included)
-- **Admin theme**: Unfold admin theme with user & group management
-- **Custom user model**: extended default Django user model
-- **Visual Studio Code**: project already constains VS Code containers and tasks
+[Add screenshots of your application here]
+- Dashboard View
+- Patient Management Interface
+- Appointment Scheduling
+- Reports and Analytics
 
-## Table of contents <!-- omit from toc -->
+## 🌟 Features
 
-- [Quickstart](#quickstart)
-  - [Environment files configuration](#environment-files-configuration)
-  - [Running docker compose](#running-docker-compose)
-- [Included dependencies](#included-dependencies)
-  - [Backend dependencies](#backend-dependencies)
-  - [Front end dependencies](#front-end-dependencies)
-- [Front end project structure](#front-end-project-structure)
-  - [Adding microsite to docker-compose.yaml](#adding-microsite-to-docker-composeyaml)
-- [Authentication](#authentication)
-  - [Configuring env variables](#configuring-env-variables)
-  - [User accounts on the backend](#user-accounts-on-the-backend)
-  - [Authenticated paths on frontend](#authenticated-paths-on-frontend)
-- [API calls to backend](#api-calls-to-backend)
-  - [API Client](#api-client)
-  - [Updating OpenAPI schema](#updating-openapi-schema)
-  - [Swagger](#swagger)
-  - [Client side requests](#client-side-requests)
-- [Test suite](#test-suite)
-- [Developing in VS Code](#developing-in-vs-code)
+- **Modern Tech Stack**: Built with Django 5.1 (Backend) and Next.js 15 (Frontend)
+- **Beautiful UI**: Sleek interface built with Tailwind CSS and Radix UI components
+- **Type-Safe**: Full TypeScript support with OpenAPI schema generation
+- **Authentication**: Secure JWT-based authentication system
+- **Patient Management**: Comprehensive patient data management system
+- **Dashboard**: Interactive dashboard for healthcare metrics
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
-## Quickstart
+## 📸️ Helpful Commands
 
-To start using Turbo, it is needed to clone the repository to your local machine and then run `docker compose`, which will take care about the installation process. The only prerequisite for starting Turbo template is to have `docker compose` installed and preconfiguring files with environment variables.
-
+### Initial Setup
 ```bash
-git clone https://github.com/unfoldadmin/turbo.git
-cd turbo
+# Start all services with initial setup (creates DB, runs migrations, creates superuser)
+docker compose --profile setup up
+
+# Start services in detached mode
+docker compose up -d
 ```
 
-### Environment files configuration
-
-Before you can run `docker compose up`, you have to set up two files with environment variables. Both files are loaded via `docker compose` and variables are available within docker containers.
-
+### Database Management
 ```bash
-cp .env.backend.template .env.backend # set SECRET_KEY and DEBUG=1 for debug mode on
-cp .env.frontend.template .env.frontend # set NEXTAUTH_SECRET to a value "openssl rand -base64 32"
+# Run database migrations
+docker compose exec api uv run -- python manage.py migrate
+
+# Generate mock data (creates sample patients and records)
+docker compose exec api uv run -- python manage.py generate_mock_data
 ```
 
-For more advanced environment variables configuration for the front end, it is recommended to read official [Next.js documentation](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) about environment variables where it is possible to configure specific variables for each microsite.
+### Development Commands
+```bash
+# Backend shell access
+docker compose exec api bash
 
-On the backend it is possible to use third party libraries for loading environment variables. In case that loading variables through `os.environ` is not fulfilling the requriements, we recommend using [django-environ](https://github.com/joke2k/django-environ) application.
+# Frontend shell access
+docker compose exec web bash
 
-### Running docker compose
+# Install backend dependencies
+docker compose exec api uv sync
 
+# Install frontend dependencies
+docker compose exec web pnpm install
+
+# Build frontend for production
+docker compose exec web pnpm build
+
+# View logs
+docker compose logs -f
+
+# View logs for specific service
+docker compose logs -f [api|web|db]
+```
+
+### Environment Variables
+```bash
+# Production mode for frontend
+export BUILD_ENV=production
+docker compose up web
+
+# Development mode (default)
+export BUILD_ENV=development
+docker compose up web
+```
+
+### Cleanup Commands
+```bash
+# Stop all services
+docker compose down
+
+# Remove all containers and volumes (clean slate)
+docker compose down -v
+
+# Remove all containers, volumes, and images
+docker compose down -v --rmi all
+```
+
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Docker and Docker Compose
+- Node.js 18+ (for local development)
+- Python 3.13+ (for local development)
+- pnpm (recommended) or npm
+
+### Quick Start with Docker
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/stellarcare.git
+cd stellarcare
+```
+
+2. Set up environment variables:
+```bash
+# Backend environment setup
+cp .env.backend.template .env.backend
+# Set SECRET_KEY and DEBUG=1 for development
+
+# Frontend environment setup
+cp .env.frontend.template .env.frontend
+# Generate NEXTAUTH_SECRET with: openssl rand -base64 32
+```
+
+3. Start the application:
 ```bash
 docker compose up
 ```
 
-After successful installation, it will be possible to access both front end (http://localhost:3000) and backend (http://localhost:8000) part of the system from the browsers.
+The application will be available at:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/api/schema/swagger-ui/
 
-**NOTE**: Don't forget to change database credentials in docker-compose.yaml and in .env.backend by configuring `DATABASE_PASSWORD`.
+## 🏗️ Project Structure
 
-## Included dependencies
+### Backend (Django)
+```
+backend/
+├── api/                    # Main Django application
+│   ├── views/             # API endpoints
+│   ├── serializers/       # API serializers
+│   ├── management/        # Django management commands
+│   │   └── commands/      # Custom commands like generate_mock_data
+│   ├── migrations/        # Database migrations
+│   ├── tests/             # Test suite
+│   ├── models.py          # Database models
+│   ├── admin.py          # Admin interface configuration
+│   ├── api.py            # API viewsets and routes
+│   ├── urls.py           # URL routing
+│   └── settings.py       # Django settings
+├── .venv/                 # Python virtual environment
+├── manage.py             # Django management script
+├── pyproject.toml        # Python dependencies and tools config
+├── uv.lock               # Dependency lock file
+└── Dockerfile            # Container configuration
+```
 
-The general rule when it comes to dependencies is to have minimum of third party applications or plugins to avoid future problems updating the project and keep the maintenance of applications is minimal.
+### Frontend (Next.js)
+```
+frontend/
+├── app/                    # Next.js application
+│   ├── (auth)/            # Authentication routes
+│   ├── actions/           # Server actions
+│   ├── api/               # API routes
+│   ├── appointments/      # Appointment management
+│   ├── components/        # Reusable UI components
+│   ├── dashboard/         # Dashboard views
+│   ├── lib/               # Utility functions
+│   ├── patients/          # Patient management
+│   ├── styles/            # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── providers/             # React context providers
+├── public/               # Static assets
+├── types/                # TypeScript definitions
+├── .next/                # Next.js build output
+├── node_modules/         # Dependencies
+├── tsconfig.json        # TypeScript configuration
+├── tailwind.config.ts   # Tailwind CSS configuration
+├── next.config.ts       # Next.js configuration
+├── next-auth-d.ts       # NextAuth type definitions
+├── postcss.config.mjs   # PostCSS configuration
+├── package.json         # Project dependencies
+├── pnpm-lock.yaml      # Dependency lock file
+└── Dockerfile          # Container configuration
+```
 
-### Backend dependencies
+## 🧪 Testing
 
-For dependency management in Django application we are using `uv`. When starting the project through the `docker compose` command, it is checked for new dependencies as well. In the case they are not installed, docker will install them before running development server.
-
-- **[djangorestframework](https://github.com/encode/django-rest-framework)** - REST API support
-- **[djangorestframework-simplejwt](https://github.com/jazzband/djangorestframework-simplejwt)** - JWT auth for REST API
-- **[drf-spectacular](https://github.com/tfranzel/drf-spectacular)** - OpenAPI schema generator
-- **[django-unfold](https://github.com/unfoldadmin/django-unfold)** - Admin theme for Django admin panel
-
-Below, you can find a command to install new dependency into backend project.
-
+### Backend Tests
 ```bash
-docker compose exec api uv add djangorestframework
+# Run all tests
+docker compose exec api uv run -- pytest .
+
+# Run specific test file
+docker compose exec api uv run -- pytest api/tests/test_api.py
+
+# Run specific test
+docker compose exec api uv run -- pytest api/tests/test_api.py -k "test_name"
 ```
 
-### Front end dependencies
+### Frontend Tests
+[Add frontend testing instructions when implemented]
 
-For the frontend project, it is bit more complicated to maintain fron end dependencies than in backend part. Dependencies, can be split into two parts. First part are general dependencies available for all projects under packages and apps folders. The second part are dependencies, which are project specific.
+## 🛠️ Development Tools
 
-- **[next-auth](https://github.com/nextauthjs/next-auth)** - Next.js authentication
-- **[react-hook-form](https://github.com/react-hook-form/react-hook-form)** - Handling of React forms
-- **[tailwind-merge](https://github.com/dcastil/tailwind-merge)** - Tailwind CSS class names helper
-- **[zod](https://github.com/colinhacks/zod)** - Schema validation
+### VS Code Setup
+The project includes VS Code configurations for development containers. To use them:
 
-To install a global dependency for all packages and apps, use `-w` parameter. In case of development package, add `-D` argument to install it into development dependencies.
+1. Install the "Remote - Containers" extension
+2. Open the project in VS Code
+3. Click "Reopen in Container" when prompted
+4. Select either frontend or backend container
 
-```bash
-docker compose exec web pnpm add react-hook-form -w
-```
+### API Documentation
+- Django Dashboard: http://localhost:8000/admin/
+- OpenAPI Schema: http://localhost:8000/api/schema/
+- Swagger UI: http://localhost:8000/api/schema/swagger-ui/
 
-To install a dependency for specific app or package, use `--filter` to specify particular package.
-
-```bash
-docker compose exec web pnpm --filter web add react-hook-form
-```
-
-## Front end project structure
-
-Project structure on the front end, it is quite different from the directory hierarchy in the backend. Turbo counts with an option that front end have multiple front ends available on various domains or ports.
-
-```text
-frontend
-| - apps       // available sites
-|   - web      // available next.js project
-| - packages   // shared packages between sites
-|   - types    // exported types from backend - api
-|   - ui       // general ui components
-```
-
-The general rule here is, if you want to have some shared code, create new package under packages/ folder. After adding new package and making it available for your website, it is needed to install the new package into website project by running a command below.
-
-```bash
-docker compose exec web pnpm --filter web add ../
-```
-
-### Adding microsite to docker-compose.yaml
-
-If you want to have new website facing customers, create new project under apps/ directory. Keep in mind that `docker-compose.yaml` file must be adjusted to start a new project with appropriate new port.
-
-```yaml
-new_microsite:
-  command: bash -c "pnpm install -r && pnpm --filter new_microsite dev"
-  build:
-    context: frontend # Dockerfile can be same
-  volumes:
-    - ./frontend:/app
-  expose:
-    - "3001" # different port
-  ports:
-    - "3001:3001" # different port
-  env_file:
-    - .env.frontend
-  depends_on:
-    - api
-```
-
-## Authentication
-
-For the authentication, Turbo uses **django-simplejwt** and **next-auth** package to provide simple REST based JWT authentication. On the backend, there is no configuraton related to django-simplejwt so everything is set to default values.
-
-On the front end, next-auth is used to provide credentials authentication. The most important file on the front end related to authentication is `frontend/web/lib/auth.ts` which is containing whole business logic behind authentication.
-
-### Configuring env variables
-
-Before starting using authentication, it is crucial to configure environment variable `NEXTAUTH_SECRET` in .env.frontend file. You can set the value to the output of the command below.
-
-```bash
-openssl rand -base64 32
-```
-
-### User accounts on the backend
-
-There are two ways how to create new user account in the backend. First option is to run managed command responsible for creating superuser. It is more or less required, if you want to have an access to the Django admin. After running the command below, it will be possible to log in on the front end part of the application.
-
-```bash
-docker compose exec api uv run -- python manage.py createsuperuser
-```
-
-The second option how to create new user account is to register it on the front end. Turbo provides simple registration form. After account registration, it will be not possible to log in because account is inactive. Superuser needs to access Django admin and activate an account. This is a default behavior provided by Turbo, implementation of special way of account activation is currently out the scope of the project.
-
-### Authenticated paths on frontend
-
-To ensure path is only for authenticated users, it is possible to use `getServerSession` to check the status of user.
-
-This function accepts an argument with authentication options, which can be imported from `@lib/auth` and contains credentials authentication business logic.
-
-```tsx
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@lib/auth";
-
-const SomePageForAuthenticatedUsers = async () => {
-  const session = await getServerSession(authOptions);
-
-  if (session === null) {
-    return redirect("/");
-  }
-
-  return <>content</>;
-};
-```
-
-To require authenticated user account on multiple pages, similar business logic can be applied in `layouts.tsx`.
-
-```tsx
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@lib/auth";
-
-const AuthenticatedLayout = async ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const session = await getServerSession(authOptions);
-
-  if (session === null) {
-    return redirect("/");
-  }
-
-  return <>{children}</>;
-};
-
-export default AuthenticatedLayout;
-```
-
-## API calls to backend
-
-Currently Turbo implements Next.js server actions in folder `frontend/apps/web/actions/` responsible for communication with the backend. When the server action is hit from the client, it fetches required data from Django API backend.
-
-### API Client
-
-The query between server action and Django backend is handled by using an API client generated by `openapi-typescript-codegen` package. In Turbo, there is a function `getApiClient` available in `frontend/apps/web/lib/api.ts` which already implements default options and authentication tokens.
-
-### Updating OpenAPI schema
-
-After changes on the backend, for example adding new fields into serializers, it is required to update typescript schema on the frontend. The schema can be updated by running command below. In VS Code, there is prepared task which will update definition.
-
+### Updating API Types
+After making changes to the backend API:
 ```bash
 docker compose exec web pnpm openapi:generate
 ```
 
-### Swagger
+## 📝 License
 
-By default, Turbo includes Swagger for API schema which is available here `http://localhost:8000/api/schema/swagger-ui/`. Swagger can be disabled by editing `urls.py` and removing `SpectacularSwaggerView`.
+This project is licensed under the MIT License - see below for details:
 
-### Client side requests
-
-At the moment, Turbo does not contain any examples of client side requests towards the backend. All the requests are handled by server actions. For client side requests, it is recommended to use [react-query](https://github.com/TanStack/query).
-
-## Test suite
-
-Project contains test suite for backend part. For testing it was used library called [pytest](https://docs.pytest.org/en/latest/) along with some additinal libraries extending functionality of pytest:
-
-- [pytest-django](https://pytest-django.readthedocs.io/en/latest/) - for testing django applications
-- [pytest-factoryboy](https://pytest-factoryboy.readthedocs.io/en/latest/) - for creating test data
-
-All these libraries mentioned above are already preconfigured in `backend/api/tests` directory.
-
-- `conftest.py` - for configuring pytest
-- `factories.py` - for generating reusable test objects using factory_boy, which creates model instances with default values that can be customized as needed
-- `fixtures.py` - for creating pytest fixtures that provide test data or resources that can be shared and reused across multiple tests
-
-To run tests, use the command below which will collect all the tests available in backend/api/tests folder:
-
-```bash
-docker compose exec api uv run -- pytest .
 ```
+MIT License
 
-Tu run tests available only in one specific file run:
+Copyright (c) 2024 Nish Sitapara
 
-```bash
-docker compose exec api uv run -- pytest api/tests/test_api.py
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 ```
-
-To run one specific test, use the command below:
-
-```bash
-docker compose exec api uv run -- pytest api/tests/test_api.py -k "test_api_users_me_authorized"
-```
-
-## Developing in VS Code
-
-The project contains configuration files for devcontainers so it is possible to directly work inside the container within VS Code. When the project opens in the VS Code the popup will appear to reopen the project in container. An action **Dev Containers: Reopen in Container** is available as well. Click on the reopen button and select the container which you want to work on. When you want to switch from the frontend to the backend project run **Dev Containers: Switch container** action. In case you are done and you want to work in the parent folder run **Dev Containers: Reopen Folder Locally** action
