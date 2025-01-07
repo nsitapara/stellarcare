@@ -1,0 +1,83 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: "registry.digitalocean.com"
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Log in to DO Container Registry
+        run: doctl registry login --expiry-seconds 600
+
+      - name: Build and push API image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:latest ./backend
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:latest
+
+      - name: Build and push Web image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:latest ./frontend
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:latest
+
+  deploy:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Create deployment directory
+        run: |
+          mkdir -p deploy
+          cp docker-compose.yaml deploy/
+          cp .env.backend deploy/ || echo "POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}" > deploy/.env.backend
+          cp .env.frontend deploy/ || echo "NEXT_PUBLIC_API_URL=http://api:8000" > deploy/.env.frontend
+
+      - name: Update docker-compose.yaml
+        run: |
+          sed -i "s|build:\\s*context:\\s*backend|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api:${{ github.sha }}|g" deploy/docker-compose.yaml
+          sed -i "s|build:\\s*context:\\s*frontend|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web:${{ github.sha }}|g" deploy/docker-compose.yaml
+
+      - name: Copy files to droplet
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          source: "deploy/*"
+          target: "/opt/stellarcare"
+          strip_components: 1
+
+      - name: Deploy to DigitalOcean
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            cd /opt/stellarcare
+            docker compose pull
+            docker compose down
+            docker compose up -d
