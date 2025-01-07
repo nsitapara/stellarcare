@@ -2,39 +2,6 @@
 
 StellarCare is a modern, full-stack healthcare management system built with Django and Next.js. It provides a comprehensive solution for managing patient data, appointments, and healthcare workflows.
 
-## 📸 Screenshots
-
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0;">
-    <a href="images/HomeScreen.png" target="_blank" style="display: block;">
-        <img src="images/HomeScreen.png" alt="Home Screen" style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <p style="text-align: center; margin-top: 8px; font-size: 14px;">Home Screen</p>
-    </a>
-    <a href="images/SignIn.png" target="_blank" style="display: block;">
-        <img src="images/SignIn.png" alt="Sign In" style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <p style="text-align: center; margin-top: 8px; font-size: 14px;">Sign In</p>
-    </a>
-    <a href="images/SignUp.png" target="_blank" style="display: block;">
-        <img src="images/SignUp.png" alt="Sign Up" style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <p style="text-align: center; margin-top: 8px; font-size: 14px;">Sign Up</p>
-    </a>
-    <a href="images/DashBoard.png" target="_blank" style="display: block;">
-        <img src="images/DashBoard.png" alt="Dashboard" style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <p style="text-align: center; margin-top: 8px; font-size: 14px;">Dashboard</p>
-    </a>
-    <a href="images/NewPatient.png" target="_blank" style="display: block;">
-        <img src="images/NewPatient.png" alt="New Patient Form" style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <p style="text-align: center; margin-top: 8px; font-size: 14px;">New Patient Form</p>
-    </a>
-    <a href="images/PatientDetails.png" target="_blank" style="display: block;">
-        <img src="images/PatientDetails.png" alt="Patient Details" style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <p style="text-align: center; margin-top: 8px; font-size: 14px;">Patient Details</p>
-    </a>
-    <a href="images/Appointments.png" target="_blank" style="display: block;">
-        <img src="images/Appointments.png" alt="Appointments" style="width: 100%; max-width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        <p style="text-align: center; margin-top: 8px; font-size: 14px;">Appointments</p>
-    </a>
-</div>
-
 ## 🌟 Features
 
 - **Modern Tech Stack**: Built with Django 5.1 (Backend) and Next.js 15 (Frontend)
@@ -270,3 +237,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## 📸 Screenshots
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
+    <a href="images/HomeScreen.png" target="_blank">
+        <img src="images/HomeScreen.png" alt="Home Screen" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/SignIn.png" target="_blank">
+        <img src="images/SignIn.png" alt="Sign In" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/SignUp.png" target="_blank">
+        <img src="images/SignUp.png" alt="Sign Up" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/DashBoard.png" target="_blank">
+        <img src="images/DashBoard.png" alt="Dashboard" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/NewPatient.png" target="_blank">
+        <img src="images/NewPatient.png" alt="New Patient Form" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/PatientDetails.png" target="_blank">
+        <img src="images/PatientDetails.png" alt="Patient Details" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/Appointments.png" target="_blank">
+        <img src="images/Appointments.png" alt="Appointments" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+</div>
