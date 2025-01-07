@@ -4,11 +4,29 @@ StellarCare is a modern, full-stack healthcare management system built with Djan
 
 ## 📸 Screenshots
 
-[Add screenshots of your application here]
-- Dashboard View
-- Patient Management Interface
-- Appointment Scheduling
-- Reports and Analytics
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
+    <a href="images/HomeScreen.png" target="_blank">
+        <img src="images/HomeScreen.png" alt="Home Screen" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/SignIn.png" target="_blank">
+        <img src="images/SignIn.png" alt="Sign In" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/SignUp.png" target="_blank">
+        <img src="images/SignUp.png" alt="Sign Up" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/DashBoard.png" target="_blank">
+        <img src="images/DashBoard.png" alt="Dashboard" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/NewPatient.png" target="_blank">
+        <img src="images/NewPatient.png" alt="New Patient Form" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/PatientDetails.png" target="_blank">
+        <img src="images/PatientDetails.png" alt="Patient Details" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+    <a href="images/Appointments.png" target="_blank">
+        <img src="images/Appointments.png" alt="Appointments" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+    </a>
+</div>
 
 ## 🌟 Features
 
