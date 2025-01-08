@@ -167,3 +167,27 @@ class CustomFieldDefinitionAssignView(generics.GenericAPIView):
         except Exception as e:
             logger.error(f"Error assigning custom field to user: {e}")
             raise
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Unassigns a custom field from the current user.
+
+        Process:
+        1. Gets the field definition
+        2. Removes it from the user's available fields
+        3. Logs the unassignment
+        4. Handles any errors
+        """
+        custom_field = self.get_object()
+        user = request.user
+        logger.info(
+            f"Unassigning custom field {custom_field.id} from user {user.email}"
+        )
+
+        try:
+            user.available_custom_fields.remove(custom_field)
+            logger.info("Successfully unassigned custom field from user")
+            return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error unassigning custom field from user: {e}")
+            raise

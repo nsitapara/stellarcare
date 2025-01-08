@@ -133,3 +133,32 @@ export async function assignCustomFieldToUser(
     throw error
   }
 }
+
+/**
+ * Unassigns a custom field definition from the current user.
+ * This is a server action that requires authentication.
+ *
+ * @param {number} customFieldId - ID of the custom field to unassign
+ * @returns {Promise<void>}
+ * @throws {Error} If user is not authenticated
+ * @throws {Error} If the API request fails
+ */
+export async function unassignCustomFieldFromUser(
+  customFieldId: number
+): Promise<void> {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    throw new Error('You must be logged in to unassign custom fields')
+  }
+
+  try {
+    const api = await getApiClient(session)
+    await api.request.request({
+      method: 'DELETE',
+      url: `/api/custom-field-definitions/${customFieldId}/assign/`
+    })
+  } catch (error) {
+    console.error('Error unassigning custom field from user:', error)
+    throw error
+  }
+}

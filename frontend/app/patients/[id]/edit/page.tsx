@@ -5,7 +5,7 @@ import { getPatientCustomFields } from '@actions/patient/get-patient-custom-fiel
 import { updatePatient } from '@actions/patient/update-patient-action'
 import type { Patient } from '@api/models/Patient'
 import type { FormCustomField, PatientFormData } from '@api/patient/form'
-import { PatientForm } from '@components/forms/PatientForm'
+import { PatientForm } from '@components/forms/patient-form'
 import { Button } from '@components/ui/button'
 import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'

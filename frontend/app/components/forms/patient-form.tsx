@@ -15,7 +15,8 @@ import {
   assignCustomFieldToUser,
   createCustomField,
   getCustomFields,
-  getUserCustomFields
+  getUserCustomFields,
+  unassignCustomFieldFromUser
 } from '@actions/patient/get-custom-fields-action'
 import type { CustomFieldDefinition } from '@api/models/CustomFieldDefinition'
 import type { FormCustomField, PatientFormData } from '@api/patient/form'
@@ -169,11 +170,26 @@ export function PatientForm({ onSubmit, initialData }: PatientFormProps) {
     }
   }
 
-  const removeCustomField = (id: string) => {
-    setCustomFields(customFields.filter((field) => field.id !== id))
+  const removeCustomField = async (id: string) => {
+    const field = customFields.find((f) => f.id === id)
+    if (!field) return
+
+    // If the field has a customFieldDefinitionId, unassign it from the user
+    if (field.customFieldDefinitionId) {
+      try {
+        await unassignCustomFieldFromUser(field.customFieldDefinitionId)
+        setUserAssignedFields((prev) =>
+          prev.filter((f) => f.id !== field.customFieldDefinitionId)
+        )
+      } catch (error) {
+        console.error('Error unassigning custom field:', error)
+      }
+    }
+
+    setCustomFields(customFields.filter((f) => f.id !== id))
   }
 
-  const handleCustomFieldChange = (
+  const handleCustomFieldChange = async (
     id: string,
     field: keyof Omit<FormCustomField, 'id'>,
     value: string | number | null

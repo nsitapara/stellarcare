@@ -19,7 +19,7 @@
 
 'use client'
 
-import { VisitCalendar } from '@components/visits/VisitCalendar'
+import { VisitCalendar } from '@components/visits/visit-calendar'
 
 /**
  * Main appointments page component.

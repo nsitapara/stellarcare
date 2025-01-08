@@ -1,4 +1,5 @@
 import { ClientLayout } from '@components/client-layout'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './styles/globals.css'
 
@@ -9,7 +10,7 @@ const inter = Inter({ subsets: ['latin'] })
  * Application metadata configuration
  * Defines the title and description for SEO and browser display
  */
-export const metadata = {
+export const metadata: Metadata = {
   title: 'StellarCare - Patient Management',
   description: 'A comprehensive healthcare management platform',
   icons: {
@@ -21,12 +22,6 @@ export const metadata = {
     ]
   },
   manifest: '/manifest.json',
-  themeColor: '#6366f1',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5
-  },
   applicationName: 'StellarCare',
   appleWebApp: {
     capable: true,
@@ -36,6 +31,17 @@ export const metadata = {
   formatDetection: {
     telephone: true
   }
+}
+
+/**
+ * Viewport configuration
+ * Defines the viewport and theme settings for the application
+ */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#6366f1'
 }
 
 /**
