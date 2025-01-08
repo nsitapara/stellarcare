@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
  */
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
-  const [isDark, setIsDark] = useState(true) // Default to dark to match server
+  const [isDark, setIsDark] = useState(false) // Initialize as false to match server default
 
   // Toggle dark mode by adding/removing the 'dark' class on the html element
   const toggleTheme = () => {
@@ -38,14 +38,12 @@ export function ThemeToggle() {
   useEffect(() => {
     setMounted(true)
     const savedTheme = localStorage.getItem('theme')
-    if (savedTheme) {
-      const isSystemDark = savedTheme === 'dark'
-      setIsDark(isSystemDark)
-      document.documentElement.classList.toggle('dark', isSystemDark)
-    }
+    const isSystemDark = savedTheme === 'dark'
+    setIsDark(isSystemDark)
+    document.documentElement.classList.toggle('dark', isSystemDark)
   }, [])
 
-  // Avoid hydration mismatch by not rendering until mounted
+  // Return a placeholder button during SSR and initial mount
   if (!mounted) {
     return (
       <Button
