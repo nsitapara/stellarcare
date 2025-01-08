@@ -210,6 +210,47 @@ After making changes to the backend API:
 docker compose exec web pnpm openapi:generate
 ```
 
+## 📝️ Database and API Design
+
+### Database Schema
+
+The application uses a PostgreSQL database with the following key models:
+
+#### Core Models
+- **User**: Extended Django user model with custom field access control
+- **Patient**: Central model for patient management with auto-incrementing IDs (starting from 100000)
+- **Address**: Flexible address storage supporting multiple addresses per patient
+
+#### Custom Fields System
+- **CustomFieldDefinition**: Defines dynamic custom fields with types (text, number)
+- **PatientCustomField**: Stores patient-specific custom field values
+
+#### Medical Records
+- **SleepStudy**: Tracks sleep study metrics (AHI, efficiency, REM latency)
+- **Treatment**: Manages treatments and medications
+- **Insurance**: Handles insurance and authorization information
+- **Visit**: Manages appointments (in-person/telehealth)
+
+### API Structure
+
+The API is organized into logical modules:
+
+```
+api/views/
+├── base.py          # Base viewset configurations
+├── custom_fields.py # Custom field management
+├── medical.py       # Medical record endpoints
+├── patient.py       # Patient CRUD operations
+└── records.py       # General record keeping
+```
+
+#### Key Features
+- **Dynamic Fields**: Flexible custom field system for patient data
+- **Temporal Tracking**: All models include created_at/modified_at timestamps
+- **Relationship Management**: Comprehensive tracking of patient relationships
+- **Status Workflows**: Patient and visit status management
+- **Access Control**: User-specific custom field availability
+
 ## 📝 License
 
 This project is licensed under the MIT License - see below for details:
@@ -263,3 +304,7 @@ SOFTWARE.
         <img src="images/Appointments.png" alt="Appointments" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     </a>
 </div>
+
+## 🙏 Acknowledgments
+
+This project was bootstrapped using [Turbo](https://github.com/unfoldadmin/turbo), a Django & Next.js boilerplate template. The base template was adapted and customized to create this healthcare management system with additional features and domain-specific functionality.
