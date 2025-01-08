@@ -210,6 +210,132 @@ After making changes to the backend API:
 docker compose exec web pnpm openapi:generate
 ```
 
+## 📝 Frontend Technical Design
+
+### Architecture Overview
+
+The frontend is built with Next.js 14+ using the App Router pattern, featuring:
+
+#### Core Technologies
+- **Next.js App Router**: Server-first React framework with RSC support
+- **TypeScript**: Full type safety across the application
+- **Tailwind CSS**: Utility-first styling with custom theme
+- **Radix UI**: Accessible component primitives
+- **Shadcn/ui**: Pre-built component system based on Radix
+- **React Hook Form**: Form handling with validation
+- **Zod**: Schema validation for forms and API data
+
+### Directory Structure
+```
+frontend/app/
+├── (auth)/              # Authentication routes and components
+│   ├── login/          # Login page and form
+│   ├── register/       # Registration page and form
+│   └── layout.tsx      # Auth-specific layout
+├── actions/            # Server actions for data mutations
+│   ├── patient/        # Patient-related actions
+│   └── auth/          # Authentication actions
+├── api/                # API route handlers
+├── components/         # Reusable UI components
+│   ├── dashboard/     # Dashboard-specific components
+│   ├── forms/         # Form components and fields
+│   ├── layout/        # Layout components
+│   ├── patients/      # Patient management components
+│   └── ui/            # Base UI components
+├── lib/                # Utility functions and configurations
+│   ├── api-client.ts  # Generated API client
+│   ├── auth.ts        # Authentication configuration
+│   └── utils.ts       # Helper functions
+└── providers/         # React context providers
+```
+
+### Key Features
+
+#### Server Components
+- **React Server Components**: Leverages Next.js 14's server-first approach
+- **Server Actions**: Direct server mutations without API endpoints
+- **Streaming**: Progressive loading with Suspense boundaries
+
+#### Type Safety
+- **End-to-end Type Safety**: Generated types from OpenAPI schema
+- **Zod Validation**: Runtime type checking for forms and API data
+- **TypeScript**: Static type checking across components
+
+#### Authentication
+- **Next-Auth**: JWT-based authentication with session management
+- **Protected Routes**: Middleware-based route protection
+- **Role-based Access**: Component-level access control
+
+#### State Management
+- **React Context**: Global state management
+- **React Query**: Server state management
+- **Form State**: Managed by React Hook Form
+
+#### UI/UX
+- **Responsive Design**: Mobile-first approach
+- **Dark Mode**: System-based and manual theme switching
+- **Loading States**: Optimistic updates and loading skeletons
+- **Error Handling**: Graceful error boundaries and fallbacks
+
+### Data Flow
+
+```mermaid
+graph TD
+    A[Client Component] -->|Server Action| B[Server Action]
+    B -->|API Client| C[Backend API]
+    C -->|Response| B
+    B -->|Revalidate| A
+    D[Server Component] -->|Direct Fetch| C
+```
+
+### Performance Optimizations
+- **Static Generation**: Where possible for faster page loads
+- **Dynamic Imports**: Code splitting for optimal bundle size
+- **Image Optimization**: Next.js Image component for optimal loading
+- **Caching Strategy**: SWR/React Query for data caching
+- **Prefetching**: Route and data prefetching for faster navigation
+
+## 🗄️ Database and API Design
+
+### Database Schema
+
+The application uses a PostgreSQL database with the following key models:
+
+#### Core Models
+- **User**: Extended Django user model with custom field access control
+- **Patient**: Central model for patient management with auto-incrementing IDs (starting from 100000)
+- **Address**: Flexible address storage supporting multiple addresses per patient
+
+#### Custom Fields System
+- **CustomFieldDefinition**: Defines dynamic custom fields with types (text, number)
+- **PatientCustomField**: Stores patient-specific custom field values
+
+#### Medical Records
+- **SleepStudy**: Tracks sleep study metrics (AHI, efficiency, REM latency)
+- **Treatment**: Manages treatments and medications
+- **Insurance**: Handles insurance and authorization information
+- **Visit**: Manages appointments (in-person/telehealth)
+
+### API Structure
+
+The API is organized into logical modules:
+
+```
+api/views/
+├── base.py          # Base viewset configurations
+├── custom_fields.py # Custom field management
+├── medical.py       # Medical record endpoints
+├── patient.py       # Patient CRUD operations
+└── records.py       # General record keeping
+```
+
+#### Key Features
+- **Dynamic Fields**: Flexible custom field system for patient data
+- **Temporal Tracking**: All models include created_at/modified_at timestamps
+- **Relationship Management**: Comprehensive tracking of patient relationships
+- **Status Workflows**: Patient and visit status management
+- **Access Control**: User-specific custom field availability
+
 ## 📝 License
 
 This project is licensed under the MIT License - see below for details:
@@ -263,3 +389,7 @@ SOFTWARE.
         <img src="images/Appointments.png" alt="Appointments" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
     </a>
 </div>
+
+## 🙏 Acknowledgments
+
+This project was bootstrapped using [Turbo](https://github.com/unfoldadmin/turbo), a Django & Next.js boilerplate template. The base template was adapted and customized to create this healthcare management system with additional features and domain-specific functionality.
