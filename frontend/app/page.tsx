@@ -1,4 +1,17 @@
 import { UserSession } from '@components/user-session'
+import type { Metadata, Viewport } from 'next'
+
+export const metadata: Metadata = {
+  title: 'StellarCare - Sleep Medicine Management Platform',
+  description:
+    'A comprehensive healthcare management platform for sleep medicine professionals'
+}
+
+export const viewport: Viewport = {
+  themeColor: '#ffffff',
+  width: 'device-width',
+  initialScale: 1
+}
 
 /**
  * Home Page Component

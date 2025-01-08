@@ -1,8 +1,20 @@
 import { getPatients } from '@actions/patient/get-patients-action'
 import { DashboardClient } from '@components/dashboard/dashboard-client'
 import { authOptions } from '@lib/auth'
+import type { Metadata, Viewport } from 'next'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Dashboard - StellarCare',
+  description: 'Manage your patients and appointments'
+}
+
+export const viewport: Viewport = {
+  themeColor: '#ffffff',
+  width: 'device-width',
+  initialScale: 1
+}
 
 /**
  * Server-side rendered dashboard page component.
