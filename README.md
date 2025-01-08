@@ -17,7 +17,7 @@ StellarCare is a modern, full-stack healthcare management system built with Djan
 ### Initial Setup
 ```bash
 # Start all services with initial setup (creates DB, runs migrations, creates superuser)
-docker compose --profile setup up
+docker compose --profile setup up -d
 
 # Start services in detached mode
 docker compose up -d

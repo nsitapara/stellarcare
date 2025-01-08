@@ -15,7 +15,6 @@ SECRET_KEY = environ.get("SECRET_KEY", get_random_secret_key())
 DEBUG = environ.get("DEBUG", "") == "1"
 
 ALLOWED_HOSTS = ["localhost", "api", "stellarcare.nsitapara.com", "127.0.0.1"]
-
 ######################################################################
 # Security Settings
 ######################################################################
@@ -153,9 +152,7 @@ USE_TZ = True
 ######################################################################
 STATIC_URL = "/static/"
 STATIC_ROOT = "/app/staticfiles"
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
