@@ -14,7 +14,36 @@ SECRET_KEY = environ.get("SECRET_KEY", get_random_secret_key())
 
 DEBUG = environ.get("DEBUG", "") == "1"
 
-ALLOWED_HOSTS = ["localhost", "api"]
+ALLOWED_HOSTS = ["localhost", "api", "stellarcare.nsitapara.com", "127.0.0.1"]
+
+######################################################################
+# Security Settings
+######################################################################
+# Production settings
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    USE_X_FORWARDED_HOST = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+# Development settings
+else:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    # Explicitly disable SSL
+    SECURE_PROXY_SSL_HEADER = None
+    USE_X_FORWARDED_HOST = False
+
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = [
+    "https://stellarcare.nsitapara.com",
+    "http://stellarcare.nsitapara.com",
+    "http://localhost:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:3000",
+]
 
 WSGI_APPLICATION = "api.wsgi.application"
 
@@ -122,7 +151,20 @@ USE_TZ = True
 ######################################################################
 # Staticfiles
 ######################################################################
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = "/app/staticfiles"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
+
+# Media files
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/app/mediafiles"
 
 ######################################################################
 # Rest Framework
