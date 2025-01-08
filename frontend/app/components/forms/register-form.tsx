@@ -14,7 +14,6 @@
 import type { registerAction } from '@actions/user/register-action'
 import type { RegisterFormError, RegisterFormSchema } from '@api/forms/auth'
 import { FormFooter } from '@components/forms/form-footer'
-import { FormHeader } from '@components/forms/form-header'
 import { SubmitField } from '@components/forms/submit-field'
 import { TextField } from '@components/forms/text-field'
 import { zodResolver } from '@hookform/resolvers/zod'
