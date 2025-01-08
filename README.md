@@ -210,7 +210,92 @@ After making changes to the backend API:
 docker compose exec web pnpm openapi:generate
 ```
 
-## 📝️ Database and API Design
+## 📝 Frontend Technical Design
+
+### Architecture Overview
+
+The frontend is built with Next.js 14+ using the App Router pattern, featuring:
+
+#### Core Technologies
+- **Next.js App Router**: Server-first React framework with RSC support
+- **TypeScript**: Full type safety across the application
+- **Tailwind CSS**: Utility-first styling with custom theme
+- **Radix UI**: Accessible component primitives
+- **Shadcn/ui**: Pre-built component system based on Radix
+- **React Hook Form**: Form handling with validation
+- **Zod**: Schema validation for forms and API data
+
+### Directory Structure
+```
+frontend/app/
+├── (auth)/              # Authentication routes and components
+│   ├── login/          # Login page and form
+│   ├── register/       # Registration page and form
+│   └── layout.tsx      # Auth-specific layout
+├── actions/            # Server actions for data mutations
+│   ├── patient/        # Patient-related actions
+│   └── auth/          # Authentication actions
+├── api/                # API route handlers
+├── components/         # Reusable UI components
+│   ├── dashboard/     # Dashboard-specific components
+│   ├── forms/         # Form components and fields
+│   ├── layout/        # Layout components
+│   ├── patients/      # Patient management components
+│   └── ui/            # Base UI components
+├── lib/                # Utility functions and configurations
+│   ├── api-client.ts  # Generated API client
+│   ├── auth.ts        # Authentication configuration
+│   └── utils.ts       # Helper functions
+└── providers/         # React context providers
+```
+
+### Key Features
+
+#### Server Components
+- **React Server Components**: Leverages Next.js 14's server-first approach
+- **Server Actions**: Direct server mutations without API endpoints
+- **Streaming**: Progressive loading with Suspense boundaries
+
+#### Type Safety
+- **End-to-end Type Safety**: Generated types from OpenAPI schema
+- **Zod Validation**: Runtime type checking for forms and API data
+- **TypeScript**: Static type checking across components
+
+#### Authentication
+- **Next-Auth**: JWT-based authentication with session management
+- **Protected Routes**: Middleware-based route protection
+- **Role-based Access**: Component-level access control
+
+#### State Management
+- **React Context**: Global state management
+- **React Query**: Server state management
+- **Form State**: Managed by React Hook Form
+
+#### UI/UX
+- **Responsive Design**: Mobile-first approach
+- **Dark Mode**: System-based and manual theme switching
+- **Loading States**: Optimistic updates and loading skeletons
+- **Error Handling**: Graceful error boundaries and fallbacks
+
+### Data Flow
+
+```mermaid
+graph TD
+    A[Client Component] -->|Server Action| B[Server Action]
+    B -->|API Client| C[Backend API]
+    C -->|Response| B
+    B -->|Revalidate| A
+    D[Server Component] -->|Direct Fetch| C
+```
+
+### Performance Optimizations
+- **Static Generation**: Where possible for faster page loads
+- **Dynamic Imports**: Code splitting for optimal bundle size
+- **Image Optimization**: Next.js Image component for optimal loading
+- **Caching Strategy**: SWR/React Query for data caching
+- **Prefetching**: Route and data prefetching for faster navigation
+
+## 🗄️ Database and API Design
 
 ### Database Schema
 
