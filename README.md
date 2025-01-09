@@ -301,6 +301,12 @@ graph TD
 
 The application uses a PostgreSQL database with the following key models:
 
+### Entity Relationship Diagram (ERD)
+
+Below is the Entity Relationship Diagram showing the relationships between different models in the system:
+
+![Database ERD](images/current_api_models.png)
+
 #### Core Models
 - **User**: Extended Django user model with custom field access control
 - **Patient**: Central model for patient management with auto-incrementing IDs (starting from 100000)
