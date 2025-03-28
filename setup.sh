@@ -13,176 +13,254 @@ function error_exit {
     exit 1
 }
 
-# Update system and install basic dependencies
-echo "[INFO] Updating system and installing basic dependencies..."
-apt-get update
-apt-get install -y curl git nginx certbot python3-certbot-nginx build-essential || error_exit "Failed to install basic dependencies"
+# Function to safely execute PostgreSQL commands
+function psql_execute() {
+    PGPASSWORD="postgres" psql -U postgres -h localhost -c "$1"
+}
 
-# Install PostgreSQL
-echo "[INFO] Installing PostgreSQL..."
-apt-get install -y postgresql postgresql-contrib || error_exit "Failed to install PostgreSQL"
+# Function to wait for PostgreSQL
+function wait_for_postgres() {
+    echo "[INFO] Waiting for PostgreSQL..."
+    while ! PGPASSWORD="postgres" psql -U postgres -h localhost -c '\l' >/dev/null 2>&1; do
+        echo "Waiting for PostgreSQL to start..."
+        sleep 1
+    done
+}
 
-# Start PostgreSQL service
-systemctl start postgresql
-systemctl enable postgresql
-
-# Install Node.js
-echo "[INFO] Installing Node.js..."
-curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
-apt-get install -y nodejs || error_exit "Failed to install Node.js"
-
-# Install pnpm
-echo "[INFO] Installing pnpm..."
-npm install -g pnpm || error_exit "Failed to install pnpm"
-
-# Install Python 3.13
-echo "[INFO] Installing Python ${PYTHON_VERSION}..."
-apt-get install -y software-properties-common
-add-apt-repository ppa:deadsnakes/ppa
-apt-get update
-apt-get install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-venv python${PYTHON_VERSION}-dev || error_exit "Failed to install Python"
-
-# Install pip and uv
-echo "[INFO] Installing pip and uv..."
-curl -sSf https://bootstrap.pypa.io/get-pip.py | python${PYTHON_VERSION}
-pip install uv || error_exit "Failed to install uv"
-
-# Clone the repository
-if [ -d "$CLONE_DIR" ]; then
-    echo "[INFO] Removing existing repository..."
-    rm -rf "$CLONE_DIR"
+# Check if Git is installed
+if ! command -v git &>/dev/null; then
+    echo "[INFO] Installing Git..."
+    apt-get update
+    apt-get install -y git || error_exit "Failed to install Git."
 fi
 
-echo "[INFO] Cloning the repository..."
-git clone "$REPO_URL" "$CLONE_DIR" || error_exit "Failed to clone the repository"
-cd "$CLONE_DIR" || error_exit "Failed to navigate to the repository directory"
+# Install Docker if not installed
+if ! command -v docker &>/dev/null; then
+    echo "[INFO] Docker not found. Installing Docker..."
+    # Install dependencies
+    apt-get update
+    apt-get install -y \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release || error_exit "Failed to install Docker dependencies."
 
-# Setup PostgreSQL database
-echo "[INFO] Setting up PostgreSQL database..."
-sudo -u postgres psql -c "CREATE DATABASE stellarcare;" || error_exit "Failed to create database"
-sudo -u postgres psql -c "CREATE USER stellarcare WITH PASSWORD 'change-me-in-production';" || error_exit "Failed to create database user"
-sudo -u postgres psql -c "ALTER ROLE stellarcare SET client_encoding TO 'utf8';"
-sudo -u postgres psql -c "ALTER ROLE stellarcare SET default_transaction_isolation TO 'read committed';"
-sudo -u postgres psql -c "ALTER ROLE stellarcare SET timezone TO 'UTC';"
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE stellarcare TO stellarcare;"
+    # Add Docker's official GPG key
+    mkdir -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-# Setup backend
-echo "[INFO] Setting up backend..."
-cd backend || error_exit "Failed to enter backend directory"
-python${PYTHON_VERSION} -m venv .venv
-source .venv/bin/activate
-uv sync || error_exit "Failed to install backend dependencies"
+    # Set up the repository
+    echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Setup environment variables
-echo "[INFO] Setting up environment variables..."
-cp ../.env.backend.template .env
-# Update environment variables with production values
-sed -i 's/DEBUG=1/DEBUG=0/' .env
-sed -i "s/POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=change-me-in-production/" .env
-echo "ALLOWED_HOSTS=$DOMAIN,localhost,127.0.0.1" >> .env
+    # Install Docker Engine
+    apt-get update
+    apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin || error_exit "Failed to install Docker."
 
-# Run migrations and create superuser
-python manage.py migrate || error_exit "Failed to run migrations"
-python manage.py collectstatic --noinput || error_exit "Failed to collect static files"
-echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@example.com', 'change-me-in-production')" | python manage.py shell
+    # Start Docker service
+    systemctl start docker || error_exit "Failed to start Docker service."
+    systemctl enable docker || error_exit "Failed to enable Docker service."
+fi
 
-# Setup frontend
-echo "[INFO] Setting up frontend..."
-cd ../frontend || error_exit "Failed to enter frontend directory"
-pnpm install || error_exit "Failed to install frontend dependencies"
-cp ../.env.frontend.template .env
-echo "BUILD_ENV=production" >> .env
-echo "NEXTAUTH_SECRET=$(openssl rand -base64 32)" >> .env
-echo "NEXTAUTH_URL=https://$DOMAIN" >> .env
-pnpm build || error_exit "Failed to build frontend"
+# Check if Docker is running
+if ! docker info &>/dev/null; then
+    systemctl start docker || error_exit "Failed to start Docker service."
+fi
 
-# Configure Nginx
+# Check if Docker Compose is installed
+if ! command -v docker compose &>/dev/null; then
+    error_exit "Docker Compose is not available. Please check Docker installation."
+fi
+
+# Install standalone docker-compose for compatibility
+if ! command -v docker-compose &>/dev/null; then
+    echo "[INFO] Installing standalone docker-compose for compatibility..."
+    curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose || error_exit "Failed to set permissions on docker-compose."
+fi
+
+# Install and configure Nginx
+if ! command -v nginx &>/dev/null; then
+    echo "[INFO] Installing Nginx..."
+    apt-get update
+    apt-get install -y nginx || error_exit "Failed to install Nginx."
+fi
+
+# Configure Nginx to run as root user
+echo "[INFO] Configuring Nginx user..."
+sed -i 's/user www-data/user root/' /etc/nginx/nginx.conf
+
+# Create Nginx configuration
 echo "[INFO] Configuring Nginx..."
-cat > /etc/nginx/sites-available/$DOMAIN << EOL
+cat > /etc/nginx/sites-available/$DOMAIN << 'EOL'
 server {
     listen 80;
-    server_name $DOMAIN;
+    listen [::]:80;
+    server_name stellarcare.nsitapara.com;
 
+    # Next.js frontend and its API routes
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    location /api {
+    # Django admin and backend API
+    location ~ ^/(admin|backend/api) {
+        rewrite ^/backend/(.*) /$1 break;
         proxy_pass http://localhost:8000;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
+    # Django static files
     location /static/ {
-        alias /path/to/$CLONE_DIR/backend/staticfiles/;
+        alias /root/stellarcare/backend/staticfiles/;
+        access_log off;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+        add_header X-Content-Type-Options nosniff;
+        add_header X-Frame-Options SAMEORIGIN;
+        gzip_static on;
+        gzip_types
+            text/css
+            text/javascript
+            application/javascript
+            application/x-javascript;
     }
 
+    # Django media files
     location /media/ {
-        alias /path/to/$CLONE_DIR/backend/mediafiles/;
+        alias /root/stellarcare/backend/mediafiles/;
+        access_log off;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+        add_header X-Content-Type-Options nosniff;
+        gzip_static on;
     }
 }
 EOL
 
+# Enable the site
 ln -sf /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t || error_exit "Nginx configuration test failed"
 
-# Setup SSL
-echo "[INFO] Setting up SSL..."
-certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email admin@$DOMAIN --redirect || error_exit "Failed to setup SSL"
+# Install certbot for SSL
+if ! command -v certbot &>/dev/null; then
+    echo "[INFO] Installing Certbot..."
+    apt-get install -y certbot python3-certbot-nginx || error_exit "Failed to install Certbot."
+fi
 
-# Create systemd services
-echo "[INFO] Creating systemd services..."
+# Obtain SSL certificate
+echo "[INFO] Obtaining SSL certificate..."
+certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email admin@$DOMAIN --redirect || error_exit "Failed to obtain SSL certificate."
 
-# Backend service
-cat > /etc/systemd/system/stellarcare-backend.service << EOL
-[Unit]
-Description=StellarCare Backend
-After=network.target
+# Clone the repository
+if [ -d "$CLONE_DIR" ]; then
+    echo "[INFO] Removing existing repository..."
+    rm -rf "$CLONE_DIR" || error_exit "Failed to remove existing repository."
+fi
 
-[Service]
-User=root
-WorkingDirectory=/path/to/$CLONE_DIR/backend
-Environment="PATH=/path/to/$CLONE_DIR/backend/.venv/bin"
-ExecStart=/path/to/$CLONE_DIR/backend/.venv/bin/python manage.py runserver 0.0.0.0:8000
-Restart=always
+echo "[INFO] Cloning the repository..."
+git clone "$REPO_URL" "$CLONE_DIR" || error_exit "Failed to clone the repository."
+cd "$CLONE_DIR" || error_exit "Failed to navigate to the repository directory."
 
-[Install]
-WantedBy=multi-user.target
-EOL
+# Copy environment files
+echo "[INFO] Setting up environment files..."
+PARENT_DIR="$(cd .. && pwd)"
 
-# Frontend service
-cat > /etc/systemd/system/stellarcare-frontend.service << EOL
-[Unit]
-Description=StellarCare Frontend
-After=network.target
+# Copy environment files from parent directory
+echo "[INFO] Copying environment files from $PARENT_DIR..."
+cp "$PARENT_DIR/.env.backend" ".env.backend" || error_exit "Failed to copy .env.backend"
+cp "$PARENT_DIR/.env.frontend" ".env.frontend" || error_exit "Failed to copy .env.frontend"
 
-[Service]
-User=root
-WorkingDirectory=/path/to/$CLONE_DIR/frontend
-Environment="NODE_ENV=production"
-ExecStart=$(which pnpm) start
-Restart=always
+# Create static and media directories
+echo "[INFO] Creating static and media directories..."
+mkdir -p backend/staticfiles backend/mediafiles
+chown -R root:root backend/staticfiles backend/mediafiles
+chmod -R 755 backend/staticfiles backend/mediafiles
 
-[Install]
-WantedBy=multi-user.target
-EOL
+# Modify docker-compose.yaml for production
+echo "[INFO] Updating docker-compose.yaml for production..."
+sed -i 's/command: bash -c "pnpm install -r && if.*$/command: bash -c "pnpm install -r \&\& pnpm build \&\& pnpm start"/' docker-compose.yaml
+sed -i 's/BUILD_ENV=development/BUILD_ENV=production/' docker-compose.yaml
 
-# Start services
-systemctl daemon-reload
-systemctl enable stellarcare-backend stellarcare-frontend
-systemctl start stellarcare-backend stellarcare-frontend
-systemctl restart nginx
+# Run Docker Compose
+echo "[INFO] Starting Docker Compose..."
+# Stop and remove existing containers
+docker-compose down --volumes --remove-orphans || true
 
-echo "[SUCCESS] Setup completed successfully!"
+# Start services with setup profile
+echo "[INFO] Running setup profile..."
+docker-compose --profile setup up -d
+
+# Wait for setup to complete
+echo "[INFO] Waiting for setup to complete..."
+while docker-compose ps setup | grep -q "running"; do
+    echo "Setup still running..."
+    sleep 5
+done
+
+# Start regular services
+echo "[INFO] Starting regular services..."
+docker-compose up -d
+
+# Wait for containers to be ready
+echo "[INFO] Waiting for containers to be ready..."
+attempt=1
+max_attempts=30
+until docker-compose ps | grep api | grep -q "Up" || [ $attempt -gt $max_attempts ]; do
+    echo "Waiting for containers to be ready... (Attempt $attempt/$max_attempts)"
+    sleep 5
+    attempt=$((attempt + 1))
+done
+
+if [ $attempt -gt $max_attempts ]; then
+    error_exit "Containers failed to start after $max_attempts attempts"
+fi
+
+# Additional wait to ensure Django is fully initialized
+sleep 10
+
+# Collect static files
+echo "[INFO] Collecting static files..."
+if docker-compose ps | grep -q "api.*Up"; then
+    docker-compose exec -T api bash -c "
+        uv sync && \
+        rm -rf /app/staticfiles/* && \
+        uv run -- python -m compileall . && \
+        uv run -- python manage.py collectstatic --noinput -v 2 && \
+        uv run -- python manage.py collectstatic --noinput -v 2 --clear
+    " || error_exit "Failed to collect static files."
+else
+    error_exit "API container is not running"
+fi
+
+# Fix permissions after collecting static files
+echo "[INFO] Fixing static files permissions..."
+chown -R root:root backend/staticfiles backend/mediafiles
+chmod -R 755 backend/staticfiles backend/mediafiles
+find backend/staticfiles/ -type f -exec chmod 644 {} \;
+
+# Restart Nginx to apply changes
+echo "[INFO] Restarting Nginx..."
+systemctl restart nginx || error_exit "Failed to restart Nginx."
+
+echo "[SUCCESS] Project deployed successfully!"
 echo "Backend running on: https://$DOMAIN/api"
 echo "Frontend running on: https://$DOMAIN"
 echo "Admin interface: https://$DOMAIN/admin"
